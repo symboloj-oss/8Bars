@@ -11,3 +11,4 @@ coverage/
 
 # IDE
 .idea/
+*.tsbuildinfo
