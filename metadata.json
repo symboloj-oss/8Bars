@@ -1,0 +1,6 @@
+{
+  "name": "8Bars - 8小节极简乐器异步合奏",
+  "description": "极简乐器初学者 Web 端异步合奏工具：8小节积木式拼图，固定4席位，随时拼出完整乐队作品。",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
