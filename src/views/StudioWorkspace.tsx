@@ -1,7 +1,7 @@
 "use client";
 
-// 录音棚工作区:4 轨磁带盘 + 席位网格 + 练习实验室 + 模板切换条 + 和弦速查
-// 从 HomeApp 抽出,供首页与 /room/[id] 房间页共用(UI 与原来完全一致)
+// 录音棚工作区:磁带盘主控台 + 席位网格 + 折叠工具箱(练习实验室 / 和弦速查)
+// 次要工具默认收起,主页面只保留核心操作,保持清爽
 import { RoomState, RoomTemplate, SlotInfo, SlotType } from '../types/music';
 import { ROOM_TEMPLATES } from '../data/templates';
 import { TransportState } from '../services/audioEngine';
@@ -9,7 +9,8 @@ import { TapeLoopVisualizer } from '../components/TapeLoopVisualizer';
 import { FourSlotsGrid } from '../components/FourSlotsGrid';
 import { PracticeTunerLab } from '../components/PracticeTunerLab';
 import { ChordReferenceDrawer } from '../components/ChordReferenceDrawer';
-import { Users } from 'lucide-react';
+import { CollapsibleSection } from '../components/CollapsibleSection';
+import { Users, Wrench, BookOpen } from 'lucide-react';
 import { motion } from 'motion/react';
 
 interface StudioWorkspaceProps {
@@ -41,18 +42,44 @@ export const StudioWorkspace: React.FC<StudioWorkspaceProps> = ({
 }) => {
   return (
     <div className="w-full flex flex-col gap-6">
-      {/* Module 1: 4-Track Tape Loop Deck */}
-      <section>
-        <TapeLoopVisualizer
-          slots={room.slots}
-          transportState={transportState}
-          progression={template.progression}
-          bpm={template.bpm}
-          t={t}
-        />
-      </section>
+      {/* Module 1: 主控台 —— 4 轨磁带盘 */}
+      <TapeLoopVisualizer
+        slots={room.slots}
+        transportState={transportState}
+        progression={template.progression}
+        bpm={template.bpm}
+        t={t}
+      />
 
-      {/* Module 2: The 4 Fixed Slots Grid with Multi-Take selector */}
+      {/* 模板风格切换:轻量 chips 行,不占独立卡片 */}
+      <div className="flex items-center gap-2 overflow-x-auto font-mono">
+        <span className="text-[11px] text-zinc-400 dark:text-zinc-500 shrink-0 whitespace-nowrap">
+          {t('templates.stripTitle')}
+        </span>
+        {ROOM_TEMPLATES.map((tmpl) => {
+          const isCurrent = tmpl.id === room.templateId;
+          return (
+            <motion.button
+              key={tmpl.id}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => {
+                if (!isCurrent) {
+                  onSwitchTemplate(tmpl);
+                }
+              }}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
+                isCurrent
+                  ? 'bg-[#ff5522] text-white shadow-primary'
+                  : 'bg-white dark:bg-zinc-900 border border-subtle text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white hover:border-subtle-strong'
+              }`}
+            >
+              {tmpl.title.split(' ')[0]} ({tmpl.bpm} BPM)
+            </motion.button>
+          );
+        })}
+      </div>
+
+      {/* Module 2: 席位网格(核心操作区) */}
       <section className="flex flex-col gap-3">
         <div className="flex items-center justify-between border-b border-subtle pb-2.5">
           <div className="flex items-center gap-2">
@@ -79,8 +106,12 @@ export const StudioWorkspace: React.FC<StudioWorkspaceProps> = ({
         />
       </section>
 
-      {/* Module 3: Musician Prep Lab (Strum Pad & 440Hz Tuner Reference) */}
-      <section>
+      {/* Module 3: 折叠工具箱(默认收起,需要时展开) */}
+      <CollapsibleSection
+        title={t('lab.title')}
+        subtitle={t('lab.subtitle')}
+        icon={<Wrench className="w-4 h-4 text-[#ff5522] shrink-0" />}
+      >
         <PracticeTunerLab
           progression={template.progression}
           progressionDetails={template.progressionDetails}
@@ -88,56 +119,19 @@ export const StudioWorkspace: React.FC<StudioWorkspaceProps> = ({
           isPlaying={transportState.isPlaying}
           t={t}
         />
-      </section>
+      </CollapsibleSection>
 
-      {/* Module 4: Preset Styles & Progression Switcher */}
-      <section className="bg-white dark:bg-zinc-900 border border-subtle rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-card dark:shadow-card-dark transition-colors duration-200">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-[#ff5522]/10 border border-[#ff5522]/25 flex items-center justify-center text-[#ff5522] shrink-0 font-mono text-xs font-bold">
-            8B
-          </div>
-          <div className="flex flex-col">
-            <h4 className="text-xs font-bold text-zinc-900 dark:text-white">
-              {t('templates.stripTitle')}
-            </h4>
-            <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
-              {t('templates.stripSubtitle')}
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0 font-mono">
-          {ROOM_TEMPLATES.map((tmpl) => {
-            const isCurrent = tmpl.id === room.templateId;
-            return (
-              <motion.button
-                key={tmpl.id}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => {
-                  if (!isCurrent) {
-                    onSwitchTemplate(tmpl);
-                  }
-                }}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
-                  isCurrent
-                    ? 'bg-[#ff5522] text-white shadow-primary'
-                    : 'bg-zinc-100 dark:bg-white/6 border border-subtle text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white hover:border-subtle-strong'
-                }`}
-              >
-                {tmpl.title.split(' ')[0]} ({tmpl.bpm} BPM)
-              </motion.button>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* Module 5: Interactive Chord Fretboard & Piano Cheatsheet with Audio Preview */}
-      <section>
+      {/* Module 4: 折叠和弦速查(默认收起) */}
+      <CollapsibleSection
+        title={t('cheatsheet.title')}
+        subtitle={t('cheatsheet.subtitle')}
+        icon={<BookOpen className="w-4 h-4 text-[#ff5522] shrink-0" />}
+      >
         <ChordReferenceDrawer progression={template.progression} t={t} />
-      </section>
+      </CollapsibleSection>
 
       {/* Clean Minimalist Hardware Footer */}
-      <footer className="mt-12 border-t border-subtle bg-white/60 dark:bg-zinc-950 py-6 px-4 sm:px-8 select-none transition-colors duration-200">
+      <footer className="mt-8 border-t border-subtle bg-white/60 dark:bg-zinc-950 py-6 px-4 sm:px-8 select-none transition-colors duration-200">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-zinc-500">
           <div className="flex items-center gap-2">
             <span className="font-bold text-zinc-800 dark:text-zinc-200">「8BARS」</span>

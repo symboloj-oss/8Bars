@@ -59,19 +59,12 @@ export const FourSlotsGrid: React.FC<FourSlotsGridProps> = ({
                 : 'bg-white dark:bg-zinc-900 hover:border-subtle-strong'
             }`}
           >
-            {/* Top row: Track Code & Status Badge */}
+            {/* Top row: 角色名 & 状态徽章 */}
             <div>
-              <div className="flex items-start justify-between gap-2 mb-3">
-                <div className="flex flex-col">
-                  <div className="flex items-center gap-1.5 font-mono text-[11px] text-zinc-400 dark:text-zinc-500">
-                    <span className="font-bold text-zinc-800 dark:text-zinc-300">TRK 0{sIdx + 1}</span>
-                    <span className="text-zinc-300 dark:text-zinc-700">/</span>
-                    <span className="uppercase">{slot.type}</span>
-                  </div>
-                  <h4 className="text-base font-bold text-zinc-900 dark:text-white tracking-tight mt-0.5">
-                    {t('role.' + slot.type) || slot.roleName}
-                  </h4>
-                </div>
+              <div className="flex items-center justify-between gap-2 mb-3">
+                <h4 className="text-base font-bold text-zinc-900 dark:text-white tracking-tight">
+                  {t('role.' + slot.type) || slot.roleName}
+                </h4>
 
                 {/* Status Badge */}
                 <div

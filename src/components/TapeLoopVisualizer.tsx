@@ -24,14 +24,11 @@ export const TapeLoopVisualizer: React.FC<TapeLoopVisualizerProps> = ({
 
   return (
     <div className="w-full bg-white dark:bg-zinc-900 border border-subtle rounded-2xl p-4 sm:p-5 flex flex-col gap-4 shadow-card dark:shadow-card-dark select-none relative overflow-hidden transition-colors duration-200">
-      {/* Background subtle mesh */}
-      <div className="absolute inset-0 opacity-[0.025] dark:opacity-[0.04] pointer-events-none bg-[radial-gradient(#000_1px,transparent_1px)] dark:bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]" />
-
       {/* Top console bar: Tape Deck Head */}
       <div className="flex items-center justify-between text-xs font-mono text-zinc-500 dark:text-zinc-400 border-b border-subtle pb-3">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1.5 text-zinc-800 dark:text-zinc-300 font-bold">
-            <span className="w-2 h-2 rounded-full bg-[#ff5522] animate-pulse" />
+            <span className={`w-2 h-2 rounded-full ${isPlaying ? 'bg-[#ff5522]' : 'bg-zinc-300 dark:bg-zinc-600'}`} />
             <span>{t('tape.title')}</span>
           </div>
           <span className="text-zinc-300 dark:text-zinc-700">/</span>
@@ -42,11 +39,10 @@ export const TapeLoopVisualizer: React.FC<TapeLoopVisualizerProps> = ({
 
         {/* Real-time Bar / Beat Counter */}
         <div className="flex items-center gap-2">
-          <span className="text-zinc-400 dark:text-zinc-500 text-[11px]">{t('tape.timecode')}</span>
-          <span className="bg-zinc-100 dark:bg-[#18181c] border border-zinc-200 dark:border-white/8 px-2 py-0.5 rounded text-zinc-800 dark:text-zinc-100 font-bold">
+          <span className="bg-zinc-100 dark:bg-white/6 border border-subtle px-2 py-0.5 rounded text-zinc-800 dark:text-zinc-100 font-bold tabular-nums">
             BAR 0{currentBar + 1} : BEAT 0{currentBeat + 1}
           </span>
-          <span className="text-[#ff5522] font-bold">
+          <span className={`${isPlaying ? 'text-[#ff5522]' : 'text-zinc-400 dark:text-zinc-500'} font-bold`}>
             {isPlaying ? `● ${t('tape.play')}` : `■ ${t('tape.stop')}`}
           </span>
         </div>
@@ -124,15 +120,15 @@ export const TapeLoopVisualizer: React.FC<TapeLoopVisualizerProps> = ({
         })}
       </div>
 
-      {/* Bottom Bar: Analog Tape Transport Deck details with real rotating reels */}
-      <div className="flex items-center justify-between text-xs font-mono text-zinc-500 dark:text-zinc-500 pt-1">
+      {/* Bottom Bar: 磁带走带指示(精简,仅播放时显示状态) */}
+      <div className="flex items-center justify-between text-xs font-mono text-zinc-400 dark:text-zinc-500 pt-1">
         <div className="flex items-center gap-5">
           <span className="flex items-center gap-1.5">
             <motion.div
               animate={{ rotate: isPlaying ? 360 : 0 }}
               transition={{ repeat: Infinity, duration: 2, ease: 'linear' }}
             >
-              <Disc className="w-3.5 h-3.5 text-zinc-600 dark:text-zinc-400" />
+              <Disc className="w-3.5 h-3.5 text-zinc-400 dark:text-zinc-500" />
             </motion.div>
             {t('tape.feedReel')}
           </span>
@@ -141,17 +137,13 @@ export const TapeLoopVisualizer: React.FC<TapeLoopVisualizerProps> = ({
               animate={{ rotate: isPlaying ? 360 : 0 }}
               transition={{ repeat: Infinity, duration: 2, ease: 'linear' }}
             >
-              <Disc className="w-3.5 h-3.5 text-zinc-600 dark:text-zinc-400" />
+              <Disc className="w-3.5 h-3.5 text-zinc-400 dark:text-zinc-500" />
             </motion.div>
             {t('tape.takeupReel')}
           </span>
         </div>
 
-        <div className="flex items-center gap-3 text-zinc-400 dark:text-zinc-400">
-          <span>{t('tape.saturation')}</span>
-          <span>·</span>
-          <span>{t('tape.latencySync')}</span>
-        </div>
+        <span>{t('tape.latencySync')}</span>
       </div>
     </div>
   );

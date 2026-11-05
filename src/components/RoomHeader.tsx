@@ -197,133 +197,89 @@ export const RoomHeader: React.FC<RoomHeaderProps> = ({
       {/* Main Room Console Hero Card (Only displayed in Studio mode) */}
       {activeTab === 'studio' && (
         <div className="px-4 sm:px-8 w-full max-w-7xl mx-auto">
-          <div className="relative rounded-2xl border border-subtle bg-white dark:bg-zinc-900 p-5 sm:p-6 shadow-card dark:shadow-card-dark flex flex-col md:flex-row items-stretch justify-between gap-6 overflow-hidden transition-colors duration-200">
-            {/* Left: Song Meta & Transport Actions */}
-          <div className="flex flex-col justify-between gap-4">
-            <div>
-              <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs font-mono text-zinc-500 dark:text-zinc-400 mb-2">
-                <span className="px-1.5 py-0.5 rounded-md bg-[#ff5522]/10 text-[#ff5522] text-[10px] font-bold border border-[#ff5522]/20">
-                  {t('header.studioLabel')}
-                </span>
-                <span className="text-zinc-300 dark:text-zinc-600">/</span>
-                <span>{template.key} 调</span>
-                <span className="text-zinc-300 dark:text-zinc-600">/</span>
-                <span>{t('header.loopLen')}</span>
-              </div>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 dark:text-white tracking-tight">
-                {room.title}
-              </h2>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1.5 max-w-xl leading-relaxed">
-                {template.tagline} {t('header.tagline')}
-              </p>
-            </div>
-
-            {/* Master Transport & Big Play Button */}
-            <div className="flex flex-wrap items-center gap-3 pt-1">
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={onTogglePlay}
-                className={`py-3 px-6 rounded-xl font-bold text-sm flex items-center gap-2.5 transition-all ${
-                  transportState.isPlaying
-                    ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-950'
-                    : 'btn-primary'
-                }`}
-              >
-                {transportState.isPlaying ? (
-                  <>
-                    <Pause className="w-4 h-4 fill-current" />
-                    {t('header.pause')}
-                  </>
-                ) : (
-                  <>
-                    <Play className="w-4 h-4 fill-current ml-0.5" />
-                    {t('header.play')}
-                  </>
-                )}
-              </motion.button>
-
-              {/* Bar and Beat Realtime Status Indicator */}
-              <div className="bg-zinc-50 dark:bg-black/30 border border-subtle rounded-xl px-4 py-2 flex items-center gap-3 font-mono text-xs">
-                <div className="flex flex-col">
-                  <span className="text-[10px] text-zinc-400 uppercase tracking-wider">{t('header.position')}</span>
-                  <span className="text-sm font-bold text-zinc-900 dark:text-zinc-200 tabular-nums">
-                    {t('header.bar', { bar: transportState.currentBar + 1 })} · {t('header.beat', { beat: transportState.currentBeat + 1 })}
+          <div className="relative rounded-2xl border border-subtle bg-white dark:bg-zinc-900 p-4 sm:p-5 shadow-card dark:shadow-card-dark overflow-hidden transition-colors duration-200">
+            {/* 一行式:左标题信息 / 右控制按钮(移动端纵向) */}
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs font-mono text-zinc-500 dark:text-zinc-400 mb-1">
+                  <span className="px-1.5 py-0.5 rounded-md bg-[#ff5522]/10 text-[#ff5522] text-[10px] font-bold border border-[#ff5522]/20">
+                    {t('header.studioLabel')}
                   </span>
+                  <span className="text-zinc-300 dark:text-zinc-600">/</span>
+                  <span>{template.key} 调</span>
+                  <span className="text-zinc-300 dark:text-zinc-600">/</span>
+                  <span>{t('header.loopLen')}</span>
                 </div>
-                <div className="h-6 w-px bg-zinc-200 dark:bg-white/8" />
-                <div className="flex flex-col">
-                  <span className="text-[10px] text-zinc-400 uppercase tracking-wider">{t('header.cycle')}</span>
-                  <span className="text-sm font-bold text-[#ff5522] tabular-nums">
-                    {Math.round(transportState.progress * 100)}%
-                  </span>
-                </div>
+                <h2 className="text-xl sm:text-2xl font-extrabold text-zinc-900 dark:text-white tracking-tight truncate">
+                  {room.title}
+                </h2>
               </div>
 
-              {/* Utility actions */}
-              <motion.button
-                whileTap={{ scale: 0.95 }}
-                onClick={onExportWav}
-                disabled={isExporting}
-                title={t('header.exportWav')}
-                className="btn-secondary py-2.5 px-3.5"
-              >
-                <Download className="w-3.5 h-3.5 text-zinc-400" />
-                {isExporting ? t('header.exporting') : t('header.exportWav')}
-              </motion.button>
+              {/* Transport & Utility Actions */}
+              <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={onTogglePlay}
+                  className={`py-2.5 px-5 rounded-xl font-bold text-sm flex items-center gap-2 transition-all ${
+                    transportState.isPlaying
+                      ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-950'
+                      : 'btn-primary'
+                  }`}
+                >
+                  {transportState.isPlaying ? (
+                    <>
+                      <Pause className="w-4 h-4 fill-current" />
+                      {t('header.pause')}
+                    </>
+                  ) : (
+                    <>
+                      <Play className="w-4 h-4 fill-current ml-0.5" />
+                      {t('header.play')}
+                    </>
+                  )}
+                </motion.button>
 
-              <motion.button
-                whileTap={{ scale: 0.95 }}
-                onClick={onOpenCreateModal}
-                className="btn-secondary py-2.5 px-3.5"
-              >
-                <Plus className="w-3.5 h-3.5 text-zinc-400" />
-                {t('header.newRoom')}
-              </motion.button>
-            </div>
-          </div>
+                {/* Bar and Beat Realtime Status Indicator */}
+                <div className="bg-zinc-50 dark:bg-black/30 border border-subtle rounded-xl px-3.5 py-1.5 flex items-center gap-3 font-mono text-xs">
+                  <div className="flex flex-col">
+                    <span className="text-[10px] text-zinc-400 uppercase tracking-wider">{t('header.position')}</span>
+                    <span className="text-sm font-bold text-zinc-900 dark:text-zinc-200 tabular-nums">
+                      {t('header.bar', { bar: transportState.currentBar + 1 })} · {t('header.beat', { beat: transportState.currentBeat + 1 })}
+                    </span>
+                  </div>
+                  <div className="h-6 w-px bg-zinc-200 dark:bg-white/8" />
+                  <div className="flex flex-col">
+                    <span className="text-[10px] text-zinc-400 uppercase tracking-wider">{t('header.cycle')}</span>
+                    <span className="text-sm font-bold text-[#ff5522] tabular-nums">
+                      {Math.round(transportState.progress * 100)}%
+                    </span>
+                  </div>
+                </div>
 
-          {/* Right: 8-Bar Chord Sequence display */}
-          <div className="flex flex-col justify-between bg-zinc-50 dark:bg-black/30 p-4 rounded-xl border border-subtle md:w-80 shrink-0 transition-colors duration-200">
-            <div className="flex items-center justify-between text-xs font-mono text-zinc-500 dark:text-zinc-400 mb-2">
-              <span className="text-zinc-800 dark:text-zinc-300 font-semibold">{t('header.progression')}</span>
-              <span className="text-[#ff5522] font-semibold">
-                {template.progression.slice(0, 4).join('-')}
-              </span>
-            </div>
+                <motion.button
+                  whileTap={{ scale: 0.95 }}
+                  onClick={onExportWav}
+                  disabled={isExporting}
+                  title={t('header.exportWav')}
+                  className="btn-secondary py-2.5 px-3.5"
+                >
+                  <Download className="w-3.5 h-3.5 text-zinc-400" />
+                  {isExporting ? t('header.exporting') : t('header.exportWav')}
+                </motion.button>
 
-            {/* 8-bar minimal blocks with spring animation */}
-            <div className="grid grid-cols-4 gap-1.5 my-2">
-              {template.progression.map((chordName, idx) => {
-                const isActive = transportState.isPlaying && transportState.currentBar === idx;
-                return (
-                  <motion.div
-                    key={`header-chord-${idx}`}
-                    animate={isActive ? { scale: 1.05 } : { scale: 1 }}
-                    transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-                    className={`py-2 px-1 rounded-lg text-center font-mono text-xs font-semibold transition-colors ${
-                      isActive
-                        ? 'bg-[#ff5522] text-white shadow-primary'
-                        : 'bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border border-subtle'
-                    }`}
-                  >
-                    <div className="text-[9px] opacity-50">#{idx + 1}</div>
-                    {chordName}
-                  </motion.div>
-                );
-              })}
-            </div>
-
-            {/* Cold-start info strip */}
-            <div className="mt-2 pt-2 border-t border-subtle flex items-center justify-between text-[11px] font-mono text-zinc-500">
-              <span>{t('header.aiActive')}</span>
-              <span className="text-zinc-700 dark:text-zinc-400 tabular-nums">
-                {room.slots.filter((s) => s.isCustomTake).length}/4
-              </span>
+                <motion.button
+                  whileTap={{ scale: 0.95 }}
+                  onClick={onOpenCreateModal}
+                  className="btn-secondary py-2.5 px-3.5"
+                >
+                  <Plus className="w-3.5 h-3.5 text-zinc-400" />
+                  {t('header.newRoom')}
+                </motion.button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
       )}
     </div>
   );

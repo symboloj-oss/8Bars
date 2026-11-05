@@ -103,6 +103,7 @@ export const TRANSLATIONS: Record<SupportedLang, Record<string, string>> = {
 
     // Cheatsheet
     'cheatsheet.title': '和弦速查与指法备忘录',
+    'cheatsheet.subtitle': '吉他指法图 · 钢琴键位',
     'cheatsheet.guitarTab': '🎸 六线谱品格',
     'cheatsheet.pianoTab': '🎹 钢琴键盘',
     'cheatsheet.selected': '当前选中和弦',
@@ -284,6 +285,7 @@ export const TRANSLATIONS: Record<SupportedLang, Record<string, string>> = {
     'templates.stripSubtitle': '一鍵切入卡農流行、微醺爵士、復古放克或公路民謠 8 小節走向',
 
     'cheatsheet.title': '和弦速查與指法備忘錄',
+    'cheatsheet.subtitle': '吉他指法圖 · 鋼琴鍵位',
     'cheatsheet.guitarTab': '🎸 六線譜品格',
     'cheatsheet.pianoTab': '🎹 鋼琴鍵盤',
     'cheatsheet.selected': '當前選中和弦',
@@ -461,6 +463,7 @@ export const TRANSLATIONS: Record<SupportedLang, Record<string, string>> = {
     'templates.stripSubtitle': 'Switch between Pop Canon, Midnight Jazz, Retro Funk or Indie Folk 8-bar grooves',
 
     'cheatsheet.title': 'CHORD FINGERING CHEATSHEET',
+    'cheatsheet.subtitle': 'Guitar diagrams · Piano keys',
     'cheatsheet.guitarTab': '🎸 Guitar Fretboard',
     'cheatsheet.pianoTab': '🎹 Piano Keys',
     'cheatsheet.selected': 'Selected Chord',
@@ -638,6 +641,7 @@ export const TRANSLATIONS: Record<SupportedLang, Record<string, string>> = {
     'templates.stripSubtitle': 'ポップカノン、深夜のジャズ、ファンク、フォークロードの8小節進行をワンタップ切替',
 
     'cheatsheet.title': 'コード運指チートシート',
+    'cheatsheet.subtitle': 'ギター運指図 · ピアノ鍵盤',
     'cheatsheet.guitarTab': '🎸 ギターダイアグラム',
     'cheatsheet.pianoTab': '🎹 ピアノ鍵盤',
     'cheatsheet.selected': '選択中のコード',
@@ -815,6 +819,7 @@ export const TRANSLATIONS: Record<SupportedLang, Record<string, string>> = {
     'templates.stripSubtitle': '캐논 팝, 미드나잇 재즈, 레트로 펑크, 포크 로드 8마디 진행 즉시 전환',
 
     'cheatsheet.title': '코드 운지표 & 치트시트',
+    'cheatsheet.subtitle': '기타 운지도 · 피아노 건반',
     'cheatsheet.guitarTab': '🎸 기타 타브 운지',
     'cheatsheet.pianoTab': '🎹 피아노 건반',
     'cheatsheet.selected': '선택된 코드',
