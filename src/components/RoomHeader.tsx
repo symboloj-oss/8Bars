@@ -74,7 +74,7 @@ export const RoomHeader: React.FC<RoomHeaderProps> = ({
   return (
     <div className="w-full flex flex-col gap-4">
       {/* Top Bar Contract (Wordmark - Tab Switcher - Navigation - Primary Action + Theme Toggle + Language) */}
-      <header className="flex items-center justify-between gap-3 sm:gap-6 px-4 sm:px-8 py-3.5 border-b border-zinc-200/80 dark:border-white/8 bg-white/80 dark:bg-[#0c0c0e]/90 backdrop-blur-md sticky top-0 z-40 select-none transition-colors duration-200">
+      <header className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 sm:gap-6 px-4 sm:px-8 py-2.5 sm:py-3.5 border-b border-zinc-200/80 dark:border-white/8 bg-white/80 dark:bg-[#0c0c0e]/90 backdrop-blur-md sticky top-0 z-40 select-none transition-colors duration-200">
         {/* Zone 1: Brand Wordmark */}
         <div className="flex items-center gap-2.5 shrink-0">
           <motion.div
@@ -119,7 +119,7 @@ export const RoomHeader: React.FC<RoomHeaderProps> = ({
         </div>
 
         {/* Zone 3: Language Selector + Theme Switch + Primary CTA */}
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-2 shrink-0 w-full justify-end sm:w-auto">
           {/* Language Selector Dropdown */}
           <div className="relative" ref={langMenuRef}>
             <motion.button
@@ -200,7 +200,7 @@ export const RoomHeader: React.FC<RoomHeaderProps> = ({
             {/* Left: Song Meta & Transport Actions */}
           <div className="flex flex-col justify-between gap-4">
             <div>
-              <div className="flex items-center gap-2 text-xs font-mono text-zinc-500 dark:text-zinc-400 mb-1.5">
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs font-mono text-zinc-500 dark:text-zinc-400 mb-1.5">
                 <span className="text-[#ff5522] font-bold">● 4-TRACK STUDIO</span>
                 <span>/</span>
                 <span>调式: {template.key}</span>
