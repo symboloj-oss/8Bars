@@ -75,10 +75,10 @@ export const BandShareCardModal: React.FC<BandShareCardModalProps> = ({
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95 }}
         transition={{ type: 'spring', stiffness: 450, damping: 30 }}
-        className="relative w-full max-w-lg bg-white dark:bg-[#121215] border border-zinc-200 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col transition-colors duration-200"
+        className="relative w-full max-w-lg bg-white dark:bg-zinc-900 border border-subtle rounded-2xl shadow-2xl overflow-hidden flex flex-col transition-colors duration-200"
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-zinc-200 dark:border-white/8 bg-zinc-50 dark:bg-[#0a0a0c]">
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-subtle bg-zinc-50 dark:bg-black/30">
           <div className="flex items-center gap-2">
             <Share2 className="w-4 h-4 text-[#ff5522]" />
             <h3 className="text-xs font-bold text-zinc-900 dark:text-white font-mono uppercase tracking-wider">
@@ -88,7 +88,7 @@ export const BandShareCardModal: React.FC<BandShareCardModalProps> = ({
           <motion.button
             whileTap={{ scale: 0.92 }}
             onClick={onClose}
-            className="w-7 h-7 rounded-lg bg-zinc-100 hover:bg-zinc-200 dark:bg-[#18181d] dark:hover:bg-[#222228] text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white flex items-center justify-center transition-colors border border-zinc-200 dark:border-white/6"
+            className="w-7 h-7 rounded-lg bg-zinc-100 hover:bg-zinc-200 dark:bg-white/6 dark:hover:bg-white/10 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white flex items-center justify-center transition-colors border border-subtle"
           >
             <X className="w-4 h-4" />
           </motion.button>
@@ -96,12 +96,12 @@ export const BandShareCardModal: React.FC<BandShareCardModalProps> = ({
 
         {/* The Visual Band Card */}
         <div className="p-5 flex flex-col gap-4">
-          <div className="relative rounded-2xl border border-zinc-200 dark:border-white/12 bg-zinc-50 dark:bg-[#09090b] p-5 shadow-sm dark:shadow-2xl overflow-hidden transition-colors duration-200">
+          <div className="relative rounded-2xl border border-subtle bg-zinc-50 dark:bg-[#09090b] p-5 shadow-sm dark:shadow-2xl overflow-hidden transition-colors duration-200">
             {/* Background subtle glow */}
             <div className="absolute top-0 right-0 w-36 h-36 bg-[#ff5522]/5 rounded-full blur-2xl pointer-events-none" />
 
             {/* Card Header */}
-            <div className="flex items-start justify-between border-b border-zinc-200 dark:border-white/8 pb-3 mb-3">
+            <div className="flex items-start justify-between border-b border-subtle pb-3 mb-3">
               <div>
                 <span className="text-[10px] font-mono uppercase tracking-widest text-[#ff5522] font-bold">
                   {t('share.roomSub')}
@@ -118,7 +118,7 @@ export const BandShareCardModal: React.FC<BandShareCardModalProps> = ({
                 </div>
               </div>
 
-              <div className="w-9 h-9 rounded-xl bg-white dark:bg-[#18181d] border border-zinc-200 dark:border-white/10 flex items-center justify-center text-zinc-800 dark:text-zinc-300 shrink-0 font-mono text-xs font-bold shadow-2xs">
+              <div className="w-9 h-9 rounded-xl bg-white dark:bg-[#18181d] border border-subtle flex items-center justify-center text-zinc-800 dark:text-zinc-300 shrink-0 font-mono text-xs font-bold shadow-sm">
                 8B
               </div>
             </div>
@@ -133,8 +133,8 @@ export const BandShareCardModal: React.FC<BandShareCardModalProps> = ({
                     key={slot.id}
                     className={`p-2.5 rounded-xl border flex items-center gap-2.5 transition-colors ${
                       isHuman
-                        ? 'bg-white dark:bg-[#ff5522]/10 border-[#ff5522]/30 dark:border-[#ff5522]/40 text-zinc-900 dark:text-zinc-100 shadow-2xs'
-                        : 'bg-white/60 dark:bg-[#121215] border-zinc-200 dark:border-white/6 text-zinc-600 dark:text-zinc-400'
+                        ? 'bg-white dark:bg-[#ff5522]/10 border-[#ff5522]/30 dark:border-[#ff5522]/40 text-zinc-900 dark:text-zinc-100 shadow-sm'
+                        : 'bg-white/60 dark:bg-[#121215] border-subtle text-zinc-600 dark:text-zinc-400'
                     }`}
                   >
                     <div className="relative shrink-0">
@@ -175,7 +175,7 @@ export const BandShareCardModal: React.FC<BandShareCardModalProps> = ({
             </div>
 
             {/* Dynamic Status Callout */}
-            <div className="bg-white dark:bg-[#141418] border border-zinc-200 dark:border-white/6 rounded-xl p-3 flex items-center gap-3 mt-3 shadow-2xs">
+            <div className="bg-white dark:bg-[#141418] border border-subtle rounded-xl p-3 flex items-center gap-3 mt-3 shadow-sm">
               <div className="w-8 h-8 rounded-lg bg-zinc-100 dark:bg-[#0c0c0e] flex items-center justify-center text-zinc-700 dark:text-zinc-300 shrink-0">
                 <Users className="w-4 h-4 text-[#ff5522]" />
               </div>
@@ -209,7 +209,7 @@ export const BandShareCardModal: React.FC<BandShareCardModalProps> = ({
               whileHover={{ scale: 1.01 }}
               whileTap={{ scale: 0.96 }}
               onClick={handleCopyLink}
-              className="w-full py-3 px-4 rounded-xl bg-[#ff5522] hover:bg-[#ff4410] text-white font-bold text-xs flex items-center justify-center gap-2 transition-colors shadow-lg shadow-[#ff5522]/20"
+              className="w-full py-3 px-4 rounded-xl bg-[#ff5522] hover:bg-[#ff4410] text-white font-bold text-xs flex items-center justify-center gap-2 transition-colors shadow-primary"
             >
               {copied ? <Check className="w-4 h-4 text-white" /> : <Copy className="w-4 h-4" />}
               {copied ? t('share.copied') : t('share.copyLink')}
@@ -219,7 +219,7 @@ export const BandShareCardModal: React.FC<BandShareCardModalProps> = ({
               whileTap={{ scale: 0.96 }}
               onClick={handleDownloadWav}
               disabled={isExporting}
-              className="w-full py-2.5 px-4 rounded-xl bg-zinc-100 dark:bg-[#18181d] hover:bg-zinc-200 dark:hover:bg-[#222228] border border-zinc-200 dark:border-white/8 text-zinc-800 dark:text-zinc-200 text-xs font-medium flex items-center justify-center gap-2 transition-colors"
+              className="w-full py-2.5 px-4 rounded-xl bg-zinc-100 dark:bg-[#18181d] hover:bg-zinc-200 dark:hover:bg-[#222228] border border-subtle text-zinc-800 dark:text-zinc-200 text-xs font-medium flex items-center justify-center gap-2 transition-colors"
             >
               <Download className="w-4 h-4 text-zinc-400" />
               {isExporting ? t('share.exporting') : t('share.downloadWav')}

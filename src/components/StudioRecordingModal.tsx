@@ -291,10 +291,10 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95 }}
         transition={{ type: 'spring', stiffness: 450, damping: 30 }}
-        className="relative w-full max-w-4xl bg-white dark:bg-[#121215] border border-zinc-200 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col my-auto max-h-[92vh] transition-colors duration-200"
+        className="relative w-full max-w-4xl bg-white dark:bg-zinc-900 border border-subtle rounded-2xl shadow-2xl overflow-hidden flex flex-col my-auto max-h-[92vh] transition-colors duration-200"
       >
         {/* Header with Cartoon Character Buddy Badge */}
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-zinc-200 dark:border-white/8 bg-zinc-50 dark:bg-[#0a0a0c]">
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-subtle bg-zinc-50 dark:bg-black/30">
           <div className="flex items-center gap-3">
             <div className="relative shrink-0">
               <img
@@ -328,7 +328,7 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
           <motion.button
             whileTap={{ scale: 0.92 }}
             onClick={onClose}
-            className="w-8 h-8 rounded-lg bg-zinc-100 hover:bg-zinc-200 dark:bg-[#18181d] dark:hover:bg-[#222228] text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white flex items-center justify-center transition-colors border border-zinc-200 dark:border-white/6"
+            className="w-8 h-8 rounded-lg bg-zinc-100 hover:bg-zinc-200 dark:bg-white/6 dark:hover:bg-white/10 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white flex items-center justify-center transition-colors border border-subtle"
           >
             <X className="w-4 h-4" />
           </motion.button>
@@ -352,7 +352,7 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
               </div>
 
               {/* Band companion speech bubble */}
-              <div className="relative bg-zinc-50 dark:bg-[#18181f] border border-zinc-200 dark:border-white/8 rounded-2xl p-3.5 mb-4 shadow-sm w-full text-left">
+              <div className="relative bg-zinc-50 dark:bg-[#18181f] border border-subtle rounded-2xl p-3.5 mb-4 shadow-sm w-full text-left">
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-[11px] font-mono font-bold uppercase tracking-wider" style={{ color: targetChar.accentColor }}>
                     {targetChar.name}（{targetChar.roleName}）
@@ -378,7 +378,7 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.96 }}
                   onClick={startMicMonitor}
-                  className="w-full py-3 px-4 rounded-xl font-bold bg-[#ff5522] hover:bg-[#ff4410] text-white transition-colors shadow-lg shadow-[#ff5522]/20 flex items-center justify-center gap-2 text-xs font-mono"
+                  className="w-full py-3 px-4 rounded-xl font-bold bg-[#ff5522] hover:bg-[#ff4410] text-white transition-colors shadow-primary flex items-center justify-center gap-2 text-xs font-mono"
                 >
                   <Headphones className="w-4 h-4" />
                   {t('studio.headphoneBtn')}
@@ -397,7 +397,7 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
           {phase === 'ready' && (
             <div className="flex flex-col gap-5">
               {/* Mic & Name strip */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-zinc-50 dark:bg-[#0a0a0c] p-4 rounded-xl border border-zinc-200 dark:border-white/6 transition-colors duration-200">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-zinc-50 dark:bg-black/30 p-4 rounded-xl border border-subtle transition-colors duration-200">
                 <div className="flex flex-col gap-1.5">
                   <label className="text-xs font-mono text-zinc-600 dark:text-zinc-400">
                     {t('studio.handle')}
@@ -407,7 +407,7 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
                     value={musicianName}
                     onChange={(e) => setMusicianName(e.target.value)}
                     placeholder="如 @阿杰"
-                    className="bg-white dark:bg-[#141418] border border-zinc-200 dark:border-white/8 px-3 py-2 rounded-lg text-xs font-mono text-zinc-900 dark:text-white focus:outline-none focus:border-[#ff5522]"
+                    className="bg-white dark:bg-[#141418] border border-subtle px-3 py-2 rounded-lg text-xs font-mono text-zinc-900 dark:text-white focus:outline-none focus:border-[#ff5522]"
                   />
                 </div>
 
@@ -440,12 +440,12 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
                   <span className="text-xs font-mono text-zinc-600 dark:text-zinc-400 uppercase tracking-wider">
                     {t('studio.prestudy')}
                   </span>
-                  <div className="flex items-center bg-zinc-100 dark:bg-[#0a0a0c] p-1 rounded-lg border border-zinc-200 dark:border-white/6 font-mono">
+                  <div className="flex items-center bg-zinc-100 dark:bg-[#0a0a0c] p-1 rounded-lg border border-subtle font-mono">
                     <button
                       onClick={() => setActiveTab('guitar')}
                       className={`px-3 py-1 text-xs rounded-md transition-colors ${
                         activeTab === 'guitar'
-                          ? 'bg-white dark:bg-[#18181e] text-zinc-900 dark:text-white font-bold shadow-2xs'
+                          ? 'bg-white dark:bg-[#18181e] text-zinc-900 dark:text-white font-bold shadow-sm'
                           : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300'
                       }`}
                     >
@@ -455,7 +455,7 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
                       onClick={() => setActiveTab('piano')}
                       className={`px-3 py-1 text-xs rounded-md transition-colors ${
                         activeTab === 'piano'
-                          ? 'bg-white dark:bg-[#18181e] text-zinc-900 dark:text-white font-bold shadow-2xs'
+                          ? 'bg-white dark:bg-[#18181e] text-zinc-900 dark:text-white font-bold shadow-sm'
                           : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300'
                       }`}
                     >
@@ -485,7 +485,7 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
                   whileHover={{ scale: 1.01 }}
                   whileTap={{ scale: 0.96 }}
                   onClick={startCountInAndRecord}
-                  className="w-full py-3.5 px-6 rounded-xl font-bold text-sm bg-[#ff5522] hover:bg-[#ff4410] text-white shadow-lg shadow-[#ff5522]/30 flex items-center justify-center gap-2 transition-transform active:scale-95 font-mono"
+                  className="w-full py-3.5 px-6 rounded-xl font-bold text-sm bg-[#ff5522] hover:bg-[#ff4410] text-white shadow-primary flex items-center justify-center gap-2 transition-transform active:scale-95 font-mono"
                 >
                   <span className="w-2.5 h-2.5 rounded-full bg-white animate-ping" />
                   {t('studio.startRec')}
@@ -539,7 +539,7 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
               </div>
 
               {/* Control bottom bar */}
-              <div className="flex items-center justify-between bg-zinc-50 dark:bg-[#0a0a0c] p-3.5 rounded-xl border border-zinc-200 dark:border-white/6 transition-colors duration-200">
+              <div className="flex items-center justify-between bg-zinc-50 dark:bg-black/30 p-3.5 rounded-xl border border-subtle transition-colors duration-200">
                 <div className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-[#ff5522] animate-ping" />
                   <span className="text-xs font-mono text-[#ff5522] font-bold">
@@ -549,7 +549,7 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
                 <motion.button
                   whileTap={{ scale: 0.95 }}
                   onClick={stopRecording}
-                  className="px-4 py-2 rounded-lg bg-zinc-200 hover:bg-zinc-300 dark:bg-[#18181d] dark:hover:bg-[#222228] text-zinc-800 dark:text-zinc-200 text-xs font-semibold font-mono transition-colors"
+                  className="px-4 py-2 rounded-lg bg-zinc-200 hover:bg-zinc-300 dark:bg-white/6 dark:hover:bg-white/10 text-zinc-800 dark:text-zinc-200 text-xs font-semibold font-mono transition-colors"
                 >
                   {t('studio.stopEarly')}
                 </motion.button>
@@ -560,7 +560,7 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
           {/* Phase 5: Review & Latency Alignment */}
           {phase === 'review' && (
             <div className="flex flex-col gap-5 py-2">
-              <div className="flex items-center justify-between bg-zinc-50 dark:bg-[#15151a] border border-zinc-200 dark:border-white/8 p-4 rounded-xl text-zinc-900 dark:text-zinc-200 transition-colors duration-200">
+              <div className="flex items-center justify-between bg-zinc-50 dark:bg-[#15151a] border border-subtle p-4 rounded-xl text-zinc-900 dark:text-zinc-200 transition-colors duration-200">
                 <div className="flex items-center gap-3">
                   <div className="relative shrink-0">
                     <img
@@ -593,13 +593,13 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
               </div>
 
               {/* Hardware Latency Compensation Slider */}
-              <div className="bg-zinc-50 dark:bg-[#0a0a0c] p-4 rounded-xl border border-zinc-200 dark:border-white/6 flex flex-col gap-3 font-mono transition-colors duration-200">
+              <div className="bg-zinc-50 dark:bg-black/30 p-4 rounded-xl border border-subtle flex flex-col gap-3 font-mono transition-colors duration-200">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-zinc-800 dark:text-zinc-200 flex items-center gap-2">
                     <Sliders className="w-3.5 h-3.5 text-[#ff5522]" />
                     {t('studio.latency')}
                   </span>
-                  <span className="text-xs font-bold text-[#ff5522] bg-white dark:bg-[#18181d] px-2.5 py-0.5 rounded border border-zinc-200 dark:border-white/8 shadow-2xs">
+                  <span className="text-xs font-bold text-[#ff5522] bg-white dark:bg-[#18181d] px-2.5 py-0.5 rounded border border-subtle shadow-sm">
                     {latencyOffsetMs > 0 ? `+${latencyOffsetMs}` : latencyOffsetMs} ms
                   </span>
                 </div>
@@ -629,7 +629,7 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
                 <motion.button
                   whileTap={{ scale: 0.95 }}
                   onClick={handleRetake}
-                  className="px-4 py-2.5 rounded-xl border border-zinc-200 dark:border-white/8 bg-zinc-100 hover:bg-zinc-200 dark:bg-[#18181d] dark:hover:bg-[#222228] text-zinc-700 dark:text-zinc-300 text-xs font-medium flex items-center gap-1.5 transition-colors"
+                  className="px-4 py-2.5 rounded-xl border border-subtle bg-zinc-100 hover:bg-zinc-200 dark:bg-white/6 dark:hover:bg-white/10 text-zinc-700 dark:text-zinc-300 text-xs font-medium flex items-center gap-1.5 transition-colors"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
                   {t('studio.retake')}
@@ -639,7 +639,7 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
                   whileHover={{ scale: 1.01 }}
                   whileTap={{ scale: 0.96 }}
                   onClick={handleSaveTake}
-                  className="px-5 py-2.5 rounded-xl bg-[#ff5522] hover:bg-[#ff4410] text-white text-xs font-bold flex items-center gap-1.5 transition-colors shadow-lg shadow-[#ff5522]/20"
+                  className="px-5 py-2.5 rounded-xl bg-[#ff5522] hover:bg-[#ff4410] text-white text-xs font-bold flex items-center gap-1.5 transition-colors shadow-primary"
                 >
                   <Check className="w-4 h-4" />
                   {t('studio.saveTake')}

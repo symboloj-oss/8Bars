@@ -33,6 +33,8 @@ export const TRANSLATIONS: Record<SupportedLang, Record<string, string>> = {
     'header.newRoom': '创建新房间',
     'header.progression': '8 小节走向',
     'header.tagline': '严格 8 个小节，随时通过积木式拼图合成完整乐队作品。',
+    'header.studioLabel': '4 轨录音棚',
+    'header.loopLen': '8 小节 · 约 21 秒',
     'header.aiActive': '冷启动虚拟替补机制生效中',
 
     // Tape loop
@@ -218,6 +220,8 @@ export const TRANSLATIONS: Record<SupportedLang, Record<string, string>> = {
     'header.newRoom': '創建新房間',
     'header.progression': '8 小節走向',
     'header.tagline': '嚴格 8 個小節，隨時通過積木式拼圖合成完整樂隊作品。',
+    'header.studioLabel': '4 軌錄音棚',
+    'header.loopLen': '8 小節 · 約 21 秒',
     'header.aiActive': '冷啟動虛擬替補機制生效中',
 
     'tape.title': '4軌磁帶循環控制台',
@@ -393,6 +397,8 @@ export const TRANSLATIONS: Record<SupportedLang, Record<string, string>> = {
     'header.newRoom': 'New Room',
     'header.progression': '8-Bar Progression',
     'header.tagline': 'Strict 8 bars. Stack musical building blocks into a full band piece.',
+    'header.studioLabel': '4-TRACK STUDIO',
+    'header.loopLen': '8 bars · ~21s',
     'header.aiActive': 'Virtual AI session stems active',
 
     'tape.title': '4-TRACK TAPE LOOP DECK',
@@ -568,6 +574,8 @@ export const TRANSLATIONS: Record<SupportedLang, Record<string, string>> = {
     'header.newRoom': '新規ルーム作成',
     'header.progression': '8小節コード進行',
     'header.tagline': '厳密な8小節（約21秒）。ブロックパズルのように合体させてバンド作品を完成。',
+    'header.studioLabel': '4トラックスタジオ',
+    'header.loopLen': '8小節・約21秒',
     'header.aiActive': 'コールドスタートAIバーチャル伴奏稼働中',
 
     'tape.title': '4トラック・テープループ・コンソール',
@@ -743,6 +751,8 @@ export const TRANSLATIONS: Record<SupportedLang, Record<string, string>> = {
     'header.newRoom': '새 합주 방 만들기',
     'header.progression': '8마디 코드 진행',
     'header.tagline': '엄격한 8마디(약 21초). 블록 퍼즐처럼 합쳐서 완성도 높은 밴드 작품을 만듭니다.',
+    'header.studioLabel': '4트랙 스튜디오',
+    'header.loopLen': '8마디 · 약 21초',
     'header.aiActive': '가상 AI 세션 반주 작동 중',
 
     'tape.title': '4트랙 테이프 루프 콘솔',

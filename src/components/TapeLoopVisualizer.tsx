@@ -23,12 +23,12 @@ export const TapeLoopVisualizer: React.FC<TapeLoopVisualizerProps> = ({
   const { isPlaying, currentBar, currentBeat, progress } = transportState;
 
   return (
-    <div className="w-full bg-white dark:bg-[#121215] border border-zinc-200/90 dark:border-white/8 rounded-2xl p-4 sm:p-5 flex flex-col gap-4 shadow-sm dark:shadow-xl select-none relative overflow-hidden transition-colors duration-200">
+    <div className="w-full bg-white dark:bg-zinc-900 border border-subtle rounded-2xl p-4 sm:p-5 flex flex-col gap-4 shadow-card dark:shadow-card-dark select-none relative overflow-hidden transition-colors duration-200">
       {/* Background subtle mesh */}
       <div className="absolute inset-0 opacity-[0.025] dark:opacity-[0.04] pointer-events-none bg-[radial-gradient(#000_1px,transparent_1px)] dark:bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]" />
 
       {/* Top console bar: Tape Deck Head */}
-      <div className="flex items-center justify-between text-xs font-mono text-zinc-500 dark:text-zinc-400 border-b border-zinc-200/80 dark:border-white/6 pb-3">
+      <div className="flex items-center justify-between text-xs font-mono text-zinc-500 dark:text-zinc-400 border-b border-subtle pb-3">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1.5 text-zinc-800 dark:text-zinc-300 font-bold">
             <span className="w-2 h-2 rounded-full bg-[#ff5522] animate-pulse" />
@@ -53,7 +53,7 @@ export const TapeLoopVisualizer: React.FC<TapeLoopVisualizerProps> = ({
       </div>
 
       {/* Center: The 8-Bar Tape Loop Scanner */}
-      <div className="relative w-full bg-zinc-50 dark:bg-[#0a0a0c] border border-zinc-200/80 dark:border-white/6 rounded-xl p-3 flex flex-col gap-2">
+      <div className="relative w-full bg-zinc-50 dark:bg-black/30 border border-subtle rounded-xl p-3 flex flex-col gap-2">
         {/* Playhead position bar */}
         <div
           className="absolute top-0 bottom-0 w-0.5 bg-[#ff5522] z-20 pointer-events-none transition-all duration-75 shadow-[0_0_8px_#ff5522]"
@@ -79,7 +79,7 @@ export const TapeLoopVisualizer: React.FC<TapeLoopVisualizerProps> = ({
               </div>
 
               {/* 8 Bars Segments */}
-              <div className="flex-1 h-full grid grid-cols-8 gap-1 relative bg-white dark:bg-[#141418] rounded-md p-1 border border-zinc-200/60 dark:border-white/4">
+              <div className="flex-1 h-full grid grid-cols-8 gap-1 relative bg-white dark:bg-zinc-900 rounded-md p-1 border border-subtle">
                 {progression.map((chord, barIdx) => {
                   const isCurrent = isPlaying && currentBar === barIdx;
                   return (

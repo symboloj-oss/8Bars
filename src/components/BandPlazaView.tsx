@@ -106,27 +106,27 @@ export const BandPlazaView: React.FC<BandPlazaViewProps> = ({
   return (
     <div className="w-full flex flex-col gap-6 max-w-7xl mx-auto px-4 sm:px-8 select-none">
       {/* Community Hero Banner */}
-      <div className="relative rounded-3xl border border-zinc-200/90 dark:border-white/8 bg-gradient-to-br from-white dark:from-[#121215] via-zinc-50 dark:via-[#16161b] to-orange-50/40 dark:to-[#220d06] p-6 sm:p-8 shadow-sm dark:shadow-2xl overflow-hidden transition-colors duration-200">
+      <div className="relative rounded-2xl border border-subtle bg-gradient-to-br from-white dark:from-zinc-900 via-zinc-50 dark:via-zinc-900 to-orange-50/60 dark:to-[#2a1206] p-6 sm:p-8 shadow-card dark:shadow-card-dark overflow-hidden transition-colors duration-200">
         {/* Subtle background glow */}
-        <div className="absolute top-0 right-0 w-80 h-80 bg-[#ff5522]/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-0 right-0 w-80 h-80 bg-[#ff5522]/8 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex flex-col gap-2 max-w-2xl">
             <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full bg-[#ff5522]/15 text-[#ff5522] text-[11px] font-mono font-bold border border-[#ff5522]/30 flex items-center gap-1">
+              <span className="px-2.5 py-0.5 rounded-full bg-[#ff5522]/10 text-[#ff5522] text-[11px] font-mono font-bold border border-[#ff5522]/25 flex items-center gap-1">
                 <Sparkles className="w-3 h-3" />
                 {t('plaza.badgeNeedMusicians', { count: vacantRoomsCount })}
               </span>
-              <span className="text-xs font-mono text-zinc-400">·</span>
-              <span className="text-xs font-mono text-zinc-500 dark:text-zinc-400">
+              <span className="text-xs font-mono text-zinc-300 dark:text-zinc-600">·</span>
+              <span className="text-xs font-mono text-zinc-400 dark:text-zinc-500 tracking-wider">
                 8BARS COMMUNITY LOUNGE
               </span>
             </div>
 
-            <h2 className="text-2xl sm:text-3xl font-black text-zinc-900 dark:text-white tracking-tight">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 dark:text-white tracking-tight">
               {t('plaza.title')}
             </h2>
-            <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed font-sans">
+            <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed font-sans">
               {t('plaza.subtitle')}
             </p>
           </div>
@@ -137,7 +137,7 @@ export const BandPlazaView: React.FC<BandPlazaViewProps> = ({
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.96 }}
               onClick={onOpenPublishModal}
-              className="py-3 px-5 rounded-2xl bg-[#ff5522] hover:bg-[#ff4410] text-white font-bold text-xs flex items-center gap-2 transition-all shadow-lg shadow-[#ff5522]/25 font-mono whitespace-nowrap"
+              className="btn-primary py-3 px-5 rounded-xl"
             >
               <Plus className="w-4 h-4" />
               {t('plaza.publishMyRoom')}
@@ -150,10 +150,10 @@ export const BandPlazaView: React.FC<BandPlazaViewProps> = ({
       <div className="flex items-center gap-2 overflow-x-auto pb-1 font-mono text-xs">
         <button
           onClick={() => setFilter('all')}
-          className={`px-3.5 py-2 rounded-xl font-bold whitespace-nowrap transition-colors shadow-2xs ${
+          className={`px-3.5 py-2 rounded-lg font-semibold whitespace-nowrap transition-colors ${
             filter === 'all'
-              ? 'bg-zinc-900 text-white dark:bg-white dark:text-black shadow-xs'
-              : 'bg-white dark:bg-[#141418] text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-white/6 hover:border-zinc-300 dark:hover:border-white/12'
+              ? 'bg-zinc-900 text-white dark:bg-white dark:text-black shadow-sm'
+              : 'bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border border-subtle hover:border-subtle-strong'
           }`}
         >
           {t('plaza.filterAll', { count: rooms.length })}
@@ -161,10 +161,10 @@ export const BandPlazaView: React.FC<BandPlazaViewProps> = ({
 
         <button
           onClick={() => setFilter('bass')}
-          className={`px-3.5 py-2 rounded-xl font-bold whitespace-nowrap transition-colors shadow-2xs ${
+          className={`px-3.5 py-2 rounded-lg font-semibold whitespace-nowrap transition-colors ${
             filter === 'bass'
-              ? 'bg-[#ff5522] text-white shadow-xs'
-              : 'bg-white dark:bg-[#141418] text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-white/6 hover:border-zinc-300 dark:hover:border-white/12'
+              ? 'bg-[#ff5522] text-white shadow-sm'
+              : 'bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border border-subtle hover:border-subtle-strong'
           }`}
         >
           {t('plaza.filterBass')}
@@ -172,10 +172,10 @@ export const BandPlazaView: React.FC<BandPlazaViewProps> = ({
 
         <button
           onClick={() => setFilter('melody')}
-          className={`px-3.5 py-2 rounded-xl font-bold whitespace-nowrap transition-colors shadow-2xs ${
+          className={`px-3.5 py-2 rounded-lg font-semibold whitespace-nowrap transition-colors ${
             filter === 'melody'
-              ? 'bg-[#ff5522] text-white shadow-xs'
-              : 'bg-white dark:bg-[#141418] text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-white/6 hover:border-zinc-300 dark:hover:border-white/12'
+              ? 'bg-[#ff5522] text-white shadow-sm'
+              : 'bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border border-subtle hover:border-subtle-strong'
           }`}
         >
           {t('plaza.filterMelody')}
@@ -183,10 +183,10 @@ export const BandPlazaView: React.FC<BandPlazaViewProps> = ({
 
         <button
           onClick={() => setFilter('chords')}
-          className={`px-3.5 py-2 rounded-xl font-bold whitespace-nowrap transition-colors shadow-2xs ${
+          className={`px-3.5 py-2 rounded-lg font-semibold whitespace-nowrap transition-colors ${
             filter === 'chords'
-              ? 'bg-[#ff5522] text-white shadow-xs'
-              : 'bg-white dark:bg-[#141418] text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-white/6 hover:border-zinc-300 dark:hover:border-white/12'
+              ? 'bg-[#ff5522] text-white shadow-sm'
+              : 'bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border border-subtle hover:border-subtle-strong'
           }`}
         >
           {t('plaza.filterChords')}
@@ -194,10 +194,10 @@ export const BandPlazaView: React.FC<BandPlazaViewProps> = ({
 
         <button
           onClick={() => setFilter('drums')}
-          className={`px-3.5 py-2 rounded-xl font-bold whitespace-nowrap transition-colors shadow-2xs ${
+          className={`px-3.5 py-2 rounded-lg font-semibold whitespace-nowrap transition-colors ${
             filter === 'drums'
-              ? 'bg-[#ff5522] text-white shadow-xs'
-              : 'bg-white dark:bg-[#141418] text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-white/6 hover:border-zinc-300 dark:hover:border-white/12'
+              ? 'bg-[#ff5522] text-white shadow-sm'
+              : 'bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border border-subtle hover:border-subtle-strong'
           }`}
         >
           {t('plaza.filterDrums')}
@@ -205,10 +205,10 @@ export const BandPlazaView: React.FC<BandPlazaViewProps> = ({
 
         <button
           onClick={() => setFilter('complete')}
-          className={`px-3.5 py-2 rounded-xl font-bold whitespace-nowrap transition-colors shadow-2xs ${
+          className={`px-3.5 py-2 rounded-lg font-semibold whitespace-nowrap transition-colors ${
             filter === 'complete'
-              ? 'bg-amber-500 text-white shadow-xs'
-              : 'bg-white dark:bg-[#141418] text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-white/6 hover:border-zinc-300 dark:hover:border-white/12'
+              ? 'bg-amber-500 text-white shadow-sm'
+              : 'bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border border-subtle hover:border-subtle-strong'
           }`}
         >
           {t('plaza.filterComplete')}
@@ -244,10 +244,10 @@ export const BandPlazaView: React.FC<BandPlazaViewProps> = ({
               key={commRoom.id}
               whileHover={{ y: -3 }}
               transition={{ type: 'spring', stiffness: 350, damping: 25 }}
-              className={`rounded-2xl border bg-white dark:bg-[#121215] p-5 flex flex-col justify-between gap-4 shadow-sm dark:shadow-xl transition-colors duration-200 ${
+              className={`rounded-2xl border bg-white dark:bg-zinc-900 p-5 flex flex-col justify-between gap-4 shadow-card dark:shadow-card-dark transition-colors duration-200 ${
                 isCurrentActive
-                  ? 'border-[#ff5522] ring-1 ring-[#ff5522]/30 bg-orange-50/20 dark:bg-[#ff5522]/5'
-                  : 'border-zinc-200/90 dark:border-white/8 hover:border-zinc-300 dark:hover:border-white/16'
+                  ? 'border-[#ff5522] ring-1 ring-[#ff5522]/30 bg-orange-50/30 dark:bg-[#ff5522]/5'
+                  : 'border-subtle hover:border-subtle-strong'
               }`}
             >
               {/* Card Top: Genre badge, BPM, Progression */}
@@ -298,13 +298,13 @@ export const BandPlazaView: React.FC<BandPlazaViewProps> = ({
                 </div>
 
                 {/* Recruitment Callout Box */}
-                <div className="my-3 p-3 rounded-xl bg-zinc-50 dark:bg-[#0a0a0c] border border-zinc-200/80 dark:border-white/6 flex flex-col gap-1.5">
-                  <p className="text-xs text-zinc-700 dark:text-zinc-300 font-sans leading-relaxed italic">
-                    "{commRoom.recruitmentCall}"
+                <div className="my-3 p-3 rounded-xl bg-zinc-50 dark:bg-black/30 border border-subtle flex flex-col gap-1.5">
+                  <p className="text-xs text-zinc-600 dark:text-zinc-300 font-sans leading-relaxed">
+                    {commRoom.recruitmentCall}
                   </p>
 
                   {/* Musician contact button */}
-                  <div className="flex items-center justify-between pt-1 border-t border-zinc-200/60 dark:border-white/4">
+                  <div className="flex items-center justify-between pt-1 border-t border-subtle">
                     <span className="text-[10px] font-mono text-zinc-400 dark:text-zinc-500 truncate max-w-[200px]">
                       {commRoom.contactInfo}
                     </span>
@@ -327,10 +327,10 @@ export const BandPlazaView: React.FC<BandPlazaViewProps> = ({
                     return (
                       <div
                         key={slot.id}
-                        className={`p-1.5 rounded-xl border flex flex-col items-center justify-center gap-1 transition-colors ${
+                        className={`p-1.5 rounded-lg border flex flex-col items-center justify-center gap-1 transition-colors ${
                           isHuman
-                            ? 'bg-[#ff5522]/10 border-[#ff5522]/30 text-zinc-800 dark:text-zinc-200 shadow-2xs'
-                            : 'bg-zinc-100/60 dark:bg-white/4 border-zinc-200 dark:border-white/6 text-zinc-400 dark:text-zinc-500'
+                            ? 'bg-[#ff5522]/10 border-[#ff5522]/30 text-zinc-800 dark:text-zinc-200'
+                            : 'bg-zinc-50 dark:bg-white/4 border-subtle text-zinc-400 dark:text-zinc-500'
                         }`}
                       >
                         <div className="relative">
@@ -366,7 +366,7 @@ export const BandPlazaView: React.FC<BandPlazaViewProps> = ({
                   {commRoom.tags.map((tag, tIdx) => (
                     <span
                       key={`tag-${tIdx}`}
-                      className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-[#18181d] text-zinc-500 dark:text-zinc-400 border border-zinc-200 dark:border-white/6"
+                      className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-white/6 text-zinc-500 dark:text-zinc-400 border border-subtle"
                     >
                       #{tag}
                     </span>
@@ -375,15 +375,15 @@ export const BandPlazaView: React.FC<BandPlazaViewProps> = ({
               </div>
 
               {/* Bottom Actions Row */}
-              <div className="flex items-center justify-between gap-3 pt-3 border-t border-zinc-200/80 dark:border-white/6 font-mono">
+              <div className="flex items-center justify-between gap-3 pt-3 border-t border-subtle font-mono">
                 <div className="flex items-center gap-2">
                   {/* Upvote / Applaud Button */}
                   <motion.button
                     whileTap={{ scale: 0.9 }}
                     onClick={() => handleApplaud(commRoom.id, commRoom.likesCount)}
-                    className="px-2.5 py-1.5 rounded-xl border border-zinc-200 dark:border-white/8 bg-zinc-50 hover:bg-zinc-100 dark:bg-[#18181d] dark:hover:bg-[#222228] text-xs font-bold text-zinc-700 dark:text-zinc-300 flex items-center gap-1.5 transition-colors shadow-2xs"
+                    className="btn-secondary px-2.5 py-1.5"
                   >
-                    <span>👏</span>
+                    <Heart className="w-3.5 h-3.5 text-[#ff5522]" />
                     <span className="tabular-nums">{displayLikes}</span>
                   </motion.button>
 
@@ -391,13 +391,13 @@ export const BandPlazaView: React.FC<BandPlazaViewProps> = ({
                   <motion.button
                     whileTap={{ scale: 0.92 }}
                     onClick={() => handleToggleAudioPreview(commRoom)}
-                    className="p-2 rounded-xl border border-zinc-200 dark:border-white/8 bg-zinc-50 hover:bg-zinc-100 dark:bg-[#18181d] dark:hover:bg-[#222228] text-zinc-600 dark:text-zinc-400 transition-colors shadow-2xs"
+                    className="btn-secondary p-2"
                     title="试听和弦走向"
                   >
                     {isPreviewing ? (
                       <Pause className="w-3.5 h-3.5 text-[#ff5522]" />
                     ) : (
-                      <Play className="w-3.5 h-3.5 ml-0.5 text-zinc-700 dark:text-zinc-300" />
+                      <Play className="w-3.5 h-3.5 ml-0.5" />
                     )}
                   </motion.button>
                 </div>
@@ -407,10 +407,10 @@ export const BandPlazaView: React.FC<BandPlazaViewProps> = ({
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.96 }}
                   onClick={() => onSelectRoom(commRoom)}
-                  className={`py-2 px-4 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-md ${
+                  className={`py-2 px-4 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all ${
                     isCurrentActive
                       ? 'bg-zinc-900 text-white dark:bg-white dark:text-black'
-                      : 'bg-[#ff5522] hover:bg-[#ff4410] text-white shadow-[#ff5522]/20'
+                      : 'btn-primary py-2 px-4'
                   }`}
                 >
                   <span>{isCurrentActive ? '当前正在合奏' : t('plaza.joinJam')}</span>

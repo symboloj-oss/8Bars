@@ -32,22 +32,22 @@ export const ChordReferenceDrawer: React.FC<ChordReferenceDrawerProps> = ({
   };
 
   return (
-    <div className="w-full bg-white dark:bg-[#121215] border border-zinc-200/90 dark:border-white/8 rounded-2xl p-4 sm:p-5 select-none shadow-sm dark:shadow-xl transition-colors duration-200">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 border-b border-zinc-200/80 dark:border-white/6 pb-3">
+    <div className="w-full bg-white dark:bg-zinc-900 border border-subtle rounded-2xl p-4 sm:p-5 select-none shadow-card dark:shadow-card-dark transition-colors duration-200">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 border-b border-subtle pb-3">
         <div className="flex items-center gap-2">
           <BookOpen className="w-4 h-4 text-[#ff5522]" />
-          <h3 className="text-xs font-bold text-zinc-900 dark:text-white font-mono uppercase tracking-wider">
+          <h3 className="text-xs font-bold text-zinc-900 dark:text-white tracking-wider">
             {t('cheatsheet.title')}
           </h3>
         </div>
 
         {/* View mode toggle */}
-        <div className="flex items-center bg-zinc-100 dark:bg-[#09090b] p-1 rounded-lg border border-zinc-200 dark:border-white/6 self-start sm:self-auto font-mono">
+        <div className="flex items-center bg-zinc-100 dark:bg-black/40 p-1 rounded-lg border border-subtle self-start sm:self-auto font-mono">
           <button
             onClick={() => setViewMode('guitar')}
             className={`px-3 py-1 text-xs rounded-md transition-colors ${
               viewMode === 'guitar'
-                ? 'bg-white dark:bg-[#18181e] text-zinc-900 dark:text-white font-bold shadow-2xs'
+                ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white font-semibold shadow-sm'
                 : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300'
             }`}
           >
@@ -57,7 +57,7 @@ export const ChordReferenceDrawer: React.FC<ChordReferenceDrawerProps> = ({
             onClick={() => setViewMode('piano')}
             className={`px-3 py-1 text-xs rounded-md transition-colors ${
               viewMode === 'piano'
-                ? 'bg-white dark:bg-[#18181e] text-zinc-900 dark:text-white font-bold shadow-2xs'
+                ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white font-semibold shadow-sm'
                 : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300'
             }`}
           >
@@ -76,10 +76,10 @@ export const ChordReferenceDrawer: React.FC<ChordReferenceDrawerProps> = ({
               key={chordName}
               whileTap={{ scale: 0.94 }}
               onClick={() => setSelectedChordName(chordName)}
-              className={`px-3.5 py-2 rounded-xl text-xs font-mono font-bold transition-colors shrink-0 flex items-center gap-1.5 shadow-2xs ${
+              className={`px-3.5 py-2 rounded-lg text-xs font-mono font-semibold transition-colors shrink-0 flex items-center gap-1.5 ${
                 isSelected
-                  ? 'bg-[#ff5522] text-white shadow-md shadow-[#ff5522]/30 scale-105'
-                  : 'bg-zinc-50 dark:bg-[#0a0a0c] text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-white/6 hover:text-zinc-900 dark:hover:text-zinc-200 hover:border-zinc-300 dark:hover:border-white/12'
+                  ? 'bg-[#ff5522] text-white shadow-primary'
+                  : 'bg-zinc-50 dark:bg-black/30 text-zinc-600 dark:text-zinc-400 border border-subtle hover:text-zinc-900 dark:hover:text-zinc-200 hover:border-subtle-strong'
               }`}
             >
               <span>{chordName}</span>
@@ -92,7 +92,7 @@ export const ChordReferenceDrawer: React.FC<ChordReferenceDrawerProps> = ({
       </div>
 
       {/* Selected Chord Detail presentation */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-zinc-50 dark:bg-[#09090b] p-4 rounded-xl border border-zinc-200/80 dark:border-white/6 transition-colors duration-200">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-zinc-50 dark:bg-black/30 p-4 rounded-xl border border-subtle transition-colors duration-200">
         <div className="md:col-span-1 flex flex-col justify-between gap-3">
           <div>
             <span className="text-[10px] font-mono text-zinc-500 dark:text-zinc-500 uppercase tracking-widest">
@@ -109,7 +109,7 @@ export const ChordReferenceDrawer: React.FC<ChordReferenceDrawerProps> = ({
             <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed mt-1">
               {selectedChord.feeling}
             </p>
-            <div className="text-xs text-zinc-500 font-mono mt-2 pt-2 border-t border-zinc-200/80 dark:border-white/6">
+            <div className="text-xs text-zinc-500 font-mono mt-2 pt-2 border-t border-subtle">
               {t('cheatsheet.notes')}: <span className="text-zinc-800 dark:text-zinc-200 font-semibold">{selectedChord.notes.join(' - ')}</span>
             </div>
           </div>
@@ -118,10 +118,10 @@ export const ChordReferenceDrawer: React.FC<ChordReferenceDrawerProps> = ({
           <motion.button
             whileTap={{ scale: 0.95 }}
             onClick={handlePlayStrum}
-            className={`py-2 px-3.5 rounded-lg border text-xs font-mono font-bold flex items-center justify-center gap-2 transition-all shadow-2xs ${
+            className={`py-2 px-3.5 rounded-lg border text-xs font-mono font-bold flex items-center justify-center gap-2 transition-all ${
               isPlayingStrum
                 ? 'bg-[#ff5522] text-white border-[#ff5522]'
-                : 'bg-white dark:bg-[#141418] border-zinc-200 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20 text-zinc-800 dark:text-zinc-200'
+                : 'bg-white dark:bg-zinc-900 border-subtle hover:border-subtle-strong text-zinc-800 dark:text-zinc-200'
             }`}
           >
             <Volume2 className="w-3.5 h-3.5 text-[#ff5522]" />

@@ -54,10 +54,10 @@ export const StudioWorkspace: React.FC<StudioWorkspaceProps> = ({
 
       {/* Module 2: The 4 Fixed Slots Grid with Multi-Take selector */}
       <section className="flex flex-col gap-3">
-        <div className="flex items-center justify-between border-b border-zinc-200/80 dark:border-white/6 pb-2.5">
+        <div className="flex items-center justify-between border-b border-subtle pb-2.5">
           <div className="flex items-center gap-2">
             <Users className="w-4 h-4 text-[#ff5522]" />
-            <h3 className="text-sm font-bold text-zinc-900 dark:text-white tracking-tight font-mono uppercase">
+            <h3 className="text-sm font-bold text-zinc-900 dark:text-white tracking-tight">
               {t('slots.title')}
             </h3>
           </div>
@@ -91,13 +91,13 @@ export const StudioWorkspace: React.FC<StudioWorkspaceProps> = ({
       </section>
 
       {/* Module 4: Preset Styles & Progression Switcher */}
-      <section className="bg-white dark:bg-[#121215] border border-zinc-200/90 dark:border-white/8 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm dark:shadow-xl transition-colors duration-200">
+      <section className="bg-white dark:bg-zinc-900 border border-subtle rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-card dark:shadow-card-dark transition-colors duration-200">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-xl bg-[#ff5522]/10 border border-[#ff5522]/30 flex items-center justify-center text-[#ff5522] shrink-0 font-mono text-xs font-bold">
+          <div className="w-8 h-8 rounded-lg bg-[#ff5522]/10 border border-[#ff5522]/25 flex items-center justify-center text-[#ff5522] shrink-0 font-mono text-xs font-bold">
             8B
           </div>
           <div className="flex flex-col">
-            <h4 className="text-xs font-bold text-zinc-900 dark:text-white font-mono uppercase">
+            <h4 className="text-xs font-bold text-zinc-900 dark:text-white">
               {t('templates.stripTitle')}
             </h4>
             <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
@@ -118,10 +118,10 @@ export const StudioWorkspace: React.FC<StudioWorkspaceProps> = ({
                     onSwitchTemplate(tmpl);
                   }
                 }}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors shadow-2xs ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
                   isCurrent
-                    ? 'bg-[#ff5522] text-white shadow-md shadow-[#ff5522]/20'
-                    : 'bg-zinc-100 dark:bg-[#18181d] border border-zinc-200 dark:border-white/6 text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white hover:border-zinc-300 dark:hover:border-white/12'
+                    ? 'bg-[#ff5522] text-white shadow-primary'
+                    : 'bg-zinc-100 dark:bg-white/6 border border-subtle text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white hover:border-subtle-strong'
                 }`}
               >
                 {tmpl.title.split(' ')[0]} ({tmpl.bpm} BPM)
@@ -137,7 +137,7 @@ export const StudioWorkspace: React.FC<StudioWorkspaceProps> = ({
       </section>
 
       {/* Clean Minimalist Hardware Footer */}
-      <footer className="mt-12 border-t border-zinc-200/80 dark:border-white/6 bg-white/60 dark:bg-[#08080a] py-6 px-4 sm:px-8 select-none transition-colors duration-200">
+      <footer className="mt-12 border-t border-subtle bg-white/60 dark:bg-zinc-950 py-6 px-4 sm:px-8 select-none transition-colors duration-200">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-zinc-500">
           <div className="flex items-center gap-2">
             <span className="font-bold text-zinc-800 dark:text-zinc-200">「8BARS」</span>

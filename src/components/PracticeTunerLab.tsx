@@ -69,9 +69,9 @@ export const PracticeTunerLab: React.FC<PracticeTunerLabProps> = ({
   };
 
   return (
-    <div className="w-full bg-white dark:bg-[#121215] border border-zinc-200/90 dark:border-white/8 rounded-2xl p-4 sm:p-5 flex flex-col gap-5 shadow-sm dark:shadow-xl select-none transition-colors duration-200">
+    <div className="w-full bg-white dark:bg-zinc-900 border border-subtle rounded-2xl p-4 sm:p-5 flex flex-col gap-5 shadow-card dark:shadow-card-dark select-none transition-colors duration-200">
       {/* Module Title */}
-      <div className="flex items-center justify-between border-b border-zinc-200/80 dark:border-white/6 pb-3">
+      <div className="flex items-center justify-between border-b border-subtle pb-3">
         <div className="flex items-center gap-2">
           <Activity className="w-4 h-4 text-[#ff5522]" />
           <h3 className="text-sm font-bold text-zinc-900 dark:text-white tracking-tight font-mono uppercase">
@@ -85,7 +85,7 @@ export const PracticeTunerLab: React.FC<PracticeTunerLabProps> = ({
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* Left: Interactive Chord Strum Pad */}
-        <div className="flex flex-col gap-3 bg-zinc-50 dark:bg-[#0a0a0c] p-4 rounded-xl border border-zinc-200/80 dark:border-white/6 transition-colors duration-200">
+        <div className="flex flex-col gap-3 bg-zinc-50 dark:bg-black/30 p-4 rounded-xl border border-subtle transition-colors duration-200">
           <div className="flex items-center justify-between">
             <span className="text-xs font-mono font-bold text-zinc-800 dark:text-zinc-300 flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-[#ff5522]" />
@@ -123,7 +123,7 @@ export const PracticeTunerLab: React.FC<PracticeTunerLabProps> = ({
           </div>
 
           {/* Strumming Pattern Coach */}
-          <div className="mt-2 pt-3 border-t border-zinc-200/80 dark:border-white/6 flex flex-col gap-1.5">
+          <div className="mt-2 pt-3 border-t border-subtle flex flex-col gap-1.5">
             <div className="flex items-center justify-between text-[11px] font-mono text-zinc-500 dark:text-zinc-400">
               <span>{t('lab.strumCoach')}</span>
               <span className="text-[#ff5522] font-semibold">
@@ -157,7 +157,7 @@ export const PracticeTunerLab: React.FC<PracticeTunerLabProps> = ({
         </div>
 
         {/* Right: Pitch Pipe / String Tuner Reference */}
-        <div className="flex flex-col gap-3 bg-zinc-50 dark:bg-[#0a0a0c] p-4 rounded-xl border border-zinc-200/80 dark:border-white/6 justify-between transition-colors duration-200">
+        <div className="flex flex-col gap-3 bg-zinc-50 dark:bg-black/30 p-4 rounded-xl border border-subtle justify-between transition-colors duration-200">
           <div>
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs font-mono font-bold text-zinc-800 dark:text-zinc-300 flex items-center gap-1.5">
