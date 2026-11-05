@@ -12,3 +12,11 @@ coverage/
 # IDE
 .idea/
 *.tsbuildinfo
+
+# Claude Code 工具链(本机安装,不入库)
+.agents/
+.claude/
+skills-lock.json
+
+# 诊断脚本临时产物
+.tmp-*.png
