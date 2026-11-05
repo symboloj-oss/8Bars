@@ -1,3 +1,4 @@
+"use client";
 import React from 'react';
 import { ChordDetail } from '../types/music';
 import { ChevronRight } from 'lucide-react';

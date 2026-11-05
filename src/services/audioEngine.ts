@@ -19,6 +19,7 @@ class AudioEngine {
   private isInitialized = false;
   private template: RoomTemplate | null = null;
   private slots: SlotInfo[] = [];
+  private currentBpm = 120;
   private transportListeners: Set<TransportListener> = new Set();
   private animationFrameId: number | null = null;
   private loopEventId: number | null = null;
@@ -41,6 +42,8 @@ class AudioEngine {
 
   // Custom user audio buffers
   private customAudioBuffers: Map<SlotType, AudioBuffer> = new Map();
+  // 原始 ArrayBuffer 副本:导出 WAV 时在离线上下文里重新解码使用
+  private customAudioArrayBuffers: Map<SlotType, ArrayBuffer> = new Map();
   private activeBufferSources: Map<SlotType, AudioBufferSourceNode> = new Map();
 
   // Scheduled sequence IDs for teardown
@@ -49,13 +52,23 @@ class AudioEngine {
   // Metronome for count-in
   private metronomeSynth: Tone.Synth | null = null;
 
+  // 并发安全的初始化:所有调用共享同一个初始化 Promise,
+  // 避免 StrictMode 双调用/多组件同时触发时重复执行 Tone.start()
+  private initPromise: Promise<void> | null = null;
+
   constructor() {
     // Lazy initialized on first user interaction
   }
 
   public async initialize(): Promise<void> {
     if (this.isInitialized) return;
+    if (!this.initPromise) {
+      this.initPromise = this.doInitialize();
+    }
+    await this.initPromise;
+  }
 
+  private async doInitialize(): Promise<void> {
     await Tone.start();
     Tone.getContext().lookAhead = 0.05;
 
@@ -154,13 +167,45 @@ class AudioEngine {
     this.melodySynth.triggerAttackRelease(note, '1.5', now, 0.7);
   }
 
-  public async setTemplateAndSlots(template: RoomTemplate, slots: SlotInfo[]): Promise<void> {
+  public async setTemplateAndSlots(template: RoomTemplate, slots: SlotInfo[], bpmOverride?: number): Promise<void> {
     await this.initialize();
+
+    // 内容没变就跳过重排:StrictMode 双调用/重复 setState 会走到这里,
+    // 重复排程会触发 Tone 时间线断言("time must be greater than last scheduled")
+    const bpm = bpmOverride ?? template.bpm;
+    const unchanged =
+      this.template?.id === template.id &&
+      this.currentBpm === bpm &&
+      this.slots.length === slots.length &&
+      this.slots.every((s, i) => {
+        const o = slots[i];
+        return (
+          !!o &&
+          s.type === o.type &&
+          s.volume === o.volume &&
+          s.isMuted === o.isMuted &&
+          s.isSolo === o.isSolo &&
+          s.isCustomTake === o.isCustomTake &&
+          s.latencyOffsetMs === o.latencyOffsetMs
+        );
+      });
+    if (unchanged) {
+      this.template = template;
+      this.slots = slots;
+      return;
+    }
+
+    // 重排前先停表归零:播放中重排会把事件排到错误的时间轴上
+    Tone.getTransport().stop();
+    Tone.getTransport().position = 0;
+
     this.template = template;
     this.slots = slots;
+    // 房间行 bpm 是权威值(种子房可能和模板默认值不同),无覆盖时用模板默认
+    this.currentBpm = bpm;
 
     // Set Transport BPM
-    Tone.getTransport().bpm.value = template.bpm;
+    Tone.getTransport().bpm.value = this.currentBpm;
 
     // Set 8-bar loop
     Tone.getTransport().loop = true;
@@ -207,10 +252,10 @@ class AudioEngine {
   private scheduleScore(): void {
     if (!this.template) return;
 
-    // Clear previous scheduled events
-    for (const id of this.scheduledIds) {
-      Tone.getTransport().clear(id);
-    }
+    // 清空整条事件时间线。注意不能用逐条 clear(id):
+    // Tone 内部 StateTimeline 的"最后调度时间"只有 cancel() 才会复位,
+    // 切换模板后从 0:0:0 重新排事件会触发断言崩溃。
+    Tone.getTransport().cancel(0);
     this.scheduledIds = [];
 
     const bpm = this.template.bpm;
@@ -378,6 +423,22 @@ class AudioEngine {
   public async setSlotAudio(slotType: SlotType, blob: Blob, latencyOffsetMs: number = -80): Promise<void> {
     await this.initialize();
     const arrayBuffer = await blob.arrayBuffer();
+    // 注意:decodeAudioData 会转移(detach)传入 buffer 的所有权,
+    // 必须先把副本存起来,供离线导出时重新解码
+    this.customAudioArrayBuffers.set(slotType, arrayBuffer.slice(0));
+    const rawContext = Tone.getContext().rawContext;
+    const audioBuffer = await rawContext.decodeAudioData(arrayBuffer);
+    this.customAudioBuffers.set(slotType, audioBuffer);
+  }
+
+  // 从远端 URL 加载真人 take(进入分享房间时使用),逻辑与 setSlotAudio 一致
+  public async setSlotAudioFromUrl(slotType: SlotType, url: string): Promise<void> {
+    await this.initialize();
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('音频下载失败 HTTP ' + res.status);
+    const arrayBuffer = await res.arrayBuffer();
+    // 同上:先存副本再解码
+    this.customAudioArrayBuffers.set(slotType, arrayBuffer.slice(0));
     const rawContext = Tone.getContext().rawContext;
     const audioBuffer = await rawContext.decodeAudioData(arrayBuffer);
     this.customAudioBuffers.set(slotType, audioBuffer);
@@ -385,6 +446,7 @@ class AudioEngine {
 
   public removeSlotAudio(slotType: SlotType): void {
     this.customAudioBuffers.delete(slotType);
+    this.customAudioArrayBuffers.delete(slotType);
     const active = this.activeBufferSources.get(slotType);
     if (active) {
       try { active.stop(); } catch (e) {}
@@ -514,7 +576,7 @@ class AudioEngine {
   private notifyState(): void {
     if (!this.template) return;
     const isPlaying = Tone.getTransport().state === 'started';
-    const bpm = this.template.bpm;
+    const bpm = this.currentBpm;
     const totalSeconds = (32 * 60) / bpm; // 8 bars * 4 beats
 
     // Tone.getTransport().seconds
@@ -552,12 +614,12 @@ class AudioEngine {
     await this.initialize();
     if (!this.template) throw new Error('No template loaded');
 
-    const bpm = this.template.bpm;
+    const bpm = this.currentBpm;
     const duration = (32 * 60) / bpm;
 
     const offlineBuffer = await Tone.Offline(async () => {
       // Recreate a master offline bus
-      const offlineBpm = this.template!.bpm;
+      const offlineBpm = this.currentBpm;
       Tone.getTransport().bpm.value = offlineBpm;
 
       // Synthesize full 8 bars offline
@@ -592,6 +654,28 @@ class AudioEngine {
         const chordSlot = this.slots.find(s => s.type === 'chords');
         if (!chordSlot?.isCustomTake) {
           offChords.triggerAttackRelease(notes, '2n', `${bar}:0:0`, 0.8);
+        }
+      }
+
+      // 混入真人 take:在离线上下文里重新解码(不能跨上下文复用 AudioBuffer,
+      // 且 decodeAudioData 会转移 ArrayBuffer 所有权,所以传副本)
+      const offlineCtx = Tone.getContext().rawContext;
+      for (const slot of this.slots) {
+        if (!slot.isCustomTake) continue;
+        const arrayBuf = this.customAudioArrayBuffers.get(slot.type);
+        if (!arrayBuf) continue;
+        try {
+          const buffer = await offlineCtx.decodeAudioData(arrayBuf.slice(0));
+          const src = offlineCtx.createBufferSource();
+          src.buffer = buffer;
+          src.connect(offlineCtx.destination);
+          // 与 playCustomBuffers 相同的延迟对齐语义
+          const offsetSec = (slot.latencyOffsetMs || -80) / 1000;
+          const bufferOffset = offsetSec < 0 ? Math.abs(offsetSec) : 0;
+          const startTime = offsetSec > 0 ? offsetSec : 0;
+          src.start(startTime, bufferOffset);
+        } catch (e) {
+          console.warn('离线渲染:席位音频解码失败', slot.type, e);
         }
       }
 
@@ -662,3 +746,8 @@ class AudioEngine {
 }
 
 export const audioEngine = new AudioEngine();
+
+// 调试钩子:浏览器控制台/无头测试可用 window.__audioEngine 访问引擎
+if (typeof window !== 'undefined') {
+  (window as any).__audioEngine = audioEngine;
+}

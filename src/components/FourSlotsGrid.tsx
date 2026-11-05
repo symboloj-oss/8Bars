@@ -1,3 +1,4 @@
+"use client";
 import React, { useState } from 'react';
 import { SlotInfo, SlotType, SlotTake } from '../types/music';
 import { getCharacterForSlot, BandCharacter } from '../data/characters';
@@ -130,7 +131,7 @@ export const FourSlotsGrid: React.FC<FourSlotsGridProps> = ({
                         />
                       )}
 
-                      {/* Floating Name & Species Pill */}
+                      {/* Floating Name & Persona Pill */}
                       <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between gap-1 pointer-events-none">
                         <span className="px-2 py-0.5 rounded-lg bg-black/80 dark:bg-black/90 backdrop-blur-md text-white text-[10px] font-bold font-mono shadow-md flex items-center gap-1.5 border border-white/10">
                           <span
@@ -141,7 +142,7 @@ export const FourSlotsGrid: React.FC<FourSlotsGridProps> = ({
                         </span>
 
                         <span className="px-2 py-0.5 rounded-lg bg-white/90 dark:bg-[#1a1a20]/90 backdrop-blur-md text-zinc-800 dark:text-zinc-200 text-[9px] font-mono border border-zinc-200/80 dark:border-white/10 shrink-0">
-                          {character.species.split(' ')[0]}
+                          {character.persona}
                         </span>
                       </div>
 

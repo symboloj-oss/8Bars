@@ -1,3 +1,4 @@
+"use client";
 import React from 'react';
 import { SlotInfo } from '../types/music';
 import { TransportState } from '../services/audioEngine';

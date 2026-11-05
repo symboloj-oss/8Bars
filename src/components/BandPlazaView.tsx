@@ -1,3 +1,4 @@
+"use client";
 import React, { useState } from 'react';
 import { CommunityRoom } from '../types/community';
 import { SlotType } from '../types/music';
@@ -19,12 +20,14 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import confetti from 'canvas-confetti';
+import { toggleLikeRoom } from '../lib/api/rooms';
 
 interface BandPlazaViewProps {
   rooms: CommunityRoom[];
   currentRoomId: string;
   onSelectRoom: (room: CommunityRoom) => void;
   onOpenPublishModal: () => void;
+  loading?: boolean;
   t?: (key: string, params?: Record<string, string | number>) => string;
 }
 
@@ -35,6 +38,7 @@ export const BandPlazaView: React.FC<BandPlazaViewProps> = ({
   currentRoomId,
   onSelectRoom,
   onOpenPublishModal,
+  loading = false,
   t = (k) => k,
 }) => {
   const [filter, setFilter] = useState<FilterCategory>('all');
@@ -62,7 +66,8 @@ export const BandPlazaView: React.FC<BandPlazaViewProps> = ({
     }, 2000);
   };
 
-  const handleApplaud = (id: string, currentCount: number) => {
+  // 点赞:乐观更新 + 服务端 RPC(原子计数/去重),失败回滚
+  const handleApplaud = async (id: string, currentCount: number) => {
     setLikesMap((prev) => ({
       ...prev,
       [id]: (prev[id] ?? currentCount) + 1,
@@ -72,6 +77,13 @@ export const BandPlazaView: React.FC<BandPlazaViewProps> = ({
       spread: 45,
       origin: { y: 0.8 },
     });
+    try {
+      const { likesCount } = await toggleLikeRoom(id);
+      setLikesMap((prev) => ({ ...prev, [id]: likesCount }));
+    } catch (e) {
+      console.warn('点赞失败', e);
+      setLikesMap((prev) => ({ ...prev, [id]: currentCount }));
+    }
   };
 
   const handleToggleAudioPreview = async (room: CommunityRoom) => {
@@ -205,7 +217,23 @@ export const BandPlazaView: React.FC<BandPlazaViewProps> = ({
 
       {/* Community Rooms Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {filteredRooms.map((commRoom) => {
+        {loading && (
+          <>
+            {[1, 2, 3, 4].map((i) => (
+              <div
+                key={`skeleton-${i}`}
+                className="rounded-2xl border border-zinc-200/90 dark:border-white/8 bg-white dark:bg-[#121215] p-5 flex flex-col gap-4 animate-pulse"
+              >
+                <div className="h-4 w-2/3 rounded bg-zinc-200 dark:bg-white/8" />
+                <div className="h-6 w-1/2 rounded bg-zinc-200 dark:bg-white/8" />
+                <div className="h-20 rounded-xl bg-zinc-100 dark:bg-white/5" />
+                <div className="h-10 rounded-xl bg-zinc-100 dark:bg-white/5" />
+              </div>
+            ))}
+          </>
+        )}
+
+        {!loading && filteredRooms.map((commRoom) => {
           const isCurrentActive = commRoom.id === currentRoomId;
           const displayLikes = likesMap[commRoom.id] ?? commRoom.likesCount;
           const isCopied = copiedId === commRoom.id;

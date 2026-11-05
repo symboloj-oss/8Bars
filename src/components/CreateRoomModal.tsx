@@ -1,3 +1,4 @@
+"use client";
 import React, { useState } from 'react';
 import { ROOM_TEMPLATES } from '../data/templates';
 import { Plus, X, Disc3 } from 'lucide-react';
@@ -18,13 +19,22 @@ export const CreateRoomModal: React.FC<CreateRoomModalProps> = ({
 }) => {
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>(ROOM_TEMPLATES[0].id);
   const [title, setTitle] = useState<string>('周五放轻松 8 小节');
-  const [creatorName, setCreatorName] = useState<string>('主理人 @' + Math.floor(Math.random() * 900 + 100));
+  // 记忆上次用过的昵称,新访客随机一个
+  const [creatorName, setCreatorName] = useState<string>(() => {
+    try {
+      const saved = localStorage.getItem('8bars_nickname');
+      if (saved) return saved;
+    } catch (e) {}
+    return '主理人 @' + Math.floor(Math.random() * 900 + 100);
+  });
 
   if (!isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onCreateRoom(selectedTemplateId, title.trim() || '新合奏房间', creatorName.trim() || '乐手');
+    const name = creatorName.trim() || '乐手';
+    try { localStorage.setItem('8bars_nickname', name); } catch (err) {}
+    onCreateRoom(selectedTemplateId, title.trim() || '新合奏房间', name);
     onClose();
   };
 

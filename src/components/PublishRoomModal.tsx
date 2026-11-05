@@ -1,3 +1,4 @@
+"use client";
 import React, { useState } from 'react';
 import { RoomState, RoomTemplate } from '../types/music';
 import { CommunityRoom } from '../types/community';

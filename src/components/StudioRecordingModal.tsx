@@ -1,3 +1,4 @@
+"use client";
 import React, { useState, useEffect, useRef } from 'react';
 import { RoomTemplate, SlotInfo, SlotType, ChordDetail } from '../types/music';
 import { audioEngine, TransportState } from '../services/audioEngine';
@@ -42,7 +43,14 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
   const [phase, setPhase] = useState<StudioPhase>('headphone_warning');
   const [countInBeat, setCountInBeat] = useState<number>(4);
   const [latencyOffsetMs, setLatencyOffsetMs] = useState<number>(-80);
-  const [musicianName, setMusicianName] = useState<string>('小吉他手 @' + Math.floor(Math.random() * 900 + 100));
+  // 记忆上次用过的昵称,新访客随机一个
+  const [musicianName, setMusicianName] = useState<string>(() => {
+    try {
+      const saved = localStorage.getItem('8bars_nickname');
+      if (saved) return saved;
+    } catch (e) {}
+    return '小吉他手 @' + Math.floor(Math.random() * 900 + 100);
+  });
   const [activeTab, setActiveTab] = useState<'guitar' | 'piano'>('guitar');
   const [micVolumeLevel, setMicVolumeLevel] = useState<number>(0);
   const [recordedAudioBlob, setRecordedAudioBlob] = useState<Blob | null>(null);
@@ -263,8 +271,10 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
   // Handle Save
   const handleSaveTake = () => {
     if (!recordedAudioBlob) return;
+    const name = musicianName.trim() || '新乐手';
+    try { localStorage.setItem('8bars_nickname', name); } catch (e) {}
     audioEngine.stop();
-    onSaveRecording(targetSlot.type, recordedAudioBlob, latencyOffsetMs, musicianName.trim() || '新乐手');
+    onSaveRecording(targetSlot.type, recordedAudioBlob, latencyOffsetMs, name);
     onClose();
   };
 
@@ -306,7 +316,7 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
                   className="hidden sm:inline-flex text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border border-black/5 dark:border-white/10"
                   style={{ backgroundColor: `${targetChar.accentColor}18`, color: targetChar.accentColor }}
                 >
-                  {targetChar.name} · {targetChar.species}
+                  {targetChar.name} · {targetChar.persona}
                 </span>
               </div>
               <p className="text-xs text-zinc-500 dark:text-zinc-400 font-mono">

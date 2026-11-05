@@ -1,3 +1,4 @@
+"use client";
 import React, { useState } from 'react';
 import { RoomState, RoomTemplate } from '../types/music';
 import { audioEngine } from '../services/audioEngine';
