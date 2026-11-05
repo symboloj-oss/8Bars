@@ -3,6 +3,8 @@
 import puppeteer from 'puppeteer-core';
 
 const CHROME = 'C:/Program Files/Google/Chrome/Application/chrome.exe';
+// 用法: node scripts/debug-headless.mjs [基础URL,默认本地]
+const BASE = process.argv[2] || 'http://localhost:3000';
 
 const browser = await puppeteer.launch({
   executablePath: CHROME,
@@ -16,7 +18,7 @@ page.on('console', (m) => msgs.push(`[console.${m.type()}] ${m.text()}`));
 page.on('pageerror', (e) => msgs.push(`[pageerror] ${e.message}`));
 page.on('requestfailed', (r) => msgs.push(`[requestfailed] ${r.url()} ${r.failure()?.errorText || ''}`));
 
-await page.goto('http://localhost:3000', { waitUntil: 'networkidle2', timeout: 30000 });
+await page.goto(BASE, { waitUntil: 'networkidle2', timeout: 30000 });
 await new Promise((r) => setTimeout(r, 3000));
 
 // 1. 列出页面上可点击的按钮
@@ -73,7 +75,7 @@ console.log('=== 广场测试 ===');
 console.log(plazaResult);
 
 // 6. 访问分享直达页(种子房 1),验证房间加载与工作区渲染
-await page.goto('http://localhost:3000/room/10000000-0000-4000-8000-000000000001', {
+await page.goto(BASE + '/room/10000000-0000-4000-8000-000000000001', {
   waitUntil: 'networkidle2',
   timeout: 30000,
 });
