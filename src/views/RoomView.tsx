@@ -10,12 +10,12 @@ import { getTemplateAsset } from '../data/templateAssets';
 import { audioEngine } from '../services/audioEngine';
 import { useTheme } from '../hooks/useTheme';
 import { useI18n } from '../i18n/useI18n';
-import { useTransport, useMeterLevels } from '../hooks/useAudioEngine';
+import { useTransport } from '../hooks/useAudioEngine';
 import { getRoomBundle, groupTakes, saveTake, updateRoomRecruitment, createRoom } from '../lib/api/rooms';
+import { StageHero } from '../components/StageHero';
 import { roomToRoomState, publicAudioUrl, slotAvatar } from '../lib/api/mappers';
 import { downloadRoomWav } from '../lib/exportWav';
 import { RoomHeader } from '../components/RoomHeader';
-import { StudioWorkspace } from './StudioWorkspace';
 import { StudioRecordingModal } from '../components/StudioRecordingModal';
 import { BandShareCardModal } from '../components/BandShareCardModal';
 import { PublishRoomModal } from '../components/PublishRoomModal';
@@ -42,7 +42,6 @@ export const RoomView: React.FC<RoomViewProps> = ({ roomId }) => {
   const [isExportingWav, setIsExportingWav] = useState<boolean>(false);
 
   const transportState = useTransport();
-  const meterLevels = useMeterLevels(transportState.isPlaying);
 
   // 进入房间:先渲染 UI(数据到达即完成加载),音频引擎接管放后台执行。
   // 注意:绝不能 await 引擎初始化再渲染——无用户手势时 Tone.start()
@@ -125,77 +124,6 @@ export const RoomView: React.FC<RoomViewProps> = ({ roomId }) => {
     audioEngine.pause();
     setActiveRecordingSlot(slot);
   }, []);
-
-  const handleToggleMute = useCallback((slotType: SlotType) => {
-    setRoom((prev) => {
-      if (!prev) return prev;
-      const updatedSlots = prev.slots.map((s) =>
-        s.type === slotType ? { ...s, isMuted: !s.isMuted } : s
-      );
-      audioEngine.updateSlots(updatedSlots);
-      return { ...prev, slots: updatedSlots };
-    });
-  }, []);
-
-  const handleToggleSolo = useCallback((slotType: SlotType) => {
-    setRoom((prev) => {
-      if (!prev) return prev;
-      const targetSlot = prev.slots.find((s) => s.type === slotType);
-      const isCurrentlySolo = !!targetSlot?.isSolo;
-      const updatedSlots = prev.slots.map((s) =>
-        s.type === slotType ? { ...s, isSolo: !isCurrentlySolo } : { ...s, isSolo: false }
-      );
-      audioEngine.updateSlots(updatedSlots);
-      return { ...prev, slots: updatedSlots };
-    });
-  }, []);
-
-  const handleVolumeChange = useCallback((slotType: SlotType, volume: number) => {
-    setRoom((prev) => {
-      if (!prev) return prev;
-      const updatedSlots = prev.slots.map((s) => (s.type === slotType ? { ...s, volume } : s));
-      audioEngine.updateSlots(updatedSlots);
-      return { ...prev, slots: updatedSlots };
-    });
-  }, []);
-
-  // 切换 Take:AI take 清空音频;真人 take 有 URL 则从远端加载
-  const handleSelectTake = useCallback(
-    async (slotType: SlotType, takeIndex: number) => {
-      const targetSlot = room?.slots.find((s) => s.type === slotType);
-      const chosenTake = targetSlot?.takes[takeIndex];
-      if (!targetSlot || !chosenTake) return;
-
-      if (chosenTake.isAI) {
-        audioEngine.removeSlotAudio(slotType);
-      } else if (chosenTake.audioBlobUrl) {
-        try {
-          await audioEngine.setSlotAudioFromUrl(slotType, chosenTake.audioBlobUrl);
-        } catch (e) {
-          console.warn('Take 音频加载失败', e);
-        }
-      }
-
-      setRoom((prev) => {
-        if (!prev) return prev;
-        const updatedSlots = prev.slots.map((s) => {
-          if (s.type === slotType) {
-            return {
-              ...s,
-              musician: chosenTake.musician,
-              isCustomTake: !chosenTake.isAI && !!chosenTake.audioBlobUrl,
-              latencyOffsetMs: chosenTake.latencyOffsetMs,
-              activeTakeIndex: takeIndex,
-            };
-          }
-          return s;
-        });
-        audioEngine.updateSlots(updatedSlots);
-        return { ...prev, slots: updatedSlots };
-      });
-    },
-    [room]
-  );
 
   // 保存录音:先上云端(takes 桶 + takes 行),再本地乐观更新
   const handleSaveRecording = useCallback(
@@ -351,46 +279,33 @@ export const RoomView: React.FC<RoomViewProps> = ({ roomId }) => {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 flex flex-col justify-between selection:bg-[#ff5522]/20 selection:text-zinc-900 dark:selection:text-white transition-colors duration-200">
-      <div className="flex flex-col gap-6">
-        <RoomHeader
-          room={room}
-          template={template}
-          transportState={transportState}
-          isDark={isDark}
-          lang={lang}
-          onSetLang={setLang}
-          t={t}
-          activeTab="studio"
-          onSelectTab={(tab) => {
-            if (tab === 'plaza') router.push('/');
-          }}
-          openRoomsCount={0}
-          onToggleTheme={toggleTheme}
-          onTogglePlay={handleTogglePlay}
-          onOpenShareModal={() => setIsShareModalOpen(true)}
-          onOpenCreateModal={() => router.push('/')}
-          onExportWav={handleExportWav}
-          isExporting={isExportingWav}
-        />
+    <div className={`min-h-screen flex flex-col justify-between selection:bg-[#ff5522]/20 transition-colors duration-200 ${isDark ? 'bg-[#120f12]' : 'bg-[#f7f3ef]'}`}>
+      <div>
+        {/* 房间页 = 全屏舞台,header 悬浮 */}
+        <div className="absolute top-0 inset-x-0 z-50">
+          <RoomHeader
+            isDark={isDark}
+            lang={lang}
+            onSetLang={setLang}
+            t={t}
+            variant="stage"
+            onToggleTheme={toggleTheme}
+            onBackToPlaza={() => router.push('/')}
+          />
+        </div>
 
-        <main className="px-4 sm:px-8 w-full max-w-7xl mx-auto flex flex-col gap-6">
-          <StudioWorkspace
+        <main className="w-full">
+          <StageHero
             room={room}
             template={template}
             transportState={transportState}
-            meterLevels={meterLevels}
+            isDark={isDark}
             t={t}
             onTogglePlay={handleTogglePlay}
-            onClaimSlot={handleClaimSlot}
-            onToggleMute={handleToggleMute}
-            onToggleSolo={handleToggleSolo}
-            onVolumeChange={handleVolumeChange}
-            onSelectTake={handleSelectTake}
+            onSelectSlot={handleClaimSlot}
+            onSwitchTemplate={handleSwitchTemplate}
             onExportWav={handleExportWav}
             isExporting={isExportingWav}
-            onOpenCreateModal={() => router.push('/')}
-            onSwitchTemplate={handleSwitchTemplate}
           />
         </main>
       </div>
