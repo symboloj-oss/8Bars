@@ -50,14 +50,18 @@ export const RoomHeader: React.FC<RoomHeaderProps> = ({
       : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-900/5',
     logoBox: isDark ? 'bg-white/10' : 'bg-[#ff5522]',
     logoIcon: isDark ? 'text-[#ff8a5c]' : 'text-white',
+    // 液态玻璃:强模糊 + 半透明 + 亮边 + 顶部内高光
+    headerBg: isDark ? 'bg-zinc-950/40' : 'bg-white/55',
+    headerBorder: isDark ? 'border-white/10' : 'border-black/[0.06]',
+    headerHighlight: isDark
+      ? 'shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]'
+      : 'shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]',
   };
 
   return (
     <header
-      className={`relative z-40 select-none transition-colors duration-200 ${
-        isStage
-          ? 'bg-transparent'
-          : 'sticky top-0 bg-white/70 dark:bg-zinc-950/60 backdrop-blur-md'
+      className={`relative z-40 select-none transition-colors duration-200 backdrop-blur-xl border-b ${c.headerBg} ${c.headerBorder} ${c.headerHighlight} ${
+        isStage ? '' : 'sticky top-0'
       }`}
     >
       {/* 内容与页面主体对齐(max-w-7xl) */}

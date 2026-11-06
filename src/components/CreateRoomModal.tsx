@@ -1,6 +1,6 @@
 "use client";
-import React, { useState } from 'react';
-import { ROOM_TEMPLATES } from '../data/templates';
+import React, { useState, useEffect } from 'react';
+import { RoomTemplate } from '../types/music';
 import { Plus, Disc3 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Button } from './ui/button';
@@ -11,6 +11,7 @@ interface CreateRoomModalProps {
   isOpen: boolean;
   onClose: () => void;
   onCreateRoom: (templateId: string, customTitle: string, creatorName: string) => void;
+  templates: RoomTemplate[];
   t?: (key: string, params?: Record<string, string | number>) => string;
 }
 
@@ -18,10 +19,19 @@ export const CreateRoomModal: React.FC<CreateRoomModalProps> = ({
   isOpen,
   onClose,
   onCreateRoom,
-  t = (k) => k,
+  templates,
+  t = (k: string) => k,
 }) => {
-  const [selectedTemplateId, setSelectedTemplateId] = useState<string>(ROOM_TEMPLATES[0].id);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
   const [title, setTitle] = useState<string>('周五放轻松 8 小节');
+
+  // templates 异步到达后,若尚未选中任何模板,默认选中第一个
+  useEffect(() => {
+    setSelectedTemplateId((cur) => {
+      if (cur) return cur;
+      return templates[0]?.id || '';
+    });
+  }, [templates]);
   // 记忆上次用过的昵称,新访客随机一个
   const [creatorName, setCreatorName] = useState<string>(() => {
     try {
@@ -87,7 +97,7 @@ export const CreateRoomModal: React.FC<CreateRoomModalProps> = ({
               {t('create.selectTmpl')}
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              {ROOM_TEMPLATES.map((tmpl) => {
+              {templates.map((tmpl) => {
                 const isSelected = tmpl.id === selectedTemplateId;
                 return (
                   <div
