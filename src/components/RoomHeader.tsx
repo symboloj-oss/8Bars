@@ -169,23 +169,26 @@ export const RoomHeader: React.FC<RoomHeaderProps> = ({
 
               {/* Transport & Utility Actions */}
               <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+                {/* 大圆形播放按钮:像唱片机的开始键 */}
                 <Button
                   onClick={onTogglePlay}
-                  size="lg"
-                  className={transportState.isPlaying ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 hover:bg-zinc-800 dark:hover:bg-zinc-200' : ''}
+                  size="icon-lg"
+                  title={transportState.isPlaying ? t('header.pause') : t('header.play')}
+                  className={`rounded-full size-12 ${
+                    transportState.isPlaying
+                      ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 hover:bg-zinc-800 dark:hover:bg-zinc-200'
+                      : ''
+                  }`}
                 >
                   {transportState.isPlaying ? (
-                    <>
-                      <Pause />
-                      {t('header.pause')}
-                    </>
+                    <Pause className="size-4" />
                   ) : (
-                    <>
-                      <Play className="ml-0.5" />
-                      {t('header.play')}
-                    </>
+                    <Play className="size-4 ml-0.5" />
                   )}
                 </Button>
+                <span className="hidden sm:inline text-xs font-medium text-zinc-500 dark:text-zinc-400">
+                  {transportState.isPlaying ? t('header.pause') : t('header.play')}
+                </span>
 
                 {/* Bar and Beat Realtime Status Indicator */}
                 <div className="bg-zinc-50 dark:bg-black/30 rounded-xl px-3.5 py-2 flex items-center gap-3 text-xs">
