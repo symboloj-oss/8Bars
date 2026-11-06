@@ -79,9 +79,6 @@
 @utility shadow-card-dark {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.35);
 }
-@utility shadow-raise {
-  box-shadow: 0 2px 4px rgba(16, 16, 20, 0.06), 0 12px 32px rgba(16, 16, 20, 0.1);
-}
 @utility shadow-primary {
   box-shadow: 0 2px 6px rgba(255, 85, 34, 0.28), 0 8px 20px rgba(255, 85, 34, 0.18);
 }
@@ -96,43 +93,21 @@
   .dark & { border-color: color-mix(in srgb, white 14%, transparent); }
 }
 
-/* 表面背景统一:卡片 / 内嵌面板 / 内嵌面板(深)
-   层次靠背景色差 + 阴影,不靠边框 */
-@utility surface-card {
-  background-color: #ffffff;
-  .dark & { background-color: var(--color-zinc-900); }
-}
-@utility surface-panel {
-  background-color: var(--color-zinc-100);
-  .dark & { background-color: color-mix(in srgb, black 40%, var(--color-zinc-900)); }
-}
-@utility surface-inset {
-  background-color: var(--color-zinc-100);
-  .dark & { background-color: color-mix(in srgb, white 5%, transparent); }
-}
-
-/* 文本层级:大标题 / 小标题 / 正文辅助 */
-@utility text-title {
-  font-size: 1.5rem;
-  line-height: 2rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  color: var(--color-zinc-900);
-  .dark & { color: #ffffff; }
-}
-@utility text-section {
-  font-size: 0.8125rem;
-  line-height: 1.25rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  color: var(--color-zinc-900);
-  .dark & { color: #ffffff; }
-}
-@utility text-caption {
-  font-size: 0.6875rem;
-  line-height: 1rem;
-  color: var(--color-zinc-500);
-  .dark & { color: var(--color-zinc-400); }
+/* ============================================================
+   主题切换:墨水渗透(慢速渐变 + 距离级联)
+   元素颜色在波前到达后缓慢渐变(1.4s),波前由近及远推进:
+   波前扫过处正在浸染,波后 = 完全新色,波前未到处 = 完全旧色
+   ============================================================ */
+html.theme-animating *,
+html.theme-animating *::before,
+html.theme-animating *::after {
+  transition:
+    background-color 1400ms cubic-bezier(0.4, 0, 0.2, 1) var(--theme-delay, 0ms),
+    color 1400ms cubic-bezier(0.4, 0, 0.2, 1) var(--theme-delay, 0ms),
+    border-color 1400ms cubic-bezier(0.4, 0, 0.2, 1) var(--theme-delay, 0ms),
+    box-shadow 1400ms cubic-bezier(0.4, 0, 0.2, 1) var(--theme-delay, 0ms),
+    fill 1400ms cubic-bezier(0.4, 0, 0.2, 1) var(--theme-delay, 0ms),
+    stroke 1400ms cubic-bezier(0.4, 0, 0.2, 1) var(--theme-delay, 0ms) !important;
 }
 
 /* ============================================================
@@ -155,6 +130,37 @@
 }
 .note-particle {
   animation: float-note 3s infinite ease-in-out;
+}
+
+/* 频谱柱跳动(播放时) */
+@keyframes eq-bounce {
+  0%, 100% { height: 6px; }
+  50% { height: 26px; }
+}
+.playing .eq-bar {
+  animation: eq-bounce 0.4s infinite ease-in-out alternate;
+}
+
+/* 舞台标题两侧装饰线(参考稿 whisker) */
+.whisker-left::before {
+  content: "///";
+  font-size: 13px;
+  letter-spacing: -2px;
+  font-style: italic;
+  color: #ff6a42;
+  margin-right: 6px;
+  display: inline-block;
+  transform: rotate(-15deg);
+}
+.whisker-right::after {
+  content: "\\\\\\";
+  font-size: 13px;
+  letter-spacing: -2px;
+  font-style: italic;
+  color: #ff6a42;
+  margin-left: 6px;
+  display: inline-block;
+  transform: rotate(15deg);
 }
 
 /* Custom scrollbars for studio feel */

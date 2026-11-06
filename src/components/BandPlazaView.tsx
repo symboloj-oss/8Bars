@@ -29,18 +29,28 @@ interface BandPlazaViewProps {
   rooms: CommunityRoom[];
   currentRoomId: string;
   onSelectRoom: (room: CommunityRoom) => void;
-  onOpenPublishModal: () => void;
+  onOpenPublishModal?: () => void;
+  onOpenCreateModal?: () => void;
   loading?: boolean;
   t?: (key: string, params?: Record<string, string | number>) => string;
 }
 
 type FilterCategory = 'all' | 'bass' | 'melody' | 'chords' | 'drums' | 'complete';
 
+// 缺位展示用短名
+const SLOT_SHORT: Record<string, string> = {
+  drums: '架子鼓',
+  bass: '贝斯',
+  chords: '吉他',
+  melody: '主唱',
+};
+
 export const BandPlazaView: React.FC<BandPlazaViewProps> = ({
   rooms,
   currentRoomId,
   onSelectRoom,
   onOpenPublishModal,
+  onOpenCreateModal,
   loading = false,
   t = (k) => k,
 }) => {
@@ -127,12 +137,17 @@ export const BandPlazaView: React.FC<BandPlazaViewProps> = ({
             </p>
           </div>
 
-          {/* Action button: Publish my current room to plaza */}
-          <div className="shrink-0 flex items-center gap-3">
-            <Button onClick={onOpenPublishModal} size="lg" className="rounded-xl">
+          {/* 入口按钮:创建乐队 / 发布到广场 */}
+          <div className="shrink-0 flex items-center gap-2.5 flex-wrap">
+            <Button onClick={onOpenCreateModal} size="lg" className="rounded-xl">
               <Plus />
-              {t('plaza.publishMyRoom')}
+              {t('header.newRoom')}
             </Button>
+            {onOpenPublishModal && (
+              <Button variant="secondary" onClick={onOpenPublishModal} size="lg" className="rounded-xl">
+                {t('plaza.publishMyRoom')}
+              </Button>
+            )}
           </div>
         </div>
       </div>
@@ -241,134 +256,64 @@ export const BandPlazaView: React.FC<BandPlazaViewProps> = ({
                   : ''
               }`}
             >
-              {/* Card Top: Genre badge, BPM, Progression */}
+              {/* 卡片信息区(精简):类型/速度/真人比例 → 标题 → 创建者 → 缺位 → 招募语 */}
               <div>
-                <div className="flex items-start justify-between gap-3 mb-2">
+                <div className="flex items-center justify-between gap-3 mb-1.5">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-zinc-100 dark:bg-white/8 text-zinc-700 dark:text-zinc-300">
+                    <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-zinc-100 dark:bg-white/8 text-zinc-700 dark:text-zinc-300">
                       {commRoom.genre}
                     </span>
                     <span className="text-[10px] font-mono text-[#ff5522] font-bold">
                       {commRoom.bpm} BPM
                     </span>
-                    <span className="text-[10px] font-mono text-zinc-400 dark:text-zinc-500">
-                      {commRoom.createdAt}
-                    </span>
                   </div>
 
-                  {/* Real musician ratio badge */}
+                  {/* 真人比例徽章 */}
                   <span
-                    className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded ${
+                    className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
                       commRoom.humanSlotsCount === 4
                         ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400'
-                        : 'bg-[#ff5522]/10 text-[#ff5522] border border-[#ff5522]/30'
+                        : 'bg-[#ff5522]/10 text-[#ff5522]'
                     }`}
                   >
                     {t('plaza.slotsRatio', { human: commRoom.humanSlotsCount })}
                   </span>
                 </div>
 
-                {/* Room Title */}
+                {/* 房间标题 */}
                 <h3 className="font-display text-lg font-bold text-zinc-900 dark:text-white tracking-tight">
                   {commRoom.title}
                 </h3>
 
-                {/* Creator info */}
-                <div className="flex items-center justify-between text-xs font-mono text-zinc-500 dark:text-zinc-400 mt-1">
-                  <span className="flex items-center gap-1.5">
+                {/* 创建者 + 缺位信息(一行) */}
+                <div className="flex items-center justify-between gap-2 text-xs mt-1">
+                  <span className="flex items-center gap-1.5 text-zinc-500 dark:text-zinc-400 truncate">
                     <span>{commRoom.creatorAvatar}</span>
                     <span className="font-semibold text-zinc-800 dark:text-zinc-200">
                       {commRoom.creatorName}
                     </span>
                   </span>
-
-                  {/* Chord sequence ribbon */}
-                  <span className="text-[11px] text-zinc-400 dark:text-zinc-500">
-                    {commRoom.progression.slice(0, 4).join('-')}
-                  </span>
-                </div>
-
-                {/* Recruitment Callout Box */}
-                <div className="my-3 p-3 rounded-xl bg-zinc-50 dark:bg-black/30 flex flex-col gap-1.5">
-                  <p className="text-xs text-zinc-600 dark:text-zinc-300 font-sans leading-relaxed">
-                    {commRoom.recruitmentCall}
-                  </p>
-
-                  {/* Musician contact button */}
-                  <div className="flex items-center justify-between pt-1">
-                    <span className="text-[10px] font-mono text-zinc-400 dark:text-zinc-500 truncate max-w-[200px]">
-                      {commRoom.contactInfo}
+                  {commRoom.vacantRoles.length > 0 && (
+                    <span className="text-[11px] text-[#ff5522] font-medium shrink-0">
+                      {t('plaza.vacant', {
+                        roles: commRoom.vacantRoles
+                          .map((r) => SLOT_SHORT[r] || r)
+                          .join(' · '),
+                      })}
                     </span>
-                    <motion.button
-                      whileTap={{ scale: 0.92 }}
-                      onClick={() => handleCopyContact(commRoom.id, commRoom.contactInfo)}
-                      className="text-[10px] font-mono text-[#ff5522] hover:text-[#ff4410] font-bold flex items-center gap-1 shrink-0"
-                    >
-                      {isCopied ? <Check className="w-3 h-3 text-emerald-500" /> : <MessageCircle className="w-3 h-3" />}
-                      {isCopied ? t('plaza.copiedContact') : t('plaza.contactMusician')}
-                    </motion.button>
-                  </div>
+                  )}
                 </div>
 
-                {/* 4-Slots Visual Mini Deck with Mascot Avatars */}
-                <div className="grid grid-cols-4 gap-1.5 my-2">
-                  {commRoom.slots.map((slot) => {
-                    const isHuman = slot.isCustomTake;
-                    const char = getCharacterForSlot(slot.type);
-                    return (
-                      <div
-                        key={slot.id}
-                        className={`p-1.5 rounded-lg border flex flex-col items-center justify-center gap-1 transition-colors ${
-                          isHuman
-                            ? 'bg-[#ff5522]/15 text-zinc-800 dark:text-zinc-200'
-                            : 'bg-zinc-100 dark:bg-white/5 text-zinc-400 dark:text-zinc-500'
-                        }`}
-                      >
-                        <div className="relative">
-                          <img
-                            src={char.imageUrl}
-                            alt={char.name}
-                            className="w-7 h-7 rounded-lg object-cover border"
-                            style={{ borderColor: isHuman ? char.accentColor : 'rgba(150,150,150,0.2)' }}
-                          />
-                          {isHuman && (
-                            <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-[#ff5522] border border-white dark:border-[#121215]" />
-                          )}
-                        </div>
-                        <span className="text-[9px] font-mono font-bold truncate max-w-full">
-                          {t('role.' + slot.type) ? t('role.' + slot.type).split(' ')[0] : slot.roleName.split(' ')[0]}
-                        </span>
-                        <span
-                          className={`text-[8px] font-mono px-1 rounded ${
-                            isHuman
-                              ? 'bg-[#ff5522] text-white font-bold'
-                              : 'bg-zinc-200 dark:bg-white/8 text-zinc-500 dark:text-zinc-400'
-                          }`}
-                        >
-                          {isHuman ? t('slots.taken') : t('slots.empty')}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* Tags */}
-                <div className="flex flex-wrap items-center gap-1 mt-2">
-                  {commRoom.tags.map((tag, tIdx) => (
-                    <span
-                      key={`tag-${tIdx}`}
-                      className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-white/8 text-zinc-500 dark:text-zinc-400"
-                    >
-                      #{tag}
-                    </span>
-                  ))}
-                </div>
+                {/* 招募语(一行截断) */}
+                <p className="mt-2.5 text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed line-clamp-2">
+                  {commRoom.recruitmentCall}
+                </p>
               </div>
 
-              {/* Bottom Actions Row */}
-              <div className="flex items-center justify-between gap-3 pt-3 font-mono">
-                <div className="flex items-center gap-2">
-                  {/* Upvote / Applaud Button */}
+              {/* 底部操作行 */}
+              <div className="flex items-center justify-between gap-2 pt-3 border-t border-subtle">
+                <div className="flex items-center gap-1.5">
+                  {/* 点赞 */}
                   <Button
                     variant="secondary"
                     size="sm"
@@ -378,7 +323,7 @@ export const BandPlazaView: React.FC<BandPlazaViewProps> = ({
                     <span className="tabular-nums">{displayLikes}</span>
                   </Button>
 
-                  {/* Audio Preview Button */}
+                  {/* 试听 */}
                   <Button
                     variant="secondary"
                     size="icon-sm"
@@ -391,9 +336,23 @@ export const BandPlazaView: React.FC<BandPlazaViewProps> = ({
                       <Play className="ml-0.5" />
                     )}
                   </Button>
+
+                  {/* 复制联系方式(图标按钮) */}
+                  <Button
+                    variant="secondary"
+                    size="icon-sm"
+                    onClick={() => handleCopyContact(commRoom.id, commRoom.contactInfo)}
+                    title={commRoom.contactInfo}
+                  >
+                    {isCopied ? (
+                      <Check className="text-emerald-500" />
+                    ) : (
+                      <MessageCircle className="text-[#ff5522]" />
+                    )}
+                  </Button>
                 </div>
 
-                {/* Enter & Jam Primary Action Button */}
+                {/* 进入乐队 */}
                 <Button
                   size="sm"
                   onClick={() => onSelectRoom(commRoom)}
