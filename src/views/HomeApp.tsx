@@ -395,11 +395,15 @@ export default function App() {
                 transportState={transportState}
                 meterLevels={meterLevels}
                 t={t}
+                onTogglePlay={handleTogglePlay}
                 onClaimSlot={handleClaimSlot}
                 onToggleMute={handleToggleMute}
                 onToggleSolo={handleToggleSolo}
                 onVolumeChange={handleVolumeChange}
                 onSelectTake={handleSelectTake}
+                onExportWav={handleExportWav}
+                isExporting={isExportingWav}
+                onOpenCreateModal={() => setIsCreateModalOpen(true)}
                 onSwitchTemplate={(tmpl) => handleCreateRoom(tmpl.id, tmpl.title.split(' ')[0] + ' 8小节', '乐手')}
               />
             </div>

@@ -381,11 +381,15 @@ export const RoomView: React.FC<RoomViewProps> = ({ roomId }) => {
             transportState={transportState}
             meterLevels={meterLevels}
             t={t}
+            onTogglePlay={handleTogglePlay}
             onClaimSlot={handleClaimSlot}
             onToggleMute={handleToggleMute}
             onToggleSolo={handleToggleSolo}
             onVolumeChange={handleVolumeChange}
             onSelectTake={handleSelectTake}
+            onExportWav={handleExportWav}
+            isExporting={isExportingWav}
+            onOpenCreateModal={() => router.push('/')}
             onSwitchTemplate={handleSwitchTemplate}
           />
         </main>

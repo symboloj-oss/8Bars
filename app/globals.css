@@ -135,6 +135,28 @@
   .dark & { color: var(--color-zinc-400); }
 }
 
+/* ============================================================
+   舞台动效(StageHero 用)
+   ============================================================ */
+
+/* 播放时乐手律动 */
+@keyframes band-groove {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(0.8deg); }
+}
+.playing .musician-figure {
+  animation: band-groove 0.55s infinite ease-in-out;
+}
+
+/* 浮动音符粒子 */
+@keyframes float-note {
+  0%, 100% { transform: translateY(0) rotate(-5deg); opacity: 0.3; }
+  50% { transform: translateY(-12px) rotate(8deg); opacity: 0.8; }
+}
+.note-particle {
+  animation: float-note 3s infinite ease-in-out;
+}
+
 /* Custom scrollbars for studio feel */
 ::-webkit-scrollbar {
   width: 6px;
