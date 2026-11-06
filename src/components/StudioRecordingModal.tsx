@@ -7,17 +7,20 @@ import { PianoChordView } from './PianoChordView';
 import { ChordTeleprompter } from './ChordTeleprompter';
 import { getChordDetail } from '../data/chords';
 import { getCharacterForSlot } from '../data/characters';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
+import { Slider } from './ui/slider';
 import {
  Mic,
  Headphones,
  RotateCcw,
  Check,
- X,
  Sliders,
  Play,
  Pause,
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 
 interface StudioRecordingModalProps {
  isOpen: boolean;
@@ -278,23 +281,15 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
  onClose();
  };
 
- if (!isOpen) return null;
-
  const targetChar = getCharacterForSlot(targetSlot.type);
  const currentChordDetail = getChordDetail(transportState.currentChord);
  const nextChordDetail = getChordDetail(transportState.nextChord);
 
  return (
- <div className="fixed inset-0 z-50 bg-black/60 dark:bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-5 overflow-y-auto select-none transition-colors duration-200">
- <motion.div
- initial={{ opacity: 0, scale: 0.95, y: 10 }}
- animate={{ opacity: 1, scale: 1, y: 0 }}
- exit={{ opacity: 0, scale: 0.95 }}
- transition={{ type: 'spring', stiffness: 450, damping: 30 }}
- className="relative w-full max-w-4xl bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl overflow-hidden flex flex-col my-auto max-h-[92vh] transition-colors duration-200"
- >
+ <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+ <DialogContent showCloseButton={false} className="sm:max-w-4xl bg-white dark:bg-zinc-900 p-0 gap-0 rounded-2xl max-h-[92vh] overflow-hidden flex flex-col">
  {/* Header with Cartoon Character Buddy Badge */}
- <div className="flex items-center justify-between px-5 py-3.5 border-b bg-zinc-100 dark:bg-black/30">
+ <div className="flex items-center justify-between px-5 py-3.5 border-b bg-zinc-100 dark:bg-black/30 shrink-0">
  <div className="flex items-center gap-3">
  <div className="relative shrink-0">
  <img
@@ -303,7 +298,7 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
  className="w-10 h-10 rounded-xl object-cover border-2 shadow-sm"
  style={{ borderColor: targetChar.accentColor }}
  />
- <span className="absolute -bottom-1 -right-1 px-1 py-0.2 rounded bg-zinc-900 text-white text-[8px] font-mono font-bold tracking-tighter">
+ <span className="absolute -bottom-1 -right-1 px-1 py-0.5 rounded bg-zinc-900 text-white text-[8px] font-mono font-bold tracking-tighter">
  REC
  </span>
  </div>
@@ -325,13 +320,9 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
  </div>
  </div>
 
- <motion.button
- whileTap={{ scale: 0.92 }}
- onClick={onClose}
- className="w-8 h-8 rounded-lg bg-zinc-100 hover:bg-zinc-200 dark:bg-white/6 dark:hover:bg-white/10 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white flex items-center justify-center transition-colors"
- >
- <X className="w-4 h-4" />
- </motion.button>
+ <Button variant="ghost" size="icon-sm" onClick={onClose}>
+ <span className="text-base">✕</span>
+ </Button>
  </div>
 
  {/* Modal Body */}
@@ -374,21 +365,13 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
  </p>
 
  <div className="w-full flex flex-col gap-2.5">
- <motion.button
- whileHover={{ scale: 1.02 }}
- whileTap={{ scale: 0.96 }}
- onClick={startMicMonitor}
- className="w-full py-3 px-4 rounded-xl font-bold bg-[#ff5522] hover:bg-[#ff4410] text-white transition-colors shadow-primary flex items-center justify-center gap-2 text-xs font-mono"
- >
- <Headphones className="w-4 h-4" />
+ <Button onClick={startMicMonitor} className="w-full py-3 font-mono">
+ <Headphones />
  {t('studio.headphoneBtn')}
- </motion.button>
- <button
- onClick={onClose}
- className="w-full py-2 px-4 rounded-xl text-xs text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors font-mono"
- >
+ </Button>
+ <Button variant="ghost" onClick={onClose} className="w-full py-2 text-xs text-zinc-500 font-mono">
  {t('studio.exit')}
- </button>
+ </Button>
  </div>
  </div>
  )}
@@ -402,12 +385,12 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
  <label className="text-xs font-mono text-zinc-600 dark:text-zinc-400">
  {t('studio.handle')}
  </label>
- <input
+ <Input
  type="text"
  value={musicianName}
  onChange={(e) => setMusicianName(e.target.value)}
  placeholder="如 @阿杰"
- className="bg-white dark:bg-zinc-800/60 border border-subtle px-3 py-2 rounded-lg text-xs font-mono text-zinc-900 dark:text-white focus:outline-none focus:border-[#ff5522]"
+ className="text-xs font-mono"
  />
  </div>
 
@@ -481,15 +464,10 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
 
  {/* Big CTA */}
  <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
- <motion.button
- whileHover={{ scale: 1.01 }}
- whileTap={{ scale: 0.96 }}
- onClick={startCountInAndRecord}
- className="w-full py-3.5 px-6 rounded-xl font-bold text-sm bg-[#ff5522] hover:bg-[#ff4410] text-white shadow-primary flex items-center justify-center gap-2 transition-transform active:scale-95 font-mono"
- >
+ <Button onClick={startCountInAndRecord} className="w-full py-3.5 text-sm font-mono">
  <span className="w-2.5 h-2.5 rounded-full bg-white animate-ping" />
  {t('studio.startRec')}
- </motion.button>
+ </Button>
  </div>
  </div>
  )}
@@ -546,13 +524,9 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
  {t('studio.autoBrake')}
  </span>
  </div>
- <motion.button
- whileTap={{ scale: 0.95 }}
- onClick={stopRecording}
- className="px-4 py-2 rounded-lg bg-zinc-200 hover:bg-zinc-300 dark:bg-white/6 dark:hover:bg-white/10 text-zinc-800 dark:text-zinc-200 text-xs font-semibold font-mono transition-colors"
- >
+ <Button variant="secondary" onClick={stopRecording} className="text-xs font-mono">
  {t('studio.stopEarly')}
- </motion.button>
+ </Button>
  </div>
  </div>
  )}
@@ -582,14 +556,10 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
  </div>
  </div>
 
- <motion.button
- whileTap={{ scale: 0.95 }}
- onClick={toggleReviewPlayback}
- className="px-4 py-2 rounded-xl bg-zinc-900 hover:bg-black dark:bg-white dark:hover:bg-zinc-200 text-white dark:text-black font-bold text-xs flex items-center gap-1.5 transition-colors shadow-md font-mono"
- >
- {isReviewPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+ <Button onClick={toggleReviewPlayback} className="bg-zinc-900 hover:bg-black dark:bg-white dark:hover:bg-zinc-200 text-white dark:text-black font-mono text-xs">
+ {isReviewPlaying ? <Pause className="size-3.5" /> : <Play className="size-3.5" />}
  {isReviewPlaying ? t('studio.previewPause') : t('studio.previewPlay')}
- </motion.button>
+ </Button>
  </div>
 
  {/* Hardware Latency Compensation Slider */}
@@ -604,14 +574,13 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
  </span>
  </div>
 
- <input
- type="range"
- min="-200"
- max="50"
- step="5"
- value={latencyOffsetMs}
- onChange={(e) => setLatencyOffsetMs(Number(e.target.value))}
- className="w-full accent-[#ff5522] cursor-pointer"
+ <Slider
+ min={-200}
+ max={50}
+ step={5}
+ value={[latencyOffsetMs]}
+ onValueChange={(v) => setLatencyOffsetMs(v[0])}
+ className="w-full"
  />
 
  <div className="flex items-center justify-between text-[10px] text-zinc-500">
@@ -626,29 +595,20 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
 
  {/* Confirmation actions */}
  <div className="flex items-center justify-end gap-3 pt-2 font-mono">
- <motion.button
- whileTap={{ scale: 0.95 }}
- onClick={handleRetake}
- className="px-4 py-2.5 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-white/6 dark:hover:bg-white/10 text-zinc-700 dark:text-zinc-300 text-xs font-medium flex items-center gap-1.5 transition-colors"
- >
- <RotateCcw className="w-3.5 h-3.5" />
+ <Button variant="secondary" onClick={handleRetake} className="text-xs font-mono">
+ <RotateCcw className="size-3.5" />
  {t('studio.retake')}
- </motion.button>
+ </Button>
 
- <motion.button
- whileHover={{ scale: 1.01 }}
- whileTap={{ scale: 0.96 }}
- onClick={handleSaveTake}
- className="px-5 py-2.5 rounded-xl bg-[#ff5522] hover:bg-[#ff4410] text-white text-xs font-bold flex items-center gap-1.5 transition-colors shadow-primary"
- >
- <Check className="w-4 h-4" />
+ <Button onClick={handleSaveTake} className="text-xs">
+ <Check />
  {t('studio.saveTake')}
- </motion.button>
+ </Button>
  </div>
  </div>
  )}
  </div>
- </motion.div>
- </div>
+ </DialogContent>
+ </Dialog>
  );
 };

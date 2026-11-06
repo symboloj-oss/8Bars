@@ -3,6 +3,14 @@ import React, { useState, useRef, useEffect } from 'react';
 import { RoomState, RoomTemplate } from '../types/music';
 import { TransportState } from '../services/audioEngine';
 import { SupportedLang, SUPPORTED_LANGS } from '../i18n/translations';
+import { Button } from './ui/button';
+import { Badge } from './ui/badge';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from './ui/dropdown-menu';
 import {
   Play,
   Pause,
@@ -15,7 +23,6 @@ import {
   ChevronDown,
   Disc3,
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
 
 interface RoomHeaderProps {
   room: RoomState;
@@ -54,21 +61,6 @@ export const RoomHeader: React.FC<RoomHeaderProps> = ({
   onSelectTab,
   openRoomsCount = 0,
 }) => {
-  const humanTakeCount = room.slots.filter((s) => s.isCustomTake).length;
-  const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
-  const langMenuRef = useRef<HTMLDivElement>(null);
-
-  // Close language dropdown on outside click
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (langMenuRef.current && !langMenuRef.current.contains(e.target as Node)) {
-        setIsLangMenuOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
   const currentLangLabel = SUPPORTED_LANGS.find((l) => l.code === lang)?.label || '简体中文';
   const currentLangShort = SUPPORTED_LANGS.find((l) => l.code === lang)?.shortLabel || '简';
 
@@ -78,119 +70,80 @@ export const RoomHeader: React.FC<RoomHeaderProps> = ({
       <header className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 sm:gap-6 px-4 sm:px-8 py-2.5 sm:py-3.5 border-b border-subtle bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md sticky top-0 z-40 select-none transition-colors duration-200">
         {/* Zone 1: Brand Wordmark */}
         <div className="flex items-center gap-2.5 shrink-0">
-          <motion.div
-            whileHover={{ rotate: 8, scale: 1.05 }}
-            className="w-7 h-7 rounded-lg bg-[#ff5522] flex items-center justify-center text-white font-mono font-black text-xs shadow-md shadow-[#ff5522]/20"
-          >
+          <div className="w-7 h-7 rounded-lg bg-[#ff5522] flex items-center justify-center text-white font-mono font-black text-xs shadow-md shadow-[#ff5522]/20">
             8B
-          </motion.div>
+          </div>
           <span className="text-base font-extrabold tracking-tight text-zinc-900 dark:text-white whitespace-nowrap">
             8Bars <span className="hidden sm:inline text-zinc-400 dark:text-zinc-500 font-mono text-xs font-normal">/ {t('brand.subtitle')}</span>
           </span>
         </div>
 
         {/* Zone 2: Segmented Main View Tabs (Studio vs Plaza) */}
-        <div className="flex items-center bg-zinc-100 dark:bg-zinc-900 p-1 rounded-xl text-xs">
-          <button
+        <div className="flex items-center bg-zinc-100 dark:bg-zinc-900 p-1 rounded-xl">
+          <Button
+            variant={activeTab === 'studio' ? 'secondary' : 'ghost'}
+            size="sm"
             onClick={() => onSelectTab('studio')}
-            className={`px-3 py-1.5 rounded-lg font-semibold transition-all flex items-center gap-1.5 ${
-              activeTab === 'studio'
-                ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-sm'
-                : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300'
-            }`}
+            className={`rounded-lg ${activeTab === 'studio' ? 'shadow-sm' : 'text-zinc-500'}`}
           >
-            <Disc3 className="w-3.5 h-3.5" />
+            <Disc3 />
             <span>{t('plaza.tabStudio')}</span>
-          </button>
+          </Button>
 
-          <button
+          <Button
+            variant={activeTab === 'plaza' ? 'default' : 'ghost'}
+            size="sm"
             onClick={() => onSelectTab('plaza')}
-            className={`px-3 py-1.5 rounded-lg font-semibold transition-all flex items-center gap-1.5 relative ${
-              activeTab === 'plaza'
-                ? 'bg-[#ff5522] text-white shadow-sm'
-                : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300'
-            }`}
+            className={`rounded-lg relative ${activeTab !== 'plaza' ? 'text-zinc-500' : ''}`}
           >
-            <Globe className="w-3.5 h-3.5" />
+            <Globe />
             <span>{t('plaza.tabPlaza')}</span>
             {openRoomsCount > 0 && (
               <span className={`w-2 h-2 rounded-full ${activeTab === 'plaza' ? 'bg-white' : 'bg-[#ff5522] animate-pulse'}`} />
             )}
-          </button>
+          </Button>
         </div>
 
         {/* Zone 3: Language Selector + Theme Switch + Primary CTA */}
         <div className="flex items-center gap-2 shrink-0 w-full justify-end sm:w-auto">
           {/* Language Selector Dropdown */}
-          <div className="relative" ref={langMenuRef}>
-            <motion.button
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setIsLangMenuOpen((v) => !v)}
-              className="btn-secondary py-1.5 px-2.5 text-xs"
-            >
-              <Globe className="w-3.5 h-3.5 text-zinc-400" />
-              <span>{currentLangShort}</span>
-              <ChevronDown className="w-3 h-3 text-zinc-400" />
-            </motion.button>
-
-            <AnimatePresence>
-              {isLangMenuOpen && (
-                <motion.div
-                  initial={{ opacity: 0, y: 6, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 4, scale: 0.95 }}
-                  transition={{ duration: 0.12 }}
-                  className="absolute right-0 top-full mt-1.5 w-32 bg-white dark:bg-zinc-900 border border-subtle rounded-xl shadow-raise py-1 z-50 overflow-hidden text-xs"
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="text-xs">
+                <Globe />
+                <span>{currentLangShort}</span>
+                <ChevronDown />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {SUPPORTED_LANGS.map((item) => (
+                <DropdownMenuItem
+                  key={item.code}
+                  onClick={() => onSetLang(item.code)}
+                  className={item.code === lang ? 'bg-[#ff5522]/10 text-[#ff5522]' : ''}
                 >
-                  {SUPPORTED_LANGS.map((item) => {
-                    const isSelected = item.code === lang;
-                    return (
-                      <button
-                        key={item.code}
-                        onClick={() => {
-                          onSetLang(item.code);
-                          setIsLangMenuOpen(false);
-                        }}
-                        className={`w-full text-left px-3 py-1.5 flex items-center justify-between transition-colors ${
-                          isSelected
-                            ? 'bg-[#ff5522]/10 text-[#ff5522] font-semibold'
-                            : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-white/6'
-                        }`}
-                      >
-                        <span>{item.label}</span>
-                        {isSelected && <span className="text-[10px] text-[#ff5522]">✓</span>}
-                      </button>
-                    );
-                  })}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+                  <span className="flex-1">{item.label}</span>
+                  {item.code === lang && <span className="text-xs text-[#ff5522]">✓</span>}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           {/* Light / Dark Mode Toggle */}
-          <motion.button
-            whileTap={{ scale: 0.92 }}
+          <Button
+            variant="outline"
+            size="icon-sm"
             onClick={onToggleTheme}
             title={isDark ? t('header.themeLight') : t('header.themeDark')}
-            className="btn-secondary p-2"
           >
-            {isDark ? (
-              <Sun className="w-4 h-4 text-amber-400" />
-            ) : (
-              <Moon className="w-4 h-4 text-zinc-600" />
-            )}
-          </motion.button>
+            {isDark ? <Sun className="text-amber-400" /> : <Moon className="text-zinc-600" />}
+          </Button>
 
           {/* Primary CTA */}
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.96 }}
-            onClick={onOpenShareModal}
-            className="btn-primary"
-          >
-            <Share2 className="w-3.5 h-3.5" />
+          <Button onClick={onOpenShareModal}>
+            <Share2 />
             {t('header.recruitCard')}
-          </motion.button>
+          </Button>
         </div>
       </header>
 
@@ -201,14 +154,13 @@ export const RoomHeader: React.FC<RoomHeaderProps> = ({
             {/* 一行式:左标题信息 / 右控制按钮(移动端纵向) */}
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
               <div className="min-w-0">
-                <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs font-mono text-zinc-500 dark:text-zinc-400 mb-1">
-                  <span className="px-1.5 py-0.5 rounded-md bg-[#ff5522]/10 text-[#ff5522] text-[10px] font-bold border border-[#ff5522]/20">
+                <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                  <Badge className="bg-[#ff5522]/10 text-[#ff5522] border-[#ff5522]/20 hover:bg-[#ff5522]/10">
                     {t('header.studioLabel')}
+                  </Badge>
+                  <span className="text-xs font-mono text-zinc-400 dark:text-zinc-500">
+                    {template.key} 调 · {t('header.loopLen')}
                   </span>
-                  <span className="text-zinc-300 dark:text-zinc-600">/</span>
-                  <span>{template.key} 调</span>
-                  <span className="text-zinc-300 dark:text-zinc-600">/</span>
-                  <span>{t('header.loopLen')}</span>
                 </div>
                 <h2 className="text-xl sm:text-2xl font-extrabold text-zinc-900 dark:text-white tracking-tight truncate">
                   {room.title}
@@ -217,28 +169,23 @@ export const RoomHeader: React.FC<RoomHeaderProps> = ({
 
               {/* Transport & Utility Actions */}
               <div className="flex flex-wrap items-center gap-2.5 shrink-0">
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.95 }}
+                <Button
                   onClick={onTogglePlay}
-                  className={`py-2.5 px-5 rounded-xl font-bold text-sm flex items-center gap-2 transition-all ${
-                    transportState.isPlaying
-                      ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-950'
-                      : 'btn-primary'
-                  }`}
+                  size="lg"
+                  className={transportState.isPlaying ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 hover:bg-zinc-800 dark:hover:bg-zinc-200' : ''}
                 >
                   {transportState.isPlaying ? (
                     <>
-                      <Pause className="w-4 h-4 fill-current" />
+                      <Pause />
                       {t('header.pause')}
                     </>
                   ) : (
                     <>
-                      <Play className="w-4 h-4 fill-current ml-0.5" />
+                      <Play className="ml-0.5" />
                       {t('header.play')}
                     </>
                   )}
-                </motion.button>
+                </Button>
 
                 {/* Bar and Beat Realtime Status Indicator */}
                 <div className="bg-zinc-100 dark:bg-black/30 rounded-xl px-3.5 py-1.5 flex items-center gap-3 font-mono text-xs">
@@ -257,25 +204,20 @@ export const RoomHeader: React.FC<RoomHeaderProps> = ({
                   </div>
                 </div>
 
-                <motion.button
-                  whileTap={{ scale: 0.95 }}
+                <Button
+                  variant="outline"
                   onClick={onExportWav}
                   disabled={isExporting}
                   title={t('header.exportWav')}
-                  className="btn-secondary py-2.5 px-3.5"
                 >
-                  <Download className="w-3.5 h-3.5 text-zinc-400" />
+                  <Download className="text-zinc-400" />
                   {isExporting ? t('header.exporting') : t('header.exportWav')}
-                </motion.button>
+                </Button>
 
-                <motion.button
-                  whileTap={{ scale: 0.95 }}
-                  onClick={onOpenCreateModal}
-                  className="btn-secondary py-2.5 px-3.5"
-                >
-                  <Plus className="w-3.5 h-3.5 text-zinc-400" />
+                <Button variant="outline" onClick={onOpenCreateModal}>
+                  <Plus className="text-zinc-400" />
                   {t('header.newRoom')}
-                </motion.button>
+                </Button>
               </div>
             </div>
           </div>

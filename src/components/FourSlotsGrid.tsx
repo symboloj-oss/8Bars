@@ -18,6 +18,8 @@ import {
   Music,
 } from 'lucide-react';
 import { motion } from 'motion/react';
+import { Button } from './ui/button';
+import { Badge } from './ui/badge';
 
 interface FourSlotsGridProps {
   slots: SlotInfo[];
@@ -67,16 +69,17 @@ export const FourSlotsGrid: React.FC<FourSlotsGridProps> = ({
                 </h4>
 
                 {/* Status Badge */}
-                <div
-                  className={`text-[10px] font-mono px-2 py-0.5 rounded-full flex items-center gap-1.5 shrink-0 ${
+                <Badge
+                  variant={isHuman ? 'default' : 'secondary'}
+                  className={`text-[10px] font-mono px-2 py-0.5 rounded-full gap-1.5 shrink-0 ${
                     isHuman
-                      ? 'bg-[#ff5522]/15 text-[#ff5522] font-bold'
-                      : 'bg-zinc-100 dark:bg-white/8 text-zinc-500 dark:text-zinc-400'
+                      ? 'bg-[#ff5522]/15 text-[#ff5522] hover:bg-[#ff5522]/15 font-bold border-transparent'
+                      : 'text-zinc-500 dark:text-zinc-400 font-normal border-transparent'
                   }`}
                 >
                   <span className={`w-1.5 h-1.5 rounded-full ${isHuman ? 'bg-[#ff5522]' : 'bg-zinc-400 dark:bg-zinc-500'}`} />
                   {isHuman ? t('slots.taken') : t('slots.aiSession')}
-                </div>
+                </Badge>
               </div>
 
               {/* Virtual Band Character Card */}
@@ -268,19 +271,14 @@ export const FourSlotsGrid: React.FC<FourSlotsGridProps> = ({
               </div>
 
               {/* Action Button: Claim / Overwrite */}
-              <motion.button
-                whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.97 }}
+              <Button
+                variant={isHuman ? 'secondary' : 'default'}
                 onClick={() => onClaimSlot(slot)}
-                className={`w-full py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all ${
-                  isHuman
-                    ? 'btn-secondary'
-                    : 'btn-primary'
-                }`}
+                className="w-full py-2.5 text-xs"
               >
-                <Mic className="w-3.5 h-3.5" />
+                <Mic />
                 {isHuman ? t('slots.fork') : t('slots.claim')}
-              </motion.button>
+              </Button>
             </div>
           </motion.div>
         );

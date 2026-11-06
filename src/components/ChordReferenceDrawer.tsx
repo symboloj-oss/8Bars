@@ -5,6 +5,7 @@ import { ChordFretboard } from './ChordFretboard';
 import { PianoChordView } from './PianoChordView';
 import { getChordDetail } from '../data/chords';
 import { audioEngine } from '../services/audioEngine';
+import { Button } from './ui/button';
 import { BookOpen, Volume2 } from 'lucide-react';
 import { motion } from 'motion/react';
 
@@ -115,18 +116,14 @@ export const ChordReferenceDrawer: React.FC<ChordReferenceDrawerProps> = ({
           </div>
 
           {/* Strum preview button */}
-          <motion.button
-            whileTap={{ scale: 0.95 }}
+          <Button
             onClick={handlePlayStrum}
-            className={`py-2 px-3.5 rounded-lg text-xs font-mono font-bold flex items-center justify-center gap-2 transition-all ${
-              isPlayingStrum
-                ? 'bg-[#ff5522] text-white'
-                : 'bg-white dark:bg-zinc-900 text-zinc-800 dark:text-zinc-200'
-            }`}
+            variant={isPlayingStrum ? 'default' : 'secondary'}
+            className="text-xs font-mono"
           >
-            <Volume2 className="w-3.5 h-3.5 text-[#ff5522]" />
+            <Volume2 className="text-[#ff5522]" />
             {isPlayingStrum ? t('cheatsheet.previewing') : t('cheatsheet.preview')}
-          </motion.button>
+          </Button>
         </div>
 
         <div className="md:col-span-2">

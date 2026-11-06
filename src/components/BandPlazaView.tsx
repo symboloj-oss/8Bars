@@ -21,6 +21,9 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import confetti from 'canvas-confetti';
 import { toggleLikeRoom } from '../lib/api/rooms';
+import { Button } from './ui/button';
+import { Badge } from './ui/badge';
+import { Skeleton } from './ui/skeleton';
 
 interface BandPlazaViewProps {
   rooms: CommunityRoom[];
@@ -133,15 +136,10 @@ export const BandPlazaView: React.FC<BandPlazaViewProps> = ({
 
           {/* Action button: Publish my current room to plaza */}
           <div className="shrink-0 flex items-center gap-3">
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.96 }}
-              onClick={onOpenPublishModal}
-              className="btn-primary py-3 px-5 rounded-xl"
-            >
-              <Plus className="w-4 h-4" />
+            <Button onClick={onOpenPublishModal} size="lg" className="rounded-xl">
+              <Plus />
               {t('plaza.publishMyRoom')}
-            </motion.button>
+            </Button>
           </div>
         </div>
       </div>
@@ -222,12 +220,12 @@ export const BandPlazaView: React.FC<BandPlazaViewProps> = ({
             {[1, 2, 3, 4].map((i) => (
               <div
                 key={`skeleton-${i}`}
-                className="rounded-2xl bg-white dark:bg-zinc-900 p-5 flex flex-col gap-4 animate-pulse"
+                className="rounded-2xl bg-white dark:bg-zinc-900 p-5 flex flex-col gap-4"
               >
-                <div className="h-4 w-2/3 rounded bg-zinc-200 dark:bg-white/8" />
-                <div className="h-6 w-1/2 rounded bg-zinc-200 dark:bg-white/8" />
-                <div className="h-20 rounded-xl bg-zinc-100 dark:bg-white/5" />
-                <div className="h-10 rounded-xl bg-zinc-100 dark:bg-white/5" />
+                <Skeleton className="h-4 w-2/3" />
+                <Skeleton className="h-6 w-1/2" />
+                <Skeleton className="h-20 rounded-xl" />
+                <Skeleton className="h-10 rounded-xl" />
               </div>
             ))}
           </>
@@ -378,44 +376,39 @@ export const BandPlazaView: React.FC<BandPlazaViewProps> = ({
               <div className="flex items-center justify-between gap-3 pt-3 font-mono">
                 <div className="flex items-center gap-2">
                   {/* Upvote / Applaud Button */}
-                  <motion.button
-                    whileTap={{ scale: 0.9 }}
+                  <Button
+                    variant="secondary"
+                    size="sm"
                     onClick={() => handleApplaud(commRoom.id, commRoom.likesCount)}
-                    className="btn-secondary px-2.5 py-1.5"
                   >
-                    <Heart className="w-3.5 h-3.5 text-[#ff5522]" />
+                    <Heart className="text-[#ff5522]" />
                     <span className="tabular-nums">{displayLikes}</span>
-                  </motion.button>
+                  </Button>
 
                   {/* Audio Preview Button */}
-                  <motion.button
-                    whileTap={{ scale: 0.92 }}
+                  <Button
+                    variant="secondary"
+                    size="icon-sm"
                     onClick={() => handleToggleAudioPreview(commRoom)}
-                    className="btn-secondary p-2"
                     title="试听和弦走向"
                   >
                     {isPreviewing ? (
-                      <Pause className="w-3.5 h-3.5 text-[#ff5522]" />
+                      <Pause className="text-[#ff5522]" />
                     ) : (
-                      <Play className="w-3.5 h-3.5 ml-0.5" />
+                      <Play className="ml-0.5" />
                     )}
-                  </motion.button>
+                  </Button>
                 </div>
 
                 {/* Enter & Jam Primary Action Button */}
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.96 }}
+                <Button
+                  size="sm"
                   onClick={() => onSelectRoom(commRoom)}
-                  className={`py-2 px-4 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all ${
-                    isCurrentActive
-                      ? 'bg-zinc-900 text-white dark:bg-white dark:text-black'
-                      : 'btn-primary py-2 px-4'
-                  }`}
+                  className={isCurrentActive ? 'bg-zinc-900 text-white dark:bg-white dark:text-black' : ''}
                 >
                   <span>{isCurrentActive ? '当前正在合奏' : t('plaza.joinJam')}</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </motion.button>
+                  <ArrowRight />
+                </Button>
               </div>
             </motion.div>
           );
