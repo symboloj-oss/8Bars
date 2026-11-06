@@ -119,7 +119,7 @@ export const BandPlazaView: React.FC<BandPlazaViewProps> = ({
               </span>
             </div>
 
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 dark:text-white tracking-tight">
+            <h2 className="font-display text-2xl sm:text-3xl font-bold text-zinc-900 dark:text-white tracking-tight">
               {t('plaza.title')}
             </h2>
             <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">
@@ -269,7 +269,7 @@ export const BandPlazaView: React.FC<BandPlazaViewProps> = ({
                 </div>
 
                 {/* Room Title */}
-                <h3 className="text-lg font-bold text-zinc-900 dark:text-white tracking-tight">
+                <h3 className="font-display text-lg font-bold text-zinc-900 dark:text-white tracking-tight">
                   {commRoom.title}
                 </h3>
 

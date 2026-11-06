@@ -73,8 +73,8 @@ export const RoomHeader: React.FC<RoomHeaderProps> = ({
           <div className="w-7 h-7 rounded-lg bg-[#ff5522] flex items-center justify-center text-white font-mono font-black text-xs shadow-md shadow-[#ff5522]/20">
             8B
           </div>
-          <span className="text-base font-extrabold tracking-tight text-zinc-900 dark:text-white whitespace-nowrap">
-            8Bars <span className="hidden sm:inline text-zinc-400 dark:text-zinc-500 font-mono text-xs font-normal">/ {t('brand.subtitle')}</span>
+          <span className="font-display text-base font-bold tracking-tight text-zinc-900 dark:text-white whitespace-nowrap">
+            8Bars <span className="hidden sm:inline text-zinc-400 dark:text-zinc-500 text-xs font-normal">/ {t('brand.subtitle')}</span>
           </span>
         </div>
 
@@ -162,7 +162,7 @@ export const RoomHeader: React.FC<RoomHeaderProps> = ({
                     {template.key} 调 · {template.bpm} BPM
                   </span>
                 </div>
-                <h2 className="text-xl sm:text-2xl font-extrabold text-zinc-900 dark:text-white tracking-tight truncate">
+                <h2 className="font-display text-xl sm:text-2xl font-bold text-zinc-900 dark:text-white tracking-tight truncate">
                   {room.title}
                 </h2>
               </div>

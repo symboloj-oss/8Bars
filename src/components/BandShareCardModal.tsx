@@ -95,7 +95,7 @@ export const BandShareCardModal: React.FC<BandShareCardModalProps> = ({
                 <span className="text-[10px] font-mono uppercase tracking-widest text-[#ff5522] font-bold">
                   {t('share.roomSub')}
                 </span>
-                <h4 className="text-xl font-extrabold text-zinc-900 dark:text-white tracking-tight mt-0.5">
+                <h4 className="font-display text-xl font-bold text-zinc-900 dark:text-white tracking-tight mt-0.5">
                   {room.title}
                 </h4>
                 <div className="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400 mt-1 font-mono">

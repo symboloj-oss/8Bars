@@ -37,7 +37,7 @@ export const ChordReferenceDrawer: React.FC<ChordReferenceDrawerProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3">
         <div className="flex items-center gap-2">
           <BookOpen className="w-4 h-4 text-[#ff5522]" />
-          <h3 className="text-xs font-bold text-zinc-900 dark:text-white tracking-wider">
+          <h3 className="font-display text-sm font-bold text-zinc-900 dark:text-white tracking-tight">
             {t('cheatsheet.title')}
           </h3>
         </div>

@@ -74,7 +74,7 @@ export const PracticeTunerLab: React.FC<PracticeTunerLabProps> = ({
       <div className="flex items-center justify-between pb-3">
         <div className="flex items-center gap-2">
           <Activity className="w-4 h-4 text-[#ff5522]" />
-          <h3 className="text-sm font-bold text-zinc-900 dark:text-white tracking-tight font-mono uppercase">
+          <h3 className="font-display text-sm font-bold text-zinc-900 dark:text-white tracking-tight">
             {t('lab.title')}
           </h3>
         </div>

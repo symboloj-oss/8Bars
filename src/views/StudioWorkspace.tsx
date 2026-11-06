@@ -82,7 +82,7 @@ export const StudioWorkspace: React.FC<StudioWorkspaceProps> = ({
         <div className="flex items-center justify-between pb-2.5">
           <div className="flex items-center gap-2">
             <Users className="w-4 h-4 text-[#ff5522]" />
-            <h3 className="text-sm font-bold text-zinc-900 dark:text-white tracking-tight">
+            <h3 className="font-display text-sm font-bold text-zinc-900 dark:text-white tracking-tight">
               {t('slots.title')}
             </h3>
           </div>

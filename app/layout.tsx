@@ -1,14 +1,29 @@
 import type { Metadata } from 'next';
-import { Plus_Jakarta_Sans, JetBrains_Mono, Geist } from 'next/font/google';
+import { Inter, Noto_Sans_SC, Space_Grotesk, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { cn } from "@/lib/utils";
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+// 字体体系:
+// 标题展示 Space Grotesk(几何现代,音乐产品气质)
+// 正文 Inter(拉丁)+ Noto Sans SC(中文,跨平台一致)
+// 数字/时间码 JetBrains Mono(仅用于 BPM、小节拍数等数值)
+const spaceGrotesk = Space_Grotesk({
+  subsets: ['latin'],
+  weight: ['500', '600', '700'],
+  variable: '--font-space-grotesk',
+  display: 'swap',
+});
 
-const plusJakarta = Plus_Jakarta_Sans({
+const inter = Inter({
   subsets: ['latin'],
   weight: ['400', '500', '600', '700', '800'],
-  variable: '--font-plus-jakarta-sans',
+  variable: '--font-inter',
+  display: 'swap',
+});
+
+const notoSansSC = Noto_Sans_SC({
+  weight: ['400', '500', '700', '900'],
+  variable: '--font-noto-sans-sc',
   display: 'swap',
 });
 
@@ -37,7 +52,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html
       lang="zh-CN"
       suppressHydrationWarning
-      className={cn(plusJakarta.variable, jetbrainsMono.variable, "font-sans", geist.variable)}
+      className={cn(spaceGrotesk.variable, inter.variable, notoSansSC.variable, jetbrainsMono.variable, "font-sans")}
     >
       <head>
         {/* 首绘前主题脚本:在 React 渲染前先给 html 挂上 dark 类,避免主题闪烁 */}
