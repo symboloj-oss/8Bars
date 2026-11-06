@@ -176,6 +176,60 @@ export type Database = {
           },
         ]
       }
+      templates: {
+        Row: {
+          accent_color: string
+          bass_line_type: string
+          bpm: number
+          chords_strum_type: string
+          created_at: string
+          drum_groove: string
+          genre: string
+          icon: string
+          id: string
+          key: string
+          melody_hook_type: string
+          progression: string[]
+          sort_order: number
+          tagline: string
+          title: string
+        }
+        Insert: {
+          accent_color?: string
+          bass_line_type?: string
+          bpm: number
+          chords_strum_type?: string
+          created_at?: string
+          drum_groove?: string
+          genre?: string
+          icon?: string
+          id: string
+          key?: string
+          melody_hook_type?: string
+          progression: string[]
+          sort_order?: number
+          tagline?: string
+          title: string
+        }
+        Update: {
+          accent_color?: string
+          bass_line_type?: string
+          bpm?: number
+          chords_strum_type?: string
+          created_at?: string
+          drum_groove?: string
+          genre?: string
+          icon?: string
+          id?: string
+          key?: string
+          melody_hook_type?: string
+          progression?: string[]
+          sort_order?: number
+          tagline?: string
+          title?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

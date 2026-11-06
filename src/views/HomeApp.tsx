@@ -10,11 +10,12 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { CommunityRoom } from '../types/community';
-import { ROOM_TEMPLATES, createDefaultSlots } from '../data/templates';
+import { createDefaultSlots } from '../data/templates';
 import { audioEngine } from '../services/audioEngine';
 import { listPublishedRooms, createRoom, updateRoomRecruitment } from '../lib/api/rooms';
 import { useTheme } from '../hooks/useTheme';
 import { useI18n } from '../i18n/useI18n';
+import { useTemplates } from '../hooks/useTemplates';
 import { RoomHeader } from '../components/RoomHeader';
 import { CreateRoomModal } from '../components/CreateRoomModal';
 import { BandPlazaView } from '../components/BandPlazaView';
@@ -24,6 +25,9 @@ export default function App() {
   const { theme, toggleTheme, isDark } = useTheme();
   const { lang, setLang, t } = useI18n();
   const router = useRouter();
+
+  // 模板列表(来自 Supabase templates 表)
+  const { templates } = useTemplates();
 
   // 广场房间列表(来自 Supabase,首次加载显示骨架屏)
   const [communityRooms, setCommunityRooms] = useState<CommunityRoom[]>([]);
@@ -44,7 +48,11 @@ export default function App() {
     customTitle: string,
     creatorName: string
   ) => {
-    const chosenTemplate = ROOM_TEMPLATES.find((t) => t.id === templateId) || ROOM_TEMPLATES[0];
+    const chosenTemplate = templates.find((t) => t.id === templateId);
+    if (!chosenTemplate) {
+      console.warn('模板不存在', templateId);
+      return;
+    }
     audioEngine.stop();
     try {
       const { id } = await createRoom({
@@ -53,7 +61,7 @@ export default function App() {
         bpm: chosenTemplate.bpm,
         progression: chosenTemplate.progression,
         creatorName,
-        slots: createDefaultSlots(chosenTemplate),
+        slots: createDefaultSlots(),
       });
       router.push(`/room/${id}`);
     } catch (e) {
@@ -103,6 +111,7 @@ export default function App() {
           isOpen={isCreateModalOpen}
           onClose={() => setIsCreateModalOpen(false)}
           onCreateRoom={handleCreateRoom}
+          templates={templates}
           t={t}
         />
       )}

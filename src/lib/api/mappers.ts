@@ -1,7 +1,7 @@
 import type { Database } from '../../types/database';
 import type { CommunityRoom } from '../../types/community';
 import type { RoomState, SlotInfo, SlotTake, SlotType } from '../../types/music';
-import { ROOM_TEMPLATES, createDefaultSlots } from '../../data/templates';
+import { createDefaultSlots } from '../../data/templates';
 
 export type RoomRow = Database['public']['Tables']['rooms']['Row'];
 export type SlotRow = Database['public']['Tables']['slots']['Row'];
@@ -37,7 +37,7 @@ export function buildSlotInfos(
   slotRows: SlotRow[],
   takesBySlotId: Map<string, TakeRow[]>
 ): SlotInfo[] {
-  const base = createDefaultSlots(ROOM_TEMPLATES[0]); // 提供 TRACK 编号/角色文案/AI 替补 take
+  const base = createDefaultSlots(); // 提供 TRACK 编号/角色文案/AI 替补 take
   const baseByType = new Map(base.map((s) => [s.type, s]));
 
   const ordered = ['drums', 'bass', 'chords', 'melody'] as SlotType[];

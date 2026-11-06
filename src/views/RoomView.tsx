@@ -5,8 +5,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { RoomState, RoomTemplate, SlotInfo, SlotType, SlotTake, MusicianInfo } from '../types/music';
-import { ROOM_TEMPLATES, createDefaultSlots } from '../data/templates';
+import { createDefaultSlots } from '../data/templates';
 import { getTemplateAsset } from '../data/templateAssets';
+import { listTemplates } from '../lib/api/templates';
 import { audioEngine } from '../services/audioEngine';
 import { useTheme } from '../hooks/useTheme';
 import { useI18n } from '../i18n/useI18n';
@@ -32,7 +33,8 @@ export const RoomView: React.FC<RoomViewProps> = ({ roomId }) => {
   const router = useRouter();
 
   const [room, setRoom] = useState<RoomState | null>(null);
-  const [template, setTemplate] = useState<RoomTemplate>(ROOM_TEMPLATES[0]);
+  const [template, setTemplate] = useState<RoomTemplate | null>(null);
+  const [templates, setTemplates] = useState<RoomTemplate[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [loadFailed, setLoadFailed] = useState<boolean>(false);
 
@@ -50,17 +52,27 @@ export const RoomView: React.FC<RoomViewProps> = ({ roomId }) => {
     let cancelled = false;
     (async () => {
       try {
-        const bundle = await getRoomBundle(roomId);
+        // 并行:房间数据 + 模板列表(模板来自 Supabase templates 表)
+        const [bundle, tmplList] = await Promise.all([
+          getRoomBundle(roomId),
+          listTemplates().catch(() => [] as RoomTemplate[]),
+        ]);
         if (cancelled) return;
         if (!bundle) {
           setLoadFailed(true);
           return;
         }
-        const tmpl = ROOM_TEMPLATES.find((t) => t.id === bundle.room.template_id) || ROOM_TEMPLATES[0];
+        const tmpl =
+          tmplList.find((t) => t.id === bundle.room.template_id) || null;
+        if (!tmpl) {
+          setLoadFailed(true);
+          return;
+        }
         const state = roomToRoomState(bundle.room, bundle.slots, groupTakes(bundle.takes));
 
         setRoom(state);
         setTemplate(tmpl);
+        setTemplates(tmplList);
         setLoading(false);
 
         // 后台:引擎接管 → 并行加载音频(真人 take 优先,模板预置切片兜底)
@@ -230,7 +242,7 @@ export const RoomView: React.FC<RoomViewProps> = ({ roomId }) => {
           bpm: tmpl.bpm,
           progression: tmpl.progression,
           creatorName: '乐手',
-          slots: createDefaultSlots(tmpl),
+          slots: createDefaultSlots(),
         });
         router.replace(`/room/${id}`);
       } catch (e) {
@@ -278,6 +290,8 @@ export const RoomView: React.FC<RoomViewProps> = ({ roomId }) => {
     );
   }
 
+  if (!template) return null;
+
   return (
     <div className={`min-h-screen flex flex-col justify-between selection:bg-[#ff5522]/20 transition-colors duration-200 ${isDark ? 'bg-[#120f12]' : 'bg-[#f7f3ef]'}`}>
       <div>
@@ -298,6 +312,7 @@ export const RoomView: React.FC<RoomViewProps> = ({ roomId }) => {
           <StageHero
             room={room}
             template={template}
+            templates={templates}
             transportState={transportState}
             isDark={isDark}
             t={t}

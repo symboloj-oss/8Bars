@@ -1,7 +1,6 @@
 "use client";
 import React, { useState } from 'react';
 import { RoomState, RoomTemplate, SlotInfo } from '../types/music';
-import { ROOM_TEMPLATES } from '../data/templates';
 import { TransportState } from '../services/audioEngine';
 import { getCharacterForSlot } from '../data/characters';
 import { BandFigure } from './BandFigures';
@@ -14,6 +13,7 @@ import { Button } from './ui/button';
 interface StageHeroProps {
   room: RoomState;
   template: RoomTemplate;
+  templates: RoomTemplate[];
   transportState: TransportState;
   isDark: boolean;
   t: (key: string, params?: Record<string, string | number>) => string;
@@ -34,6 +34,7 @@ const SLOT_SHORT: Record<string, string> = {
 export const StageHero: React.FC<StageHeroProps> = ({
   room,
   template,
+  templates,
   transportState,
   isDark,
   t,
@@ -190,7 +191,7 @@ export const StageHero: React.FC<StageHeroProps> = ({
         <div className={`w-full rounded-[24px] backdrop-blur-2xl border px-4 sm:px-6 py-3 sm:py-3.5 mb-4 sm:mb-5 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-3 shrink-0 ${c.dock}`}>
           {/* 模板 chips */}
           <div className="flex items-center gap-1.5 overflow-x-auto w-full md:w-auto">
-            {ROOM_TEMPLATES.map((tmpl) => {
+            {templates.map((tmpl) => {
               const isCurrent = tmpl.id === room.templateId;
               return (
                 <button
