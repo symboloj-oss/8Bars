@@ -32,7 +32,7 @@ export const ChordTeleprompter: React.FC<ChordTeleprompterProps> = ({
   return (
     <div className="w-full flex flex-col gap-3">
       {/* 8-bar segmented timeline ribbon */}
-      <div className="grid grid-cols-8 gap-1.5 w-full bg-zinc-100 dark:bg-[#0a0a0d] p-2 rounded-xl border border-zinc-200/80 dark:border-white/6 transition-colors duration-200">
+      <div className="grid grid-cols-8 gap-1.5 w-full bg-zinc-100 dark:bg-black/40 p-2 rounded-xl transition-colors duration-200">
         {progression.map((chordName, barIdx) => {
           const isCurrent = isPlaying && currentBar === barIdx;
           const isPast = isPlaying && currentBar > barIdx;
@@ -45,8 +45,8 @@ export const ChordTeleprompter: React.FC<ChordTeleprompterProps> = ({
                 isCurrent
                   ? 'bg-[#ff5522]/20 border-[#ff5522] text-[#ff5522] dark:text-white shadow-xs font-bold'
                   : isPast
-                  ? 'bg-zinc-200/40 dark:bg-[#121215]/40 border-zinc-200 dark:border-white/4 text-zinc-400 dark:text-zinc-600 opacity-60'
-                  : 'bg-white dark:bg-[#15151a] border-zinc-200/80 dark:border-white/6 text-zinc-700 dark:text-zinc-300'
+                  ? 'bg-zinc-200/40 dark:bg-zinc-800/40 text-zinc-400 dark:text-zinc-600 opacity-60'
+                  : 'bg-white dark:bg-zinc-800/60 text-zinc-700 dark:text-zinc-300'
               }`}
             >
               <div className="flex items-center justify-between w-full px-0.5">
@@ -82,7 +82,7 @@ export const ChordTeleprompter: React.FC<ChordTeleprompterProps> = ({
       <div className={`relative overflow-hidden rounded-2xl border p-4 sm:p-5 flex flex-col md:flex-row items-center justify-between gap-4 transition-colors duration-200 shadow-sm ${
         isRecording
           ? 'bg-gradient-to-r from-rose-50/50 dark:from-[#240e08] via-white dark:via-[#141418] to-white dark:to-[#121215] border-[#ff5522]/60 shadow-lg shadow-[#ff5522]/10'
-          : 'bg-white dark:bg-[#121215] border-zinc-200/90 dark:border-white/8'
+          : 'bg-white dark:bg-zinc-900'
       }`}>
         {/* Left: Current Chord Hero with spring transition */}
         <div className="flex items-center gap-4">
@@ -134,7 +134,7 @@ export const ChordTeleprompter: React.FC<ChordTeleprompterProps> = ({
                   className={`w-9 h-11 rounded-xl flex flex-col items-center justify-center font-mono font-bold transition-colors ${
                     isActive
                       ? 'bg-[#ff5522] text-white shadow-md shadow-[#ff5522]/30'
-                      : 'bg-zinc-100 dark:bg-[#18181d] text-zinc-500 border border-zinc-200 dark:border-white/6'
+                      : 'bg-zinc-100 dark:bg-white/8 text-zinc-500'
                   }`}
                 >
                   <span className="text-sm">{b + 1}</span>
@@ -146,7 +146,7 @@ export const ChordTeleprompter: React.FC<ChordTeleprompterProps> = ({
         </div>
 
         {/* Right: Upcoming next chord preview */}
-        <div className="flex items-center gap-3 bg-zinc-50 dark:bg-[#0a0a0c] border border-zinc-200 dark:border-white/6 px-4 py-3 rounded-xl shrink-0 transition-colors duration-200">
+        <div className="flex items-center gap-3 bg-zinc-100 dark:bg-black/40 px-4 py-3 rounded-xl shrink-0 transition-colors duration-200">
           <ChevronRight className="w-5 h-5 text-zinc-400 dark:text-zinc-500" />
           <div className="flex flex-col">
             <span className="text-[11px] font-mono text-zinc-500 dark:text-zinc-400 uppercase">

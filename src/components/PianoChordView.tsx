@@ -36,7 +36,7 @@ export const PianoChordView: React.FC<PianoChordViewProps> = ({
   const blackKeyHeight = 44;
 
   return (
-    <div className={`flex flex-col items-center bg-white dark:bg-[#0c0c0f] border border-zinc-200/90 dark:border-white/8 rounded-xl p-3 shadow-2xs transition-colors duration-200 ${className}`}>
+    <div className={`flex flex-col items-center bg-white dark:bg-zinc-900 rounded-xl p-3 shadow-sm transition-colors duration-200 ${className}`}>
       <div className="flex items-center justify-between w-full mb-1">
         <span className="text-xs font-bold text-zinc-900 dark:text-white flex items-center gap-1.5 font-mono">
           <span className="w-2 h-2 rounded-full bg-[#ff5522]"></span>
@@ -49,14 +49,14 @@ export const PianoChordView: React.FC<PianoChordViewProps> = ({
 
       <div className="relative h-[80px] my-1 select-none flex justify-center">
         {/* White keys */}
-        <div className="flex border border-zinc-300 dark:border-white/10 rounded overflow-hidden shadow-inner bg-zinc-100 dark:bg-[#08080a]">
+        <div className="flex rounded overflow-hidden bg-zinc-100 dark:bg-zinc-950">
           {whiteKeyPitches.map((pitch, idx) => {
             const isActive = activePitchClasses.has(pitch);
             return (
               <div
                 key={`white-${idx}`}
                 style={{ width: `${whiteKeyWidth}px`, height: `${whiteKeyHeight}px` }}
-                className={`border-r border-zinc-200 dark:border-zinc-800 flex flex-col justify-end items-center pb-1 text-[9px] font-mono transition-colors ${
+                className={`flex flex-col justify-end items-center pb-1 text-[9px] font-mono transition-colors ${
                   isActive
                     ? 'bg-[#ff5522] text-white font-bold shadow-md'
                     : 'bg-white dark:bg-[#e4e4e7] text-zinc-600 dark:text-zinc-700'

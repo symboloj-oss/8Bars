@@ -23,9 +23,9 @@ export const TapeLoopVisualizer: React.FC<TapeLoopVisualizerProps> = ({
   const { isPlaying, currentBar, currentBeat, progress } = transportState;
 
   return (
-    <div className="w-full bg-white dark:bg-zinc-900 border border-subtle rounded-2xl p-4 sm:p-5 flex flex-col gap-4 shadow-card dark:shadow-card-dark select-none relative overflow-hidden transition-colors duration-200">
+    <div className="w-full bg-white dark:bg-zinc-900 rounded-2xl p-4 sm:p-5 flex flex-col gap-4 shadow-card dark:shadow-card-dark select-none relative overflow-hidden transition-colors duration-200">
       {/* Top console bar: Tape Deck Head */}
-      <div className="flex items-center justify-between text-xs font-mono text-zinc-500 dark:text-zinc-400 border-b border-subtle pb-3">
+      <div className="flex items-center justify-between text-xs font-mono text-zinc-500 dark:text-zinc-400 pb-3">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1.5 text-zinc-800 dark:text-zinc-300 font-bold">
             <span className={`w-2 h-2 rounded-full ${isPlaying ? 'bg-[#ff5522]' : 'bg-zinc-300 dark:bg-zinc-600'}`} />
@@ -39,7 +39,7 @@ export const TapeLoopVisualizer: React.FC<TapeLoopVisualizerProps> = ({
 
         {/* Real-time Bar / Beat Counter */}
         <div className="flex items-center gap-2">
-          <span className="bg-zinc-100 dark:bg-white/6 border border-subtle px-2 py-0.5 rounded text-zinc-800 dark:text-zinc-100 font-bold tabular-nums">
+          <span className="bg-zinc-100 dark:bg-white/8 px-2 py-0.5 rounded text-zinc-800 dark:text-zinc-100 font-bold tabular-nums">
             BAR 0{currentBar + 1} : BEAT 0{currentBeat + 1}
           </span>
           <span className={`${isPlaying ? 'text-[#ff5522]' : 'text-zinc-400 dark:text-zinc-500'} font-bold`}>
@@ -49,7 +49,7 @@ export const TapeLoopVisualizer: React.FC<TapeLoopVisualizerProps> = ({
       </div>
 
       {/* Center: The 8-Bar Tape Loop Scanner */}
-      <div className="relative w-full bg-zinc-50 dark:bg-black/30 border border-subtle rounded-xl p-3 flex flex-col gap-2">
+      <div className="relative w-full bg-zinc-100 dark:bg-black/30 rounded-xl p-3 flex flex-col gap-2">
         {/* Playhead position bar */}
         <div
           className="absolute top-0 bottom-0 w-0.5 bg-[#ff5522] z-20 pointer-events-none transition-all duration-75 shadow-[0_0_8px_#ff5522]"
@@ -75,7 +75,7 @@ export const TapeLoopVisualizer: React.FC<TapeLoopVisualizerProps> = ({
               </div>
 
               {/* 8 Bars Segments */}
-              <div className="flex-1 h-full grid grid-cols-8 gap-1 relative bg-white dark:bg-zinc-900 rounded-md p-1 border border-subtle">
+              <div className="flex-1 h-full grid grid-cols-8 gap-1 relative bg-white dark:bg-zinc-800/60 rounded-md p-1">
                 {progression.map((chord, barIdx) => {
                   const isCurrent = isPlaying && currentBar === barIdx;
                   return (
@@ -84,8 +84,8 @@ export const TapeLoopVisualizer: React.FC<TapeLoopVisualizerProps> = ({
                       className={`h-full rounded-xs flex items-center justify-center font-mono text-[10px] transition-colors relative overflow-hidden ${
                         isCurrent
                           ? isHuman
-                            ? 'bg-[#ff5522]/20 dark:bg-[#ff5522]/25 text-[#ff5522] dark:text-white font-bold border border-[#ff5522]/50'
-                            : 'bg-zinc-900/10 dark:bg-white/10 text-zinc-900 dark:text-white font-bold border border-zinc-900/20 dark:border-white/20'
+                            ? 'bg-[#ff5522]/25 dark:bg-[#ff5522]/30 text-[#ff5522] dark:text-white font-bold'
+                            : 'bg-zinc-900/10 dark:bg-white/15 text-zinc-900 dark:text-white font-bold'
                           : 'bg-zinc-50 dark:bg-[#18181e] text-zinc-400 dark:text-zinc-500'
                       }`}
                     >
@@ -108,8 +108,8 @@ export const TapeLoopVisualizer: React.FC<TapeLoopVisualizerProps> = ({
                 <span
                   className={`px-1.5 py-0.5 rounded ${
                     isHuman
-                      ? 'bg-[#ff5522]/15 text-[#ff5522] dark:text-[#ff6633] font-bold border border-[#ff5522]/30'
-                      : 'bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-zinc-400'
+                      ? 'bg-[#ff5522]/15 text-[#ff5522] dark:text-[#ff6633] font-bold'
+                      : 'bg-zinc-100 dark:bg-white/8 text-zinc-500 dark:text-zinc-400'
                   }`}
                 >
                   {isHuman ? t('tape.human') : t('tape.aiStem')}

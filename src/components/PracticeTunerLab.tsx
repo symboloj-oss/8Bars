@@ -69,9 +69,9 @@ export const PracticeTunerLab: React.FC<PracticeTunerLabProps> = ({
   };
 
   return (
-    <div className="w-full bg-white dark:bg-zinc-900 border border-subtle rounded-2xl p-4 sm:p-5 flex flex-col gap-5 shadow-card dark:shadow-card-dark select-none transition-colors duration-200">
+    <div className="w-full bg-white dark:bg-zinc-900 rounded-2xl p-4 sm:p-5 flex flex-col gap-5 shadow-card dark:shadow-card-dark select-none transition-colors duration-200">
       {/* Module Title */}
-      <div className="flex items-center justify-between border-b border-subtle pb-3">
+      <div className="flex items-center justify-between pb-3">
         <div className="flex items-center gap-2">
           <Activity className="w-4 h-4 text-[#ff5522]" />
           <h3 className="text-sm font-bold text-zinc-900 dark:text-white tracking-tight font-mono uppercase">
@@ -85,7 +85,7 @@ export const PracticeTunerLab: React.FC<PracticeTunerLabProps> = ({
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* Left: Interactive Chord Strum Pad */}
-        <div className="flex flex-col gap-3 bg-zinc-50 dark:bg-black/30 p-4 rounded-xl border border-subtle transition-colors duration-200">
+        <div className="flex flex-col gap-3 bg-zinc-100 dark:bg-black/30 p-4 rounded-xl transition-colors duration-200">
           <div className="flex items-center justify-between">
             <span className="text-xs font-mono font-bold text-zinc-800 dark:text-zinc-300 flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-[#ff5522]" />
@@ -107,10 +107,10 @@ export const PracticeTunerLab: React.FC<PracticeTunerLabProps> = ({
                   whileHover={{ y: -2 }}
                   whileTap={{ scale: 0.92 }}
                   onClick={() => handleStrumChord(name)}
-                  className={`py-3 px-2 rounded-xl border text-center font-mono transition-colors duration-150 flex flex-col items-center justify-center gap-0.5 shadow-2xs ${
+                  className={`py-3 px-2 rounded-xl text-center font-mono transition-colors duration-150 flex flex-col items-center justify-center gap-0.5 ${
                     isStrumming
-                      ? 'bg-[#ff5522] border-[#ff5522] text-white shadow-lg shadow-[#ff5522]/30 scale-105'
-                      : 'bg-white dark:bg-[#18181d] border-zinc-200 dark:border-white/8 text-zinc-800 dark:text-zinc-200 hover:text-zinc-950 dark:hover:text-white hover:border-zinc-300 dark:hover:border-white/20'
+                      ? 'bg-[#ff5522] text-white shadow-lg shadow-[#ff5522]/30 scale-105'
+                      : 'bg-white dark:bg-[#18181d] text-zinc-800 dark:text-zinc-200 hover:text-zinc-950 dark:hover:text-white'
                   }`}
                 >
                   <span className="text-base font-extrabold">{name}</span>
@@ -123,7 +123,7 @@ export const PracticeTunerLab: React.FC<PracticeTunerLabProps> = ({
           </div>
 
           {/* Strumming Pattern Coach */}
-          <div className="mt-2 pt-3 border-t border-subtle flex flex-col gap-1.5">
+          <div className="mt-2 pt-3 flex flex-col gap-1.5">
             <div className="flex items-center justify-between text-[11px] font-mono text-zinc-500 dark:text-zinc-400">
               <span>{t('lab.strumCoach')}</span>
               <span className="text-[#ff5522] font-semibold">
@@ -139,12 +139,12 @@ export const PracticeTunerLab: React.FC<PracticeTunerLabProps> = ({
                     key={`strum-${idx}`}
                     animate={isActive ? { scale: 1.08, y: -2 } : { scale: 1, y: 0 }}
                     transition={{ type: 'spring', stiffness: 500, damping: 25 }}
-                    className={`h-10 rounded-lg flex flex-col items-center justify-center font-mono font-bold text-xs border transition-colors ${
+                    className={`h-10 rounded-lg flex flex-col items-center justify-center font-mono font-bold text-xs transition-colors ${
                       isActive
-                        ? 'bg-[#ff5522]/20 border-[#ff5522] text-[#ff5522]'
+                        ? 'bg-[#ff5522]/20 text-[#ff5522]'
                         : item.dir === '·'
-                        ? 'bg-zinc-100/50 dark:bg-[#121215] border-zinc-200/40 dark:border-white/4 text-zinc-400 dark:text-zinc-600'
-                        : 'bg-white dark:bg-[#16161b] border-zinc-200 dark:border-white/6 text-zinc-700 dark:text-zinc-300 shadow-2xs'
+                        ? 'bg-zinc-100/50 dark:bg-[#121215] text-zinc-400 dark:text-zinc-600'
+                        : 'bg-white dark:bg-[#16161b] text-zinc-700 dark:text-zinc-300'
                     }`}
                   >
                     <span className="text-sm">{item.dir}</span>
@@ -157,7 +157,7 @@ export const PracticeTunerLab: React.FC<PracticeTunerLabProps> = ({
         </div>
 
         {/* Right: Pitch Pipe / String Tuner Reference */}
-        <div className="flex flex-col gap-3 bg-zinc-50 dark:bg-black/30 p-4 rounded-xl border border-subtle justify-between transition-colors duration-200">
+        <div className="flex flex-col gap-3 bg-zinc-100 dark:bg-black/30 p-4 rounded-xl justify-between transition-colors duration-200">
           <div>
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs font-mono font-bold text-zinc-800 dark:text-zinc-300 flex items-center gap-1.5">
@@ -178,10 +178,10 @@ export const PracticeTunerLab: React.FC<PracticeTunerLabProps> = ({
                     whileHover={{ y: -2 }}
                     whileTap={{ scale: 0.94 }}
                     onClick={() => handlePlayTuningNote(s.note)}
-                    className={`p-2.5 rounded-xl border font-mono text-left transition-all ${
+                    className={`p-2.5 rounded-xl font-mono text-left transition-all ${
                       isPlayingThis
-                        ? 'bg-[#ff5522]/15 border-[#ff5522] text-[#ff5522] shadow-sm'
-                        : 'bg-white dark:bg-[#18181d] border-zinc-200 dark:border-white/8 text-zinc-700 dark:text-zinc-300 hover:border-zinc-300 dark:hover:border-white/20 shadow-2xs'
+                        ? 'bg-[#ff5522]/15 text-[#ff5522] shadow-sm'
+                        : 'bg-white dark:bg-[#18181d] text-zinc-700 dark:text-zinc-300'
                     }`}
                   >
                     <div className="flex items-center justify-between">

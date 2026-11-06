@@ -90,7 +90,7 @@ export const RoomHeader: React.FC<RoomHeaderProps> = ({
         </div>
 
         {/* Zone 2: Segmented Main View Tabs (Studio vs Plaza) */}
-        <div className="flex items-center bg-zinc-100 dark:bg-zinc-900 p-1 rounded-xl border border-subtle text-xs">
+        <div className="flex items-center bg-zinc-100 dark:bg-zinc-900 p-1 rounded-xl text-xs">
           <button
             onClick={() => onSelectTab('studio')}
             className={`px-3 py-1.5 rounded-lg font-semibold transition-all flex items-center gap-1.5 ${
@@ -197,7 +197,7 @@ export const RoomHeader: React.FC<RoomHeaderProps> = ({
       {/* Main Room Console Hero Card (Only displayed in Studio mode) */}
       {activeTab === 'studio' && (
         <div className="px-4 sm:px-8 w-full max-w-7xl mx-auto">
-          <div className="relative rounded-2xl border border-subtle bg-white dark:bg-zinc-900 p-4 sm:p-5 shadow-card dark:shadow-card-dark overflow-hidden transition-colors duration-200">
+          <div className="relative rounded-2xl bg-white dark:bg-zinc-900 p-4 sm:p-5 shadow-card dark:shadow-card-dark overflow-hidden transition-colors duration-200">
             {/* 一行式:左标题信息 / 右控制按钮(移动端纵向) */}
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
               <div className="min-w-0">
@@ -241,7 +241,7 @@ export const RoomHeader: React.FC<RoomHeaderProps> = ({
                 </motion.button>
 
                 {/* Bar and Beat Realtime Status Indicator */}
-                <div className="bg-zinc-50 dark:bg-black/30 border border-subtle rounded-xl px-3.5 py-1.5 flex items-center gap-3 font-mono text-xs">
+                <div className="bg-zinc-100 dark:bg-black/30 rounded-xl px-3.5 py-1.5 flex items-center gap-3 font-mono text-xs">
                   <div className="flex flex-col">
                     <span className="text-[10px] text-zinc-400 uppercase tracking-wider">{t('header.position')}</span>
                     <span className="text-sm font-bold text-zinc-900 dark:text-zinc-200 tabular-nums">

@@ -53,10 +53,10 @@ export const FourSlotsGrid: React.FC<FourSlotsGridProps> = ({
             key={slot.id}
             whileHover={{ y: -2 }}
             transition={{ type: 'spring', stiffness: 350, damping: 25 }}
-            className={`relative rounded-2xl border border-subtle transition-colors duration-150 flex flex-col justify-between overflow-hidden p-4 select-none shadow-card dark:shadow-none ${
+            className={`relative rounded-2xl transition-colors duration-150 flex flex-col justify-between overflow-hidden p-4 select-none shadow-card dark:shadow-card-dark ${
               isHuman
-                ? 'bg-white dark:bg-zinc-900 border-[#ff5522]/40 ring-1 ring-[#ff5522]/20'
-                : 'bg-white dark:bg-zinc-900 hover:border-subtle-strong'
+                ? 'bg-orange-50/60 dark:bg-zinc-900'
+                : 'bg-white dark:bg-zinc-900'
             }`}
           >
             {/* Top row: 角色名 & 状态徽章 */}
@@ -70,8 +70,8 @@ export const FourSlotsGrid: React.FC<FourSlotsGridProps> = ({
                 <div
                   className={`text-[10px] font-mono px-2 py-0.5 rounded-full flex items-center gap-1.5 shrink-0 ${
                     isHuman
-                      ? 'bg-[#ff5522]/10 text-[#ff5522] border border-[#ff5522]/30 font-bold'
-                      : 'bg-zinc-100 dark:bg-white/6 text-zinc-500 dark:text-zinc-400 border border-subtle'
+                      ? 'bg-[#ff5522]/15 text-[#ff5522] font-bold'
+                      : 'bg-zinc-100 dark:bg-white/8 text-zinc-500 dark:text-zinc-400'
                   }`}
                 >
                   <span className={`w-1.5 h-1.5 rounded-full ${isHuman ? 'bg-[#ff5522]' : 'bg-zinc-400 dark:bg-zinc-500'}`} />
@@ -83,7 +83,7 @@ export const FourSlotsGrid: React.FC<FourSlotsGridProps> = ({
               {(() => {
                 const character = getCharacterForSlot(slot.type);
                 return (
-                  <div className="relative rounded-xl overflow-hidden bg-zinc-100 dark:bg-black/40 border border-subtle group transition-all">
+                  <div className="relative rounded-xl overflow-hidden bg-zinc-100 dark:bg-black/40 group transition-all">
                     {/* Character Artwork with Groove Animation */}
                     <div className="relative aspect-[4/3] w-full overflow-hidden flex items-center justify-center bg-zinc-100 dark:bg-zinc-950">
                       <motion.img
@@ -140,14 +140,14 @@ export const FourSlotsGrid: React.FC<FourSlotsGridProps> = ({
                           }
                         }}
                         title={`试听 ${character.name} 原声音色`}
-                        className="absolute top-2 right-2 w-7 h-7 rounded-lg bg-white/90 dark:bg-black/70 backdrop-blur-md text-zinc-600 dark:text-zinc-300 hover:text-[#ff5522] border border-subtle flex items-center justify-center shadow-sm transition-colors"
+                        className="absolute top-2 right-2 w-7 h-7 rounded-lg bg-white/90 dark:bg-black/70 backdrop-blur-md text-zinc-600 dark:text-zinc-300 hover:text-[#ff5522] flex items-center justify-center shadow-sm transition-colors"
                       >
                         <Music className="w-3.5 h-3.5" />
                       </motion.button>
                     </div>
 
                     {/* Musician + VU Meter compact strip */}
-                    <div className="px-3 py-2 bg-white/90 dark:bg-zinc-900/95 border-t border-subtle flex flex-col gap-1.5">
+                    <div className="px-3 py-2 bg-white dark:bg-zinc-900/95 flex flex-col gap-1.5">
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-semibold text-zinc-800 dark:text-zinc-200 truncate flex items-center gap-1.5">
                           {isHuman ? (
@@ -167,7 +167,7 @@ export const FourSlotsGrid: React.FC<FourSlotsGridProps> = ({
                         <span className="text-[10px] font-mono text-zinc-400 dark:text-zinc-500 shrink-0">
                           {t('slots.level')}
                         </span>
-                        <div className="h-1 flex-1 bg-zinc-100 dark:bg-black/60 rounded-full overflow-hidden border border-subtle">
+                        <div className="h-1 flex-1 bg-zinc-100 dark:bg-black/60 rounded-full overflow-hidden">
                           <motion.div
                             className={`h-full rounded-full transition-all duration-75 ${
                               slot.isMuted
@@ -197,7 +197,7 @@ export const FourSlotsGrid: React.FC<FourSlotsGridProps> = ({
                     </span>
                     <span>{t('slots.totalTakes', { count: slot.takes.length })}</span>
                   </div>
-                  <div className="flex gap-1 overflow-x-auto p-1 bg-zinc-50 dark:bg-black/40 rounded-lg border border-subtle">
+                  <div className="flex gap-1 overflow-x-auto p-1 bg-zinc-100 dark:bg-black/40 rounded-lg">
                     {slot.takes.map((take, tIdx) => {
                       const isActive = slot.activeTakeIndex === tIdx;
                       return (
@@ -223,7 +223,7 @@ export const FourSlotsGrid: React.FC<FourSlotsGridProps> = ({
             {/* Bottom Controls: Mixer strip + Big Action Button */}
             <div>
               {/* Mixer Channel: Mute / Solo / Fader */}
-              <div className="flex items-center justify-between gap-2 pt-3 border-t border-subtle mb-3">
+              <div className="flex items-center justify-between gap-2 pt-3 mb-3">
                 <div className="flex items-center gap-1 font-mono text-[10px]">
                   <motion.button
                     whileTap={{ scale: 0.92 }}
@@ -232,7 +232,7 @@ export const FourSlotsGrid: React.FC<FourSlotsGridProps> = ({
                     className={`w-7 h-6 rounded-md font-bold transition-colors flex items-center justify-center ${
                       slot.isMuted
                         ? 'bg-rose-500 text-white shadow-sm'
-                        : 'bg-zinc-100 dark:bg-white/6 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white border border-subtle'
+                        : 'bg-zinc-100 dark:bg-white/8 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
                     }`}
                   >
                     M
@@ -245,7 +245,7 @@ export const FourSlotsGrid: React.FC<FourSlotsGridProps> = ({
                     className={`w-7 h-6 rounded-md font-bold transition-colors flex items-center justify-center ${
                       slot.isSolo
                         ? 'bg-zinc-900 text-white dark:bg-white dark:text-black font-extrabold shadow-sm'
-                        : 'bg-zinc-100 dark:bg-white/6 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white border border-subtle'
+                        : 'bg-zinc-100 dark:bg-white/8 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
                     }`}
                   >
                     S

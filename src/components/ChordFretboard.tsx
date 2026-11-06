@@ -36,7 +36,7 @@ export const ChordFretboard: React.FC<ChordFretboardProps> = ({
   const fretSpacing = fretboardHeight / fretCount;
 
   return (
-    <div className={`flex flex-col items-center bg-white dark:bg-[#0c0c0f] border border-zinc-200/90 dark:border-white/8 rounded-xl p-3 shadow-2xs transition-colors duration-200 ${className}`}>
+    <div className={`flex flex-col items-center bg-white dark:bg-zinc-900 rounded-xl p-3 shadow-sm transition-colors duration-200 ${className}`}>
       <div className="flex items-center justify-between w-full mb-1">
         <span className="text-xs font-bold text-zinc-900 dark:text-white flex items-center gap-1.5 font-mono">
           <span className="w-2 h-2 rounded-full bg-[#ff5522]"></span>

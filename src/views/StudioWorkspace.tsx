@@ -1,7 +1,6 @@
 "use client";
 
-// 录音棚工作区:磁带盘主控台 + 席位网格 + 折叠工具箱(练习实验室 / 和弦速查)
-// 次要工具默认收起,主页面只保留核心操作,保持清爽
+// 录音棚工作区:磁带盘主控台 + 席位网格 + 练习实验室 + 和弦速查(全平铺,无边框层次)
 import { RoomState, RoomTemplate, SlotInfo, SlotType } from '../types/music';
 import { ROOM_TEMPLATES } from '../data/templates';
 import { TransportState } from '../services/audioEngine';
@@ -9,8 +8,7 @@ import { TapeLoopVisualizer } from '../components/TapeLoopVisualizer';
 import { FourSlotsGrid } from '../components/FourSlotsGrid';
 import { PracticeTunerLab } from '../components/PracticeTunerLab';
 import { ChordReferenceDrawer } from '../components/ChordReferenceDrawer';
-import { CollapsibleSection } from '../components/CollapsibleSection';
-import { Users, Wrench, BookOpen } from 'lucide-react';
+import { Users } from 'lucide-react';
 import { motion } from 'motion/react';
 
 interface StudioWorkspaceProps {
@@ -70,7 +68,7 @@ export const StudioWorkspace: React.FC<StudioWorkspaceProps> = ({
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
                 isCurrent
                   ? 'bg-[#ff5522] text-white shadow-primary'
-                  : 'bg-white dark:bg-zinc-900 border border-subtle text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white hover:border-subtle-strong'
+                  : 'bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white'
               }`}
             >
               {tmpl.title.split(' ')[0]} ({tmpl.bpm} BPM)
@@ -81,7 +79,7 @@ export const StudioWorkspace: React.FC<StudioWorkspaceProps> = ({
 
       {/* Module 2: 席位网格(核心操作区) */}
       <section className="flex flex-col gap-3">
-        <div className="flex items-center justify-between border-b border-subtle pb-2.5">
+        <div className="flex items-center justify-between pb-2.5">
           <div className="flex items-center gap-2">
             <Users className="w-4 h-4 text-[#ff5522]" />
             <h3 className="text-sm font-bold text-zinc-900 dark:text-white tracking-tight">
@@ -106,12 +104,8 @@ export const StudioWorkspace: React.FC<StudioWorkspaceProps> = ({
         />
       </section>
 
-      {/* Module 3: 折叠工具箱(默认收起,需要时展开) */}
-      <CollapsibleSection
-        title={t('lab.title')}
-        subtitle={t('lab.subtitle')}
-        icon={<Wrench className="w-4 h-4 text-[#ff5522] shrink-0" />}
-      >
+      {/* Module 3: Musician Prep Lab (Strum Pad & 440Hz Tuner Reference) */}
+      <section>
         <PracticeTunerLab
           progression={template.progression}
           progressionDetails={template.progressionDetails}
@@ -119,16 +113,12 @@ export const StudioWorkspace: React.FC<StudioWorkspaceProps> = ({
           isPlaying={transportState.isPlaying}
           t={t}
         />
-      </CollapsibleSection>
+      </section>
 
-      {/* Module 4: 折叠和弦速查(默认收起) */}
-      <CollapsibleSection
-        title={t('cheatsheet.title')}
-        subtitle={t('cheatsheet.subtitle')}
-        icon={<BookOpen className="w-4 h-4 text-[#ff5522] shrink-0" />}
-      >
+      {/* Module 4: Interactive Chord Fretboard & Piano Cheatsheet with Audio Preview */}
+      <section>
         <ChordReferenceDrawer progression={template.progression} t={t} />
-      </CollapsibleSection>
+      </section>
 
       {/* Clean Minimalist Hardware Footer */}
       <footer className="mt-8 border-t border-subtle bg-white/60 dark:bg-zinc-950 py-6 px-4 sm:px-8 select-none transition-colors duration-200">

@@ -45,21 +45,22 @@
   .dark & { border-color: color-mix(in srgb, white 14%, transparent); }
 }
 
-/* 表面背景统一:卡片 / 内嵌面板 / 内嵌面板(深) */
+/* 表面背景统一:卡片 / 内嵌面板 / 内嵌面板(深)
+   层次靠背景色差 + 阴影,不靠边框 */
 @utility surface-card {
   background-color: #ffffff;
   .dark & { background-color: var(--color-zinc-900); }
 }
 @utility surface-panel {
-  background-color: var(--color-zinc-50);
-  .dark & { background-color: color-mix(in srgb, black 55%, var(--color-zinc-900)); }
+  background-color: var(--color-zinc-100);
+  .dark & { background-color: color-mix(in srgb, black 40%, var(--color-zinc-900)); }
 }
 @utility surface-inset {
   background-color: var(--color-zinc-100);
   .dark & { background-color: color-mix(in srgb, white 5%, transparent); }
 }
 
-/* 按钮体系:主按钮 / 次按钮 / 幽灵按钮 */
+/* 按钮体系:主按钮 / 次按钮 / 幽灵按钮(次按钮与幽灵按钮无边框) */
 @utility btn-primary {
   display: inline-flex;
   align-items: center;
@@ -82,21 +83,19 @@
   align-items: center;
   justify-content: center;
   gap: 0.375rem;
-  background-color: #ffffff;
-  color: var(--color-zinc-700);
+  background-color: var(--color-zinc-100);
+  color: var(--color-zinc-600);
   font-weight: 600;
   font-size: 0.75rem;
   line-height: 1rem;
   padding: 0.625rem 1rem;
   border-radius: 0.75rem;
-  border: 1px solid var(--color-zinc-200);
   white-space: nowrap;
   transition: background-color 0.15s, color 0.15s;
-  &:hover { background-color: var(--color-zinc-50); color: var(--color-zinc-900); }
+  &:hover { background-color: var(--color-zinc-200); color: var(--color-zinc-900); }
   .dark & {
     background-color: color-mix(in srgb, white 6%, transparent);
     color: var(--color-zinc-300);
-    border-color: color-mix(in srgb, white 10%, transparent);
     &:hover { background-color: color-mix(in srgb, white 10%, transparent); color: #ffffff; }
   }
 }
