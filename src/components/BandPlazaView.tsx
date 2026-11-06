@@ -109,27 +109,20 @@ export const BandPlazaView: React.FC<BandPlazaViewProps> = ({
   return (
     <div className="w-full flex flex-col gap-6 max-w-7xl mx-auto px-4 sm:px-8 select-none">
       {/* Community Hero Banner */}
-      <div className="relative rounded-2xl bg-gradient-to-br from-white dark:from-zinc-900 via-zinc-50 dark:via-zinc-900 to-orange-50/60 dark:to-[#2a1206] p-6 sm:p-8 shadow-card dark:shadow-card-dark overflow-hidden transition-colors duration-200">
-        {/* Subtle background glow */}
-        <div className="absolute top-0 right-0 w-80 h-80 bg-[#ff5522]/8 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="rounded-2xl bg-white dark:bg-zinc-900 p-6 sm:p-8 shadow-card dark:shadow-card-dark transition-colors duration-200">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex flex-col gap-2 max-w-2xl">
             <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full bg-[#ff5522]/10 text-[#ff5522] text-[11px] font-mono font-bold border border-[#ff5522]/25 flex items-center gap-1">
+              <span className="px-2.5 py-0.5 rounded-full bg-[#ff5522]/10 text-[#ff5522] text-[11px] font-bold flex items-center gap-1">
                 <Sparkles className="w-3 h-3" />
                 {t('plaza.badgeNeedMusicians', { count: vacantRoomsCount })}
-              </span>
-              <span className="text-xs font-mono text-zinc-300 dark:text-zinc-600">·</span>
-              <span className="text-xs font-mono text-zinc-400 dark:text-zinc-500 tracking-wider">
-                8BARS COMMUNITY LOUNGE
               </span>
             </div>
 
             <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 dark:text-white tracking-tight">
               {t('plaza.title')}
             </h2>
-            <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed font-sans">
+            <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">
               {t('plaza.subtitle')}
             </p>
           </div>
@@ -296,7 +289,7 @@ export const BandPlazaView: React.FC<BandPlazaViewProps> = ({
                 </div>
 
                 {/* Recruitment Callout Box */}
-                <div className="my-3 p-3 rounded-xl bg-zinc-100 dark:bg-black/30 flex flex-col gap-1.5">
+                <div className="my-3 p-3 rounded-xl bg-zinc-50 dark:bg-black/30 flex flex-col gap-1.5">
                   <p className="text-xs text-zinc-600 dark:text-zinc-300 font-sans leading-relaxed">
                     {commRoom.recruitmentCall}
                   </p>

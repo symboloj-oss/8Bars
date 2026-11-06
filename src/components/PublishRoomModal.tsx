@@ -74,7 +74,7 @@ export const PublishRoomModal: React.FC<PublishRoomModalProps> = ({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent showCloseButton={false} className="sm:max-w-lg bg-white dark:bg-zinc-900 p-0 gap-0 rounded-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3.5 border-b bg-zinc-100 dark:bg-black/30">
+        <div className="flex items-center justify-between px-5 py-3.5 border-b bg-zinc-50 dark:bg-black/30">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-xs font-bold font-mono uppercase tracking-wider">
               <Globe className="w-4 h-4 text-[#ff5522]" />
@@ -88,7 +88,7 @@ export const PublishRoomModal: React.FC<PublishRoomModalProps> = ({
 
         <form onSubmit={handleSubmit} className="p-5 flex flex-col gap-4">
           {/* Room Preview strip */}
-          <div className="bg-zinc-100 dark:bg-black/30 p-3.5 rounded-xl flex items-center justify-between">
+          <div className="bg-zinc-50 dark:bg-black/30 p-3.5 rounded-xl flex items-center justify-between">
             <div>
               <span className="text-[10px] text-[#ff5522] font-bold uppercase tracking-wider block">
                 {template.genre} · {template.bpm} BPM

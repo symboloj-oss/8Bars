@@ -328,7 +328,7 @@ export const RoomView: React.FC<RoomViewProps> = ({ roomId }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-zinc-50 dark:bg-zinc-950 text-zinc-500 font-mono">
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-white dark:bg-zinc-950 text-zinc-500 font-mono">
         <div className="w-10 h-10 rounded-2xl border-2 border-[#ff5522]/30 border-t-[#ff5522] animate-spin" />
         <span className="text-xs">正在装载 8 小节乐队…</span>
       </div>
@@ -337,7 +337,7 @@ export const RoomView: React.FC<RoomViewProps> = ({ roomId }) => {
 
   if (loadFailed || !room) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-zinc-50 dark:bg-zinc-950 text-zinc-600 dark:text-zinc-300 font-mono">
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-white dark:bg-zinc-950 text-zinc-600 dark:text-zinc-300 font-mono">
         <span className="text-4xl">🎚️</span>
         <p className="text-sm">房间不存在或已被删除</p>
         <button
@@ -351,7 +351,7 @@ export const RoomView: React.FC<RoomViewProps> = ({ roomId }) => {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 flex flex-col justify-between selection:bg-[#ff5522]/20 selection:text-zinc-900 dark:selection:text-white transition-colors duration-200">
+    <div className="min-h-screen bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 flex flex-col justify-between selection:bg-[#ff5522]/20 selection:text-zinc-900 dark:selection:text-white transition-colors duration-200">
       <div className="flex flex-col gap-6">
         <RoomHeader
           room={room}

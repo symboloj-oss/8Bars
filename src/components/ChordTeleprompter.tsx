@@ -32,7 +32,7 @@ export const ChordTeleprompter: React.FC<ChordTeleprompterProps> = ({
   return (
     <div className="w-full flex flex-col gap-3">
       {/* 8-bar segmented timeline ribbon */}
-      <div className="grid grid-cols-8 gap-1.5 w-full bg-zinc-100 dark:bg-black/40 p-2 rounded-xl transition-colors duration-200">
+      <div className="grid grid-cols-8 gap-1.5 w-full bg-zinc-50 dark:bg-black/40 p-2 rounded-xl transition-colors duration-200">
         {progression.map((chordName, barIdx) => {
           const isCurrent = isPlaying && currentBar === barIdx;
           const isPast = isPlaying && currentBar > barIdx;
@@ -146,7 +146,7 @@ export const ChordTeleprompter: React.FC<ChordTeleprompterProps> = ({
         </div>
 
         {/* Right: Upcoming next chord preview */}
-        <div className="flex items-center gap-3 bg-zinc-100 dark:bg-black/40 px-4 py-3 rounded-xl shrink-0 transition-colors duration-200">
+        <div className="flex items-center gap-3 bg-zinc-50 dark:bg-black/40 px-4 py-3 rounded-xl shrink-0 transition-colors duration-200">
           <ChevronRight className="w-5 h-5 text-zinc-400 dark:text-zinc-500" />
           <div className="flex flex-col">
             <span className="text-[11px] font-mono text-zinc-500 dark:text-zinc-400 uppercase">

@@ -43,7 +43,7 @@ export const ChordReferenceDrawer: React.FC<ChordReferenceDrawerProps> = ({
         </div>
 
         {/* View mode toggle */}
-        <div className="flex items-center bg-zinc-100 dark:bg-black/40 p-1 rounded-lg self-start sm:self-auto font-mono">
+        <div className="flex items-center bg-zinc-50 dark:bg-black/40 p-1 rounded-lg self-start sm:self-auto font-mono">
           <button
             onClick={() => setViewMode('guitar')}
             className={`px-3 py-1 text-xs rounded-md transition-colors ${
@@ -80,7 +80,7 @@ export const ChordReferenceDrawer: React.FC<ChordReferenceDrawerProps> = ({
               className={`px-3.5 py-2 rounded-lg text-xs font-mono font-semibold transition-colors shrink-0 flex items-center gap-1.5 ${
                 isSelected
                   ? 'bg-[#ff5522] text-white shadow-primary'
-                  : 'bg-zinc-100 dark:bg-black/30 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
+                  : 'bg-zinc-50 dark:bg-black/30 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
               }`}
             >
               <span>{chordName}</span>
@@ -93,7 +93,7 @@ export const ChordReferenceDrawer: React.FC<ChordReferenceDrawerProps> = ({
       </div>
 
       {/* Selected Chord Detail presentation */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-zinc-100 dark:bg-black/30 p-4 rounded-xl transition-colors duration-200">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-zinc-50 dark:bg-black/30 p-4 rounded-xl transition-colors duration-200">
         <div className="md:col-span-1 flex flex-col justify-between gap-3">
           <div>
             <span className="text-[10px] font-mono text-zinc-500 dark:text-zinc-500 uppercase tracking-widest">

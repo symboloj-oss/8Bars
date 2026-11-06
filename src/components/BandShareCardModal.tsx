@@ -71,7 +71,7 @@ export const BandShareCardModal: React.FC<BandShareCardModalProps> = ({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent showCloseButton={false} className="sm:max-w-lg bg-white dark:bg-zinc-900 p-0 gap-0 rounded-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3.5 border-b bg-zinc-100 dark:bg-black/30">
+        <div className="flex items-center justify-between px-5 py-3.5 border-b bg-zinc-50 dark:bg-black/30">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-xs font-bold font-mono uppercase tracking-wider">
               <Share2 className="w-4 h-4 text-[#ff5522]" />
@@ -165,7 +165,7 @@ export const BandShareCardModal: React.FC<BandShareCardModalProps> = ({
 
             {/* Dynamic Status Callout */}
             <div className="bg-white dark:bg-zinc-800/60 rounded-xl p-3 flex items-center gap-3 mt-3">
-              <div className="w-8 h-8 rounded-lg bg-zinc-100 dark:bg-black/40 flex items-center justify-center text-zinc-700 dark:text-zinc-300 shrink-0">
+              <div className="w-8 h-8 rounded-lg bg-zinc-50 dark:bg-black/40 flex items-center justify-center text-zinc-700 dark:text-zinc-300 shrink-0">
                 <Users className="w-4 h-4 text-[#ff5522]" />
               </div>
               <div className="flex flex-col text-xs font-mono">

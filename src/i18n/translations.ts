@@ -51,8 +51,8 @@ export const TRANSLATIONS: Record<SupportedLang, Record<string, string>> = {
     'tape.aiStem': 'AI替补',
 
     // Slots
-    'slots.title': '合奏席位 · 固定 4 轨',
-    'slots.subtitle': '空缺席位由 AI 虚拟乐手发声 · 点击随时接管覆盖',
+    'slots.title': '合奏席位',
+    'slots.subtitle': '空位由 AI 代奏,点击即可接管',
     'slots.track': '音轨',
     'slots.taken': '已就位',
     'slots.aiSession': 'AI 替补',
@@ -76,7 +76,7 @@ export const TRANSLATIONS: Record<SupportedLang, Record<string, string>> = {
     'role.melody': '主奏/旋律 (独奏/主唱)',
 
     // Practice Lab
-    'lab.title': '乐手预备台 · 扫弦节奏教练 & 定音哨',
+    'lab.title': '乐手预备台',
     'lab.subtitle': '录音前先校准琴音与扫弦手感',
     'lab.tapToStrum': '和弦触控试听垫 (轻点发声)',
     'lab.tapHint': '点击琴垫立即试听真实原声扫弦',
@@ -98,7 +98,7 @@ export const TRANSLATIONS: Record<SupportedLang, Record<string, string>> = {
     'lab.tunerTip': '提示：轻点琴弦发声，对照真实吉他空弦调音；调准音后合奏才能真正和谐共鸣。',
 
     // Preset templates strip
-    'templates.stripTitle': '经典和弦模版 (PRESET PROGRESSIONS)',
+    'templates.stripTitle': '和弦模板',
     'templates.stripSubtitle': '一键切入卡农流行、微醺爵士、复古放克或公路民谣 8 小节走向',
 
     // Cheatsheet
@@ -201,7 +201,7 @@ export const TRANSLATIONS: Record<SupportedLang, Record<string, string>> = {
     'footer.brand': '「8BARS」/ 极简乐器初学者 Web 端异步合奏工具',
     'footer.rule1': '严控 8 小节 · 约 21 秒',
     'footer.rule2': '固定 4 轨',
-    'footer.rule3': '免服务器 · 纯前端高精度音频引擎',
+    'footer.rule3': '云端协同 · 分享即合奏',
   },
 
   'zh-TW': {
@@ -237,8 +237,8 @@ export const TRANSLATIONS: Record<SupportedLang, Record<string, string>> = {
     'tape.human': '實錄',
     'tape.aiStem': 'AI替補',
 
-    'slots.title': '合奏席位 · 固定 4 軌',
-    'slots.subtitle': '空缺席位由 AI 虛擬樂手發聲 · 點擊隨時接管覆蓋',
+    'slots.title': '合奏席位',
+    'slots.subtitle': '空位由 AI 代奏,點擊即可接管',
     'slots.track': '音軌',
     'slots.taken': '已就位',
     'slots.aiSession': 'AI 替補',
@@ -260,7 +260,7 @@ export const TRANSLATIONS: Record<SupportedLang, Record<string, string>> = {
     'role.chords': '和弦伴奏 (吉他/鍵盤)',
     'role.melody': '主奏/旋律 (獨奏/主唱)',
 
-    'lab.title': '樂手預備台 · 掃弦節奏教練 & 定音哨',
+    'lab.title': '樂手預備台',
     'lab.subtitle': '錄音前先校準琴音與掃弦手感',
     'lab.tapToStrum': '和弦觸控試聽墊 (輕點發聲)',
     'lab.tapHint': '點擊琴墊立即試聽真實原聲掃弦',
@@ -281,7 +281,7 @@ export const TRANSLATIONS: Record<SupportedLang, Record<string, string>> = {
     'lab.standardA': '標準音 (A440)',
     'lab.tunerTip': '提示：輕點琴弦發聲，對照真實吉他空弦調音；調準音後合奏才能真正和諧共鳴。',
 
-    'templates.stripTitle': '經典和弦模版 (PRESET PROGRESSIONS)',
+    'templates.stripTitle': '和弦模板',
     'templates.stripSubtitle': '一鍵切入卡農流行、微醺爵士、復古放克或公路民謠 8 小節走向',
 
     'cheatsheet.title': '和弦速查與指法備忘錄',
@@ -379,7 +379,7 @@ export const TRANSLATIONS: Record<SupportedLang, Record<string, string>> = {
     'footer.brand': '「8BARS」/ 極簡樂器初學者 Web 端異步合奏工具',
     'footer.rule1': '嚴控 8 小節 · 約 21 秒',
     'footer.rule2': '固定 4 軌',
-    'footer.rule3': '免服務器 · 純前端高精度音頻引擎',
+    'footer.rule3': '雲端協同 · 分享即合奏',
   },
 
   'en': {
@@ -415,8 +415,8 @@ export const TRANSLATIONS: Record<SupportedLang, Record<string, string>> = {
     'tape.human': 'TAKE',
     'tape.aiStem': 'AI STEM',
 
-    'slots.title': 'BAND SLOTS · FIXED 4 TRACKS',
-    'slots.subtitle': 'Empty slots filled by AI session musicians · Click to take over anytime',
+    'slots.title': 'Band Slots',
+    'slots.subtitle': 'Empty slots play AI parts · tap to take over',
     'slots.track': 'Track',
     'slots.taken': 'Taken',
     'slots.aiSession': 'AI Backup',
@@ -438,7 +438,7 @@ export const TRANSLATIONS: Record<SupportedLang, Record<string, string>> = {
     'role.chords': 'Chords (Guitar/Keys)',
     'role.melody': 'Melody & Lead',
 
-    'lab.title': 'PRACTICE LAB · Strumming Coach & Tuner',
+    'lab.title': 'Practice Lab',
     'lab.subtitle': 'Tune instrument and warm up strumming before recording',
     'lab.tapToStrum': 'Chord Touch Pad (Tap to Strum)',
     'lab.tapHint': 'Tap any pad to hear authentic acoustic chord strum',
@@ -459,7 +459,7 @@ export const TRANSLATIONS: Record<SupportedLang, Record<string, string>> = {
     'lab.standardA': 'Pitch (A440)',
     'lab.tunerTip': 'Tip: Tap any string to play reference pitch for tuning. Accurate tuning ensures your take meshes tightly with backing tracks.',
 
-    'templates.stripTitle': 'PRESET PROGRESSIONS',
+    'templates.stripTitle': 'Templates',
     'templates.stripSubtitle': 'Switch between Pop Canon, Midnight Jazz, Retro Funk or Indie Folk 8-bar grooves',
 
     'cheatsheet.title': 'CHORD FINGERING CHEATSHEET',
@@ -557,7 +557,7 @@ export const TRANSLATIONS: Record<SupportedLang, Record<string, string>> = {
     'footer.brand': '「8BARS」/ Minimalist Async Instrument Jamming Tool',
     'footer.rule1': 'Strict 8 Bars · ~21s',
     'footer.rule2': 'Fixed 4 Tracks',
-    'footer.rule3': 'Zero-Server · Client-Side High-Precision Web Audio',
+    'footer.rule3': 'Cloud collaboration · share to jam',
   },
 
   'ja': {
@@ -593,8 +593,8 @@ export const TRANSLATIONS: Record<SupportedLang, Record<string, string>> = {
     'tape.human': '実録',
     'tape.aiStem': 'AI伴奏',
 
-    'slots.title': 'セッション席 · 固定4パート',
-    'slots.subtitle': '空き席はAIが演奏中 · いつでも自分のテイクで上書き参加可能',
+    'slots.title': 'セッション席',
+    'slots.subtitle': '空き席はAIが代奏 · タップで参加',
     'slots.track': 'トラック',
     'slots.taken': '参加済み',
     'slots.aiSession': 'AI 代行',
@@ -616,7 +616,7 @@ export const TRANSLATIONS: Record<SupportedLang, Record<string, string>> = {
     'role.chords': 'コード伴奏 (ギター/キーボード)',
     'role.melody': 'リード/メロディ (ソロ/ボーカル)',
 
-    'lab.title': 'プレイヤー準備台 · ストローク練習＆チューナー',
+    'lab.title': 'プレイヤー準備台',
     'lab.subtitle': '録音前にチューニングとストロークの手応えを確認',
     'lab.tapToStrum': 'コード試聴パッド (タップで発音)',
     'lab.tapHint': 'パッドをタップして本物のアコースティック和音を試聴',
@@ -637,7 +637,7 @@ export const TRANSLATIONS: Record<SupportedLang, Record<string, string>> = {
     'lab.standardA': '基準音 (A440)',
     'lab.tunerTip': 'ヒント: 弦をタップして基準音を鳴らし、実機ギターをチューニングしてください。',
 
-    'templates.stripTitle': '定番コード進行テンプレート',
+    'templates.stripTitle': 'テンプレート',
     'templates.stripSubtitle': 'ポップカノン、深夜のジャズ、ファンク、フォークロードの8小節進行をワンタップ切替',
 
     'cheatsheet.title': 'コード運指チートシート',
@@ -735,7 +735,7 @@ export const TRANSLATIONS: Record<SupportedLang, Record<string, string>> = {
     'footer.brand': '「8BARS」/ ミニマル楽器初心者向けWeb非同期セッションツール',
     'footer.rule1': '厳密な8小節 (約21秒)',
     'footer.rule2': '固定4トラック',
-    'footer.rule3': 'サーバー不要 · 高精度Web Audioエンジン',
+    'footer.rule3': 'クラウド連携 · シェアでセッション',
   },
 
   'ko': {
@@ -771,8 +771,8 @@ export const TRANSLATIONS: Record<SupportedLang, Record<string, string>> = {
     'tape.human': '실제녹음',
     'tape.aiStem': 'AI반주',
 
-    'slots.title': '합주 파트 · 고정 4트랙',
-    'slots.subtitle': '빈자리는 AI가 자동 연주 중 · 언제든 클릭하여 내 테이크로 참여 가능',
+    'slots.title': '합주 파트',
+    'slots.subtitle': '빈자리는 AI가 대신 연주 · 탭하면 참여',
     'slots.track': '트랙',
     'slots.taken': '참여완료',
     'slots.aiSession': 'AI 대역',
@@ -794,7 +794,7 @@ export const TRANSLATIONS: Record<SupportedLang, Record<string, string>> = {
     'role.chords': '코드 반주 (기타/키보드)',
     'role.melody': '멜로디/리드 (솔로/보컬)',
 
-    'lab.title': '연주자 준비실 · 스트로크 코칭 & 튜너',
+    'lab.title': '연주자 준비실',
     'lab.subtitle': '녹음 전 튜닝과 스트로크 리듬감을 점검하세요',
     'lab.tapToStrum': '코드 터치 시연 패드 (터치하여 발음)',
     'lab.tapHint': '패드를 터치하면 어쿠스틱 코드 소리를 즉시 들을 수 있습니다',
@@ -815,7 +815,7 @@ export const TRANSLATIONS: Record<SupportedLang, Record<string, string>> = {
     'lab.standardA': '기준음 (A440)',
     'lab.tunerTip': '힌트: 현을 탭하여 기준음을 듣고 기타를 조율하세요. 정확한 음정이 합주의 조화를 만듭니다.',
 
-    'templates.stripTitle': '인기 코드 진행 템플릿',
+    'templates.stripTitle': '템플릿',
     'templates.stripSubtitle': '캐논 팝, 미드나잇 재즈, 레트로 펑크, 포크 로드 8마디 진행 즉시 전환',
 
     'cheatsheet.title': '코드 운지표 & 치트시트',
@@ -913,7 +913,7 @@ export const TRANSLATIONS: Record<SupportedLang, Record<string, string>> = {
     'footer.brand': '「8BARS」/ 미니멀 악기 초보자를 위한 웹 비동기 합주 도구',
     'footer.rule1': '엄격한 8마디 · 약 21초',
     'footer.rule2': '고정 4트랙',
-    'footer.rule3': '서버 불필요 · 순수 프론트엔드 고정밀 오디오 엔진',
+    'footer.rule3': '클라우드 협업 · 공유로 합주',
   },
 };
 

@@ -289,7 +289,7 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
  <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
  <DialogContent showCloseButton={false} className="sm:max-w-4xl bg-white dark:bg-zinc-900 p-0 gap-0 rounded-2xl max-h-[92vh] overflow-hidden flex flex-col">
  {/* Header with Cartoon Character Buddy Badge */}
- <div className="flex items-center justify-between px-5 py-3.5 border-b bg-zinc-100 dark:bg-black/30 shrink-0">
+ <div className="flex items-center justify-between px-5 py-3.5 border-b bg-zinc-50 dark:bg-black/30 shrink-0">
  <div className="flex items-center gap-3">
  <div className="relative shrink-0">
  <img
@@ -380,7 +380,7 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
  {phase === 'ready' && (
  <div className="flex flex-col gap-5">
  {/* Mic & Name strip */}
- <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-zinc-100 dark:bg-black/30 p-4 rounded-xl transition-colors duration-200">
+ <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-zinc-50 dark:bg-black/30 p-4 rounded-xl transition-colors duration-200">
  <div className="flex flex-col gap-1.5">
  <label className="text-xs font-mono text-zinc-600 dark:text-zinc-400">
  {t('studio.handle')}
@@ -423,7 +423,7 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
  <span className="text-xs font-mono text-zinc-600 dark:text-zinc-400 uppercase tracking-wider">
  {t('studio.prestudy')}
  </span>
- <div className="flex items-center bg-zinc-100 dark:bg-black/40 p-1 rounded-lg font-mono">
+ <div className="flex items-center bg-zinc-50 dark:bg-black/40 p-1 rounded-lg font-mono">
  <button
  onClick={() => setActiveTab('guitar')}
  className={`px-3 py-1 text-xs rounded-md transition-colors ${
@@ -517,7 +517,7 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
  </div>
 
  {/* Control bottom bar */}
- <div className="flex items-center justify-between bg-zinc-100 dark:bg-black/30 p-3.5 rounded-xl transition-colors duration-200">
+ <div className="flex items-center justify-between bg-zinc-50 dark:bg-black/30 p-3.5 rounded-xl transition-colors duration-200">
  <div className="flex items-center gap-2">
  <span className="w-2.5 h-2.5 rounded-full bg-[#ff5522] animate-ping" />
  <span className="text-xs font-mono text-[#ff5522] font-bold">
@@ -563,7 +563,7 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
  </div>
 
  {/* Hardware Latency Compensation Slider */}
- <div className="bg-zinc-100 dark:bg-black/30 p-4 rounded-xl flex flex-col gap-3 font-mono transition-colors duration-200">
+ <div className="bg-zinc-50 dark:bg-black/30 p-4 rounded-xl flex flex-col gap-3 font-mono transition-colors duration-200">
  <div className="flex items-center justify-between">
  <span className="text-xs font-bold text-zinc-800 dark:text-zinc-200 flex items-center gap-2">
  <Sliders className="w-3.5 h-3.5 text-[#ff5522]" />

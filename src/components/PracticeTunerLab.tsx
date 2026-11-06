@@ -85,7 +85,7 @@ export const PracticeTunerLab: React.FC<PracticeTunerLabProps> = ({
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* Left: Interactive Chord Strum Pad */}
-        <div className="flex flex-col gap-3 bg-zinc-100 dark:bg-black/30 p-4 rounded-xl transition-colors duration-200">
+        <div className="flex flex-col gap-3 bg-zinc-50 dark:bg-black/30 p-4 rounded-xl transition-colors duration-200">
           <div className="flex items-center justify-between">
             <span className="text-xs font-mono font-bold text-zinc-800 dark:text-zinc-300 flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-[#ff5522]" />
@@ -157,7 +157,7 @@ export const PracticeTunerLab: React.FC<PracticeTunerLabProps> = ({
         </div>
 
         {/* Right: Pitch Pipe / String Tuner Reference */}
-        <div className="flex flex-col gap-3 bg-zinc-100 dark:bg-black/30 p-4 rounded-xl justify-between transition-colors duration-200">
+        <div className="flex flex-col gap-3 bg-zinc-50 dark:bg-black/30 p-4 rounded-xl justify-between transition-colors duration-200">
           <div>
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs font-mono font-bold text-zinc-800 dark:text-zinc-300 flex items-center gap-1.5">

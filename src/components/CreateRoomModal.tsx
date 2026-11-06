@@ -43,7 +43,7 @@ export const CreateRoomModal: React.FC<CreateRoomModalProps> = ({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent showCloseButton={false} className="sm:max-w-xl bg-white dark:bg-zinc-900 p-0 gap-0 rounded-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3.5 border-b bg-zinc-100 dark:bg-black/30">
+        <div className="flex items-center justify-between px-5 py-3.5 border-b bg-zinc-50 dark:bg-black/30">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-xs font-bold font-mono uppercase tracking-wider">
               <Disc3 className="w-4 h-4 text-[#ff5522]" />

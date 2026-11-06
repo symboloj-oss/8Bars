@@ -158,8 +158,8 @@ export const RoomHeader: React.FC<RoomHeaderProps> = ({
                   <Badge className="bg-[#ff5522]/10 text-[#ff5522] border-[#ff5522]/20 hover:bg-[#ff5522]/10">
                     {t('header.studioLabel')}
                   </Badge>
-                  <span className="text-xs font-mono text-zinc-400 dark:text-zinc-500">
-                    {template.key} 调 · {t('header.loopLen')}
+                  <span className="text-xs text-zinc-400 dark:text-zinc-500">
+                    {template.key} 调 · {template.bpm} BPM
                   </span>
                 </div>
                 <h2 className="text-xl sm:text-2xl font-extrabold text-zinc-900 dark:text-white tracking-tight truncate">
@@ -188,20 +188,14 @@ export const RoomHeader: React.FC<RoomHeaderProps> = ({
                 </Button>
 
                 {/* Bar and Beat Realtime Status Indicator */}
-                <div className="bg-zinc-100 dark:bg-black/30 rounded-xl px-3.5 py-1.5 flex items-center gap-3 font-mono text-xs">
-                  <div className="flex flex-col">
-                    <span className="text-[10px] text-zinc-400 uppercase tracking-wider">{t('header.position')}</span>
-                    <span className="text-sm font-bold text-zinc-900 dark:text-zinc-200 tabular-nums">
-                      {t('header.bar', { bar: transportState.currentBar + 1 })} · {t('header.beat', { beat: transportState.currentBeat + 1 })}
-                    </span>
-                  </div>
-                  <div className="h-6 w-px bg-zinc-200 dark:bg-white/8" />
-                  <div className="flex flex-col">
-                    <span className="text-[10px] text-zinc-400 uppercase tracking-wider">{t('header.cycle')}</span>
-                    <span className="text-sm font-bold text-[#ff5522] tabular-nums">
-                      {Math.round(transportState.progress * 100)}%
-                    </span>
-                  </div>
+                <div className="bg-zinc-50 dark:bg-black/30 rounded-xl px-3.5 py-2 flex items-center gap-3 text-xs">
+                  <span className="font-bold text-zinc-900 dark:text-zinc-200 tabular-nums">
+                    {t('header.bar', { bar: transportState.currentBar + 1 })} · {t('header.beat', { beat: transportState.currentBeat + 1 })}
+                  </span>
+                  <div className="h-4 w-px bg-zinc-200 dark:bg-white/8" />
+                  <span className="font-bold text-[#ff5522] tabular-nums">
+                    {Math.round(transportState.progress * 100)}%
+                  </span>
                 </div>
 
                 <Button

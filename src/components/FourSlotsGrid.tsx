@@ -86,7 +86,7 @@ export const FourSlotsGrid: React.FC<FourSlotsGridProps> = ({
               {(() => {
                 const character = getCharacterForSlot(slot.type);
                 return (
-                  <div className="relative rounded-xl overflow-hidden bg-zinc-100 dark:bg-black/40 group transition-all">
+                  <div className="relative rounded-xl overflow-hidden bg-zinc-50 dark:bg-black/40 group transition-all">
                     {/* Character Artwork with Groove Animation */}
                     <div className="relative aspect-[4/3] w-full overflow-hidden flex items-center justify-center bg-zinc-100 dark:bg-zinc-950">
                       <motion.img
@@ -200,7 +200,7 @@ export const FourSlotsGrid: React.FC<FourSlotsGridProps> = ({
                     </span>
                     <span>{t('slots.totalTakes', { count: slot.takes.length })}</span>
                   </div>
-                  <div className="flex gap-1 overflow-x-auto p-1 bg-zinc-100 dark:bg-black/40 rounded-lg">
+                  <div className="flex gap-1 overflow-x-auto p-1 bg-zinc-50 dark:bg-black/40 rounded-lg">
                     {slot.takes.map((take, tIdx) => {
                       const isActive = slot.activeTakeIndex === tIdx;
                       return (
