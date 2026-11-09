@@ -1,7 +1,6 @@
 "use client";
 import React, { useState } from 'react';
 import { RoomState, RoomTemplate } from '../types/music';
-import { CommunityRoom } from '../types/community';
 import { Globe, Send } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Button } from './ui/button';
@@ -15,7 +14,12 @@ interface PublishRoomModalProps {
   onClose: () => void;
   room: RoomState;
   template: RoomTemplate;
-  onPublish: (newCommunityRoom: CommunityRoom) => void;
+  onPublish: (input: {
+    contactInfo: string;
+    recruitmentCall: string;
+    tags: string[];
+    genre?: string;
+  }) => Promise<void> | void;
   t?: (key: string, params?: Record<string, string | number>) => string;
 }
 
@@ -30,11 +34,12 @@ export const PublishRoomModal: React.FC<PublishRoomModalProps> = ({
   const [slogan, setSlogan] = useState<string>('急寻贝斯手！跟上流行卡农走向，戴耳机录15秒即可上车！');
   const [contact, setContact] = useState<string>('微信: @' + room.creatorName.split(' ')[0]);
   const [tagsInput, setTagsInput] = useState<string>('新手友好, 卡农走向, 急寻低音');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const vacantRoles = room.slots.filter((s) => !s.isCustomTake).map((s) => s.type);
-  const humanSlotsCount = room.slots.filter((s) => s.isCustomTake).length;
+  const humanSlotsCount = room.slots.filter((s) => s.occupancy === 'human').length;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const parsedTags = tagsInput
@@ -42,32 +47,22 @@ export const PublishRoomModal: React.FC<PublishRoomModalProps> = ({
       .map((tag) => tag.trim().replace(/^#/, ''))
       .filter(Boolean);
 
-    const newCommRoom: CommunityRoom = {
-      id: `comm-${Date.now()}`,
-      title: room.title,
-      templateId: room.templateId,
-      genre: template.genre,
-      bpm: template.bpm,
-      progression: room.progression,
-      creatorName: room.creatorName,
-      creatorAvatar: '🎸',
-      contactInfo: contact.trim() || '可在房间内直接录制席位',
-      recruitmentCall: slogan.trim() || '欢迎任何乐器伙伴戴耳机加入！',
-      tags: parsedTags.length > 0 ? parsedTags : ['新手友好', '8小节合奏'],
-      humanSlotsCount,
-      vacantRoles,
-      likesCount: 1,
-      createdAt: '刚刚发布',
-      slots: room.slots,
-    };
-
-    onPublish(newCommRoom);
-    confetti({
-      particleCount: 70,
-      spread: 70,
-      origin: { y: 0.6 },
-    });
-    onClose();
+    setIsSubmitting(true);
+    setSubmitError(null);
+    try {
+      await onPublish({
+        genre: template.genre,
+        contactInfo: contact.trim() || '可在房间内直接录制席位',
+        recruitmentCall: slogan.trim() || '欢迎任何乐器伙伴戴耳机加入！',
+        tags: parsedTags.length > 0 ? parsedTags : ['新手友好', '8小节合奏'],
+      });
+      confetti({ particleCount: 70, spread: 70, origin: { y: 0.6 } });
+      onClose();
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : '发布失败，请稍后重试');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -142,9 +137,14 @@ export const PublishRoomModal: React.FC<PublishRoomModalProps> = ({
             />
           </div>
 
-          <Button type="submit" className="w-full mt-2 py-3">
+          {submitError && (
+            <p role="alert" className="text-xs text-red-500 dark:text-red-400">
+              {submitError}
+            </p>
+          )}
+          <Button type="submit" disabled={isSubmitting} className="w-full mt-2 py-3">
             <Send />
-            {t('plaza.publishSubmit')}
+            {isSubmitting ? '发布中…' : t('plaza.publishSubmit')}
           </Button>
         </form>
       </DialogContent>

@@ -28,6 +28,9 @@ export async function listPublishedRooms(): Promise<CommunityRoom[]> {
   const { data: roomRows, error: roomErr } = await supabase
     .from('rooms')
     .select('*')
+    // 只有明确发布且填写招募信息的房间进入广场。
+    .eq('status', 'published')
+    .neq('recruitment_call', '')
     .order('created_at', { ascending: false })
     .limit(50);
   if (roomErr || !roomRows || roomRows.length === 0) return [];
@@ -91,35 +94,33 @@ export async function createRoom(input: {
   creatorAvatar?: string;
   slots: SlotInfo[];
 }): Promise<{ id: string; createdAt: string }> {
-  const uid = await ensureAnonymousUser();
+  await ensureAnonymousUser();
   const supabase = getSupabaseBrowser();
 
-  const { data: room, error: roomErr } = await supabase
+  const slots = input.slots.map((s) => ({
+    slot_type: s.type,
+    volume: s.volume,
+    latency_offset_ms: s.latencyOffsetMs,
+  }));
+  const { data: roomId, error } = await supabase.rpc('create_room_with_slots', {
+    p_title: input.title,
+    p_template_id: input.templateId,
+    p_bpm: input.bpm,
+    p_progression: input.progression,
+    p_creator_name: input.creatorName,
+    p_creator_avatar: input.creatorAvatar || '🎸',
+    p_slots: slots,
+  });
+  if (error || !roomId) throw new Error('创建房间失败: ' + (error?.message || '未知错误'));
+
+  const { data: room, error: roomError } = await supabase
     .from('rooms')
-    .insert({
-      title: input.title,
-      template_id: input.templateId,
-      bpm: input.bpm,
-      progression: input.progression,
-      creator_uid: uid,
-      creator_name: input.creatorName,
-      creator_avatar: input.creatorAvatar || '🎸',
-    })
-    .select()
+    .select('created_at')
+    .eq('id', roomId)
     .single();
-  if (roomErr || !room) throw new Error('创建房间失败: ' + (roomErr?.message || '未知错误'));
+  if (roomError || !room) throw new Error('创建房间失败: 无法读取房间时间');
 
-  const { error: slotErr } = await supabase.from('slots').insert(
-    input.slots.map((s) => ({
-      room_id: room.id,
-      slot_type: s.type,
-      volume: s.volume,
-      latency_offset_ms: s.latencyOffsetMs,
-    }))
-  );
-  if (slotErr) console.warn('席位初始化失败(房间仍可用):', slotErr.message);
-
-  return { id: room.id, createdAt: room.created_at };
+  return { id: roomId, createdAt: room.created_at };
 }
 
 /** 发布/更新房间的招募信息(房间行必须已存在且由本人创建) */
@@ -127,17 +128,23 @@ export async function updateRoomRecruitment(
   roomId: string,
   input: { genre?: string; contactInfo: string; recruitmentCall: string; tags: string[] }
 ): Promise<void> {
+  await ensureAnonymousUser();
   const supabase = getSupabaseBrowser();
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('rooms')
     .update({
       genre: input.genre,
       contact_info: input.contactInfo,
       recruitment_call: input.recruitmentCall,
       tags: input.tags,
+      status: 'published',
+      published_at: new Date().toISOString(),
     })
-    .eq('id', roomId);
+    .eq('id', roomId)
+    .select('id')
+    .maybeSingle();
   if (error) throw new Error('发布房间失败: ' + error.message);
+  if (!data) throw new Error('发布房间失败: 当前身份不是房主或房间已不存在');
 }
 
 /** 保存录音:先传音频到 storage,再插 take 行 */
@@ -154,9 +161,11 @@ export async function saveTake(input: {
 
   // 先传后插:路径 {roomId}/{uuid}.webm
   const filePath = `${input.roomId}/${crypto.randomUUID()}.webm`;
+  // Storage 桶按基础 MIME 校验;MediaRecorder 可能返回 audio/webm;codecs=opus。
+  const contentType = (input.blob.type || 'audio/webm').split(';', 1)[0];
   const { error: uploadErr } = await supabase.storage
     .from('takes')
-    .upload(filePath, input.blob, { contentType: input.blob.type || 'audio/webm' });
+    .upload(filePath, input.blob, { contentType });
   if (uploadErr) throw new Error('音频上传失败: ' + uploadErr.message);
 
   const { data: take, error: takeErr } = await supabase
@@ -173,7 +182,10 @@ export async function saveTake(input: {
     .select()
     .single();
   if (takeErr || !take) {
-    console.warn('take 记录写入失败(音频已上传,遗留孤儿文件):', takeErr?.message);
+    const { error: cleanupErr } = await supabase.storage.from('takes').remove([filePath]);
+    if (cleanupErr) {
+      console.warn('take 记录写入失败,且孤儿音频清理失败:', cleanupErr.message);
+    }
     throw new Error('保存录音失败: ' + (takeErr?.message || '未知错误'));
   }
   return take;

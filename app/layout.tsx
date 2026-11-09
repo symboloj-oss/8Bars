@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Inter, Noto_Sans_SC, Space_Grotesk, JetBrains_Mono } from 'next/font/google';
+import { TooltipProvider } from '@/components/ui/tooltip';
 import './globals.css';
 import { cn } from "@/lib/utils";
 
@@ -63,7 +64,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className="bg-[#fbfbfb] dark:bg-[#09090b] text-zinc-900 dark:text-zinc-100 min-h-screen selection:bg-[#ff5522]/30 selection:text-zinc-900 dark:selection:text-white antialiased transition-colors duration-200">
-        {children}
+        <TooltipProvider delayDuration={300}>{children}</TooltipProvider>
       </body>
     </html>
   );

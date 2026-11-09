@@ -53,7 +53,9 @@ export type Database = {
           is_seed: boolean
           likes_count: number
           progression: string[]
+          published_at: string | null
           recruitment_call: string
+          status: string
           tags: string[]
           template_id: string
           title: string
@@ -70,7 +72,9 @@ export type Database = {
           is_seed?: boolean
           likes_count?: number
           progression: string[]
+          published_at?: string | null
           recruitment_call?: string
+          status?: string
           tags?: string[]
           template_id: string
           title: string
@@ -87,7 +91,9 @@ export type Database = {
           is_seed?: boolean
           likes_count?: number
           progression?: string[]
+          published_at?: string | null
           recruitment_call?: string
+          status?: string
           tags?: string[]
           template_id?: string
           title?: string
@@ -235,6 +241,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_room_with_slots: {
+        Args: {
+          p_bpm: number
+          p_creator_avatar: string
+          p_creator_name: string
+          p_progression: string[]
+          p_slots: Json
+          p_template_id: string
+          p_title: string
+        }
+        Returns: string
+      }
       toggle_like: {
         Args: { p_room_id: string }
         Returns: {

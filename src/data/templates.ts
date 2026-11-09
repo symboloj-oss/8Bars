@@ -21,6 +21,8 @@ export function createDefaultSlots(): SlotInfo[] {
       isMuted: false,
       isSolo: false,
       latencyOffsetMs: -80,
+      occupancy: 'system',
+      audioSource: 'synthetic',
       isCustomTake: false,
       takes: [
         {
@@ -57,6 +59,8 @@ export function createDefaultSlots(): SlotInfo[] {
       isMuted: false,
       isSolo: false,
       latencyOffsetMs: -80,
+      occupancy: 'system',
+      audioSource: 'synthetic',
       isCustomTake: false,
       takes: [
         {
@@ -93,6 +97,8 @@ export function createDefaultSlots(): SlotInfo[] {
       isMuted: false,
       isSolo: false,
       latencyOffsetMs: -80,
+      occupancy: 'human',
+      audioSource: 'synthetic',
       isCustomTake: true,
       takes: [
         {
@@ -143,6 +149,8 @@ export function createDefaultSlots(): SlotInfo[] {
       isMuted: false,
       isSolo: false,
       latencyOffsetMs: -80,
+      occupancy: 'system',
+      audioSource: 'synthetic',
       isCustomTake: false,
       takes: [
         {

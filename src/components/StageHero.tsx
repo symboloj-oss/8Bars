@@ -4,7 +4,7 @@ import { RoomState, RoomTemplate, SlotInfo } from '../types/music';
 import { TransportState } from '../services/audioEngine';
 import { getCharacterForSlot } from '../data/characters';
 import { BandFigure } from './BandFigures';
-import { Play, Pause, Download, ChevronDown, Music2, X } from 'lucide-react';
+import { Play, Pause, Download, ChevronDown, Music2, X, Share2, Globe } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Button } from './ui/button';
 
@@ -21,6 +21,8 @@ interface StageHeroProps {
   onSelectSlot: (slot: SlotInfo) => void;
   onSwitchTemplate: (template: RoomTemplate) => void;
   onExportWav: () => void;
+  onOpenShareModal: () => void;
+  onOpenPublishModal: () => void;
   isExporting: boolean;
 }
 
@@ -42,6 +44,8 @@ export const StageHero: React.FC<StageHeroProps> = ({
   onSelectSlot,
   onSwitchTemplate,
   onExportWav,
+  onOpenShareModal,
+  onOpenPublishModal,
   isExporting,
 }) => {
   const { isPlaying, currentBar, progress } = transportState;
@@ -94,6 +98,26 @@ export const StageHero: React.FC<StageHeroProps> = ({
           <p className="text-[11px] sm:text-xs mt-1.5 font-normal tracking-wide" style={{ color: c.sub }}>
             {template.genre} · {template.key} 调 · {template.bpm} BPM
           </p>
+          <div className="flex items-center justify-center gap-2 mt-3">
+            <button
+              type="button"
+              onClick={onOpenShareModal}
+              aria-label={t('share.title')}
+              className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11px] font-medium backdrop-blur-md transition active:scale-95 ${c.pill}`}
+            >
+              <Share2 className="w-3.5 h-3.5" />
+              <span>{t('share.title')}</span>
+            </button>
+            <button
+              type="button"
+              onClick={onOpenPublishModal}
+              aria-label={t('plaza.publishMyRoom')}
+              className="inline-flex items-center gap-1.5 rounded-full bg-[#ff5a36] px-3 py-1.5 text-[11px] font-semibold text-white shadow-sm transition hover:bg-[#ff6e4d] active:scale-95"
+            >
+              <Globe className="w-3.5 h-3.5" />
+              <span>{t('plaza.publishMyRoom')}</span>
+            </button>
+          </div>
         </div>
 
         {/* 4 位乐手 */}
@@ -101,7 +125,7 @@ export const StageHero: React.FC<StageHeroProps> = ({
           <div className="w-full grid grid-cols-4 gap-2 sm:gap-8 items-end justify-items-center">
             {room.slots.map((slot) => {
               const character = getCharacterForSlot(slot.type);
-              const isHuman = slot.isCustomTake;
+              const isHuman = slot.occupancy === 'human';
               return (
                 <div
                   key={slot.id}

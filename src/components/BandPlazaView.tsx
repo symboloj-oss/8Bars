@@ -24,6 +24,7 @@ import { toggleLikeRoom } from '../lib/api/rooms';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { Skeleton } from './ui/skeleton';
+import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 
 interface BandPlazaViewProps {
   rooms: CommunityRoom[];
@@ -123,10 +124,10 @@ export const BandPlazaView: React.FC<BandPlazaViewProps> = ({
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex flex-col gap-2 max-w-2xl">
             <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full bg-[#ff5522]/10 text-[#ff5522] text-[11px] font-bold flex items-center gap-1">
+              <Badge className="rounded-full bg-[#ff5522]/10 text-[#ff5522] hover:bg-[#ff5522]/10 border-transparent px-2.5 py-0.5 gap-1">
                 <Sparkles className="w-3 h-3" />
                 {t('plaza.badgeNeedMusicians', { count: vacantRoomsCount })}
-              </span>
+              </Badge>
             </div>
 
             <h2 className="font-display text-2xl sm:text-3xl font-bold text-zinc-900 dark:text-white tracking-tight">
@@ -152,73 +153,32 @@ export const BandPlazaView: React.FC<BandPlazaViewProps> = ({
         </div>
       </div>
 
-      {/* Filter Chips Bar */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 font-mono text-xs">
-        <button
-          onClick={() => setFilter('all')}
-          className={`px-3.5 py-2 rounded-lg font-semibold whitespace-nowrap transition-colors ${
-            filter === 'all'
-              ? 'bg-zinc-900 text-white dark:bg-white dark:text-black shadow-sm'
-              : 'bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400'
-          }`}
-        >
-          {t('plaza.filterAll', { count: rooms.length })}
-        </button>
-
-        <button
-          onClick={() => setFilter('bass')}
-          className={`px-3.5 py-2 rounded-lg font-semibold whitespace-nowrap transition-colors ${
-            filter === 'bass'
-              ? 'bg-[#ff5522] text-white shadow-sm'
-              : 'bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400'
-          }`}
-        >
-          {t('plaza.filterBass')}
-        </button>
-
-        <button
-          onClick={() => setFilter('melody')}
-          className={`px-3.5 py-2 rounded-lg font-semibold whitespace-nowrap transition-colors ${
-            filter === 'melody'
-              ? 'bg-[#ff5522] text-white shadow-sm'
-              : 'bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400'
-          }`}
-        >
-          {t('plaza.filterMelody')}
-        </button>
-
-        <button
-          onClick={() => setFilter('chords')}
-          className={`px-3.5 py-2 rounded-lg font-semibold whitespace-nowrap transition-colors ${
-            filter === 'chords'
-              ? 'bg-[#ff5522] text-white shadow-sm'
-              : 'bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400'
-          }`}
-        >
-          {t('plaza.filterChords')}
-        </button>
-
-        <button
-          onClick={() => setFilter('drums')}
-          className={`px-3.5 py-2 rounded-lg font-semibold whitespace-nowrap transition-colors ${
-            filter === 'drums'
-              ? 'bg-[#ff5522] text-white shadow-sm'
-              : 'bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400'
-          }`}
-        >
-          {t('plaza.filterDrums')}
-        </button>
-
-        <button
-          onClick={() => setFilter('complete')}
-          className={`px-3.5 py-2 rounded-lg font-semibold whitespace-nowrap transition-colors ${
-            filter === 'complete'
-              ? 'bg-amber-500 text-white shadow-sm'
-              : 'bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400'
-          }`}
-        >
-          {t('plaza.filterComplete')}
-        </button>
+      {/* Filter:YouTube 风格 chips(圆角胶囊 32px,选中高对比,未选中浅灰细边) */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-0.5">
+        {[
+          { value: 'all', label: t('plaza.filterAll', { count: rooms.length }) },
+          { value: 'bass', label: t('plaza.filterBass') },
+          { value: 'melody', label: t('plaza.filterMelody') },
+          { value: 'chords', label: t('plaza.filterChords') },
+          { value: 'drums', label: t('plaza.filterDrums') },
+          { value: 'complete', label: t('plaza.filterComplete') },
+        ].map((item) => {
+          const isSelected = filter === item.value;
+          return (
+            <button
+              key={item.value}
+              onClick={() => setFilter(item.value as FilterCategory)}
+              aria-pressed={isSelected}
+              className={`h-8 shrink-0 whitespace-nowrap rounded-full border px-4 text-[13px] font-medium transition-colors ${
+                isSelected
+                  ? 'border-[#ff5522]/35 bg-[#ff5522]/10 font-semibold text-[#ff5522] dark:border-[#ff5522]/45 dark:bg-[#ff5522]/15 dark:text-[#ff8a5c]'
+                  : 'border-zinc-200 bg-zinc-100/70 text-zinc-600 hover:bg-zinc-200/80 hover:text-zinc-900 dark:border-white/10 dark:bg-white/6 dark:text-zinc-300 dark:hover:bg-white/12 dark:hover:text-white'
+              }`}
+            >
+              {item.label}
+            </button>
+          );
+        })}
       </div>
 
       {/* Community Rooms Grid */}
@@ -250,7 +210,7 @@ export const BandPlazaView: React.FC<BandPlazaViewProps> = ({
               key={commRoom.id}
               whileHover={{ y: -3 }}
               transition={{ type: 'spring', stiffness: 350, damping: 25 }}
-              className={`rounded-2xl bg-white dark:bg-zinc-900 p-5 flex flex-col justify-between gap-4 shadow-card dark:shadow-card-dark transition-colors duration-200 ${
+              className={`rounded-2xl bg-white dark:bg-zinc-900 p-5 flex flex-col justify-between gap-4 shadow-card dark:shadow-card-dark transition-all duration-200 ring-1 ring-transparent hover:ring-[#ff5522]/25 hover:shadow-raise ${
                 isCurrentActive
                   ? 'bg-orange-50/60 dark:bg-zinc-900'
                   : ''
@@ -314,42 +274,57 @@ export const BandPlazaView: React.FC<BandPlazaViewProps> = ({
               <div className="flex items-center justify-between gap-2 pt-3 border-t border-subtle">
                 <div className="flex items-center gap-1.5">
                   {/* 点赞 */}
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => handleApplaud(commRoom.id, commRoom.likesCount)}
-                  >
-                    <Heart className="text-[#ff5522]" />
-                    <span className="tabular-nums">{displayLikes}</span>
-                  </Button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => handleApplaud(commRoom.id, commRoom.likesCount)}
+                      >
+                        <Heart className="text-[#ff5522]" />
+                        <span className="tabular-nums">{displayLikes}</span>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>{t('plaza.applaud')}</TooltipContent>
+                  </Tooltip>
 
                   {/* 试听 */}
-                  <Button
-                    variant="secondary"
-                    size="icon-sm"
-                    onClick={() => handleToggleAudioPreview(commRoom)}
-                    title="试听和弦走向"
-                  >
-                    {isPreviewing ? (
-                      <Pause className="text-[#ff5522]" />
-                    ) : (
-                      <Play className="ml-0.5" />
-                    )}
-                  </Button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="secondary"
+                        size="icon-sm"
+                        onClick={() => handleToggleAudioPreview(commRoom)}
+                      >
+                        {isPreviewing ? (
+                          <Pause className="text-[#ff5522]" />
+                        ) : (
+                          <Play className="ml-0.5" />
+                        )}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>{isPreviewing ? t('header.pause') : t('cheatsheet.preview')}</TooltipContent>
+                  </Tooltip>
 
-                  {/* 复制联系方式(图标按钮) */}
-                  <Button
-                    variant="secondary"
-                    size="icon-sm"
-                    onClick={() => handleCopyContact(commRoom.id, commRoom.contactInfo)}
-                    title={commRoom.contactInfo}
-                  >
-                    {isCopied ? (
-                      <Check className="text-emerald-500" />
-                    ) : (
-                      <MessageCircle className="text-[#ff5522]" />
-                    )}
-                  </Button>
+                  {/* 复制联系方式 */}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="secondary"
+                        size="icon-sm"
+                        onClick={() => handleCopyContact(commRoom.id, commRoom.contactInfo)}
+                      >
+                        {isCopied ? (
+                          <Check className="text-emerald-500" />
+                        ) : (
+                          <MessageCircle className="text-[#ff5522]" />
+                        )}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-[220px]">
+                      {isCopied ? t('plaza.copiedContact') : commRoom.contactInfo}
+                    </TooltipContent>
+                  </Tooltip>
                 </div>
 
                 {/* 进入乐队 */}

@@ -1,4 +1,7 @@
 export type SlotType = 'drums' | 'bass' | 'chords' | 'melody';
+export type SlotOccupancy = 'system' | 'human';
+export type SlotAudioSource = 'synthetic' | 'template' | 'human';
+export type RoomPublicationStatus = 'draft' | 'published' | 'archived';
 
 export interface MusicianInfo {
   name: string;
@@ -32,6 +35,10 @@ export interface SlotInfo {
   isMuted: boolean;
   isSolo: boolean;
   latencyOffsetMs: number; // default -80ms
+  /** 当前席位由系统补位还是由真人认领。 */
+  occupancy: SlotOccupancy;
+  /** 当前实际播放的音频来源。 */
+  audioSource: SlotAudioSource;
   isCustomTake: boolean;
   takes: SlotTake[];
   activeTakeIndex: number;
@@ -84,6 +91,8 @@ export interface RoomState {
   bpm: number;
   createdAt: string;
   creatorName: string;
+  publicationStatus: RoomPublicationStatus;
+  publishedAt?: string | null;
   slots: SlotInfo[];
   progression: string[];
 }

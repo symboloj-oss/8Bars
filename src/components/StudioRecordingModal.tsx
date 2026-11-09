@@ -79,6 +79,7 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
  const analyserRef = useRef<AnalyserNode | null>(null);
  const animFrameRef = useRef<number | null>(null);
  const countInTimerRef = useRef<any>(null);
+ const recordedAudioUrlRef = useRef<string | null>(null);
 
  // Stop background music when studio opens
  useEffect(() => {
@@ -86,10 +87,7 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
  audioEngine.pause();
  setPhase('headphone_warning');
  setRecordedAudioBlob(null);
- if (recordedAudioUrl) {
- URL.revokeObjectURL(recordedAudioUrl);
- setRecordedAudioUrl(null);
- }
+ revokeRecordedAudioUrl();
  } else {
  cleanupMic();
  audioEngine.stop();
@@ -114,6 +112,10 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
  // Cleanup mic on exit
  const cleanupMic = () => {
  if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+ if (countInTimerRef.current) {
+ clearInterval(countInTimerRef.current);
+ countInTimerRef.current = null;
+ }
  if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
  try { mediaRecorderRef.current.stop(); } catch (e) {}
  }
@@ -121,6 +123,13 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
  mediaStreamRef.current.getTracks().forEach((t) => t.stop());
  mediaStreamRef.current = null;
  }
+ };
+
+ const revokeRecordedAudioUrl = () => {
+ const url = recordedAudioUrlRef.current;
+ if (url) URL.revokeObjectURL(url);
+ recordedAudioUrlRef.current = null;
+ setRecordedAudioUrl(null);
  };
 
  // Start Mic Monitor
@@ -193,10 +202,15 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
 
  if (mediaStreamRef.current) {
  try {
- const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
- ? 'audio/webm;codecs=opus'
- : 'audio/webm';
- const recorder = new MediaRecorder(mediaStreamRef.current, { mimeType });
+ const supportedMimeType = [
+ 'audio/webm;codecs=opus',
+ 'audio/webm',
+ 'audio/mp4',
+ 'audio/ogg;codecs=opus',
+ ].find((type) => MediaRecorder.isTypeSupported(type));
+ const recorder = supportedMimeType
+ ? new MediaRecorder(mediaStreamRef.current, { mimeType: supportedMimeType })
+ : new MediaRecorder(mediaStreamRef.current);
 
  recorder.ondataavailable = (e) => {
  if (e.data.size > 0) {
@@ -205,9 +219,12 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
  };
 
  recorder.onstop = async () => {
- const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+ const blob = new Blob(audioChunksRef.current, {
+ type: recorder.mimeType || supportedMimeType || 'audio/webm',
+ });
  setRecordedAudioBlob(blob);
  const url = URL.createObjectURL(blob);
+ recordedAudioUrlRef.current = url;
  setRecordedAudioUrl(url);
 
  // Preload into audio engine for latency test preview
@@ -231,6 +248,10 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
 
  // Stop recording
  const stopRecording = () => {
+ if (countInTimerRef.current) {
+ clearInterval(countInTimerRef.current);
+ countInTimerRef.current = null;
+ }
  if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
  mediaRecorderRef.current.stop();
  }
@@ -244,10 +265,7 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
  setIsReviewPlaying(false);
  audioEngine.removeSlotAudio(targetSlot.type);
  setRecordedAudioBlob(null);
- if (recordedAudioUrl) {
- URL.revokeObjectURL(recordedAudioUrl);
- setRecordedAudioUrl(null);
- }
+ revokeRecordedAudioUrl();
  setPhase('ready');
  };
 

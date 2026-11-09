@@ -82,7 +82,7 @@ export const RoomView: React.FC<RoomViewProps> = ({ roomId }) => {
             // 一级:真人 take
             await Promise.all(
               state.slots
-                .filter((s) => s.isCustomTake && s.takes[0]?.audioBlobUrl)
+                .filter((s) => s.occupancy === 'human' && s.takes[0]?.audioBlobUrl)
                 .map((s) =>
                   audioEngine
                     .setSlotAudioFromUrl(s.type, s.takes[0].audioBlobUrl!)
@@ -92,7 +92,7 @@ export const RoomView: React.FC<RoomViewProps> = ({ roomId }) => {
             // 二级:模板预置音频切片(无真人 take 时)
             await Promise.all(
               state.slots
-                .filter((s) => !s.isCustomTake && getTemplateAsset(bundle.room.template_id, s.type))
+                .filter((s) => s.audioSource !== 'human' && getTemplateAsset(bundle.room.template_id, s.type))
                 .map(async (s) => {
                   const assetUrl = getTemplateAsset(bundle.room.template_id, s.type)!;
                   try {
@@ -100,7 +100,9 @@ export const RoomView: React.FC<RoomViewProps> = ({ roomId }) => {
                     setRoom((prev) => {
                       if (!prev) return prev;
                       const updatedSlots = prev.slots.map((x) =>
-                        x.type === s.type ? { ...x, isCustomTake: true } : x
+                        x.type === s.type
+                          ? { ...x, isCustomTake: true, occupancy: 'system' as const, audioSource: 'template' as const }
+                          : x
                       );
                       audioEngine.updateSlots(updatedSlots);
                       return { ...prev, slots: updatedSlots };
@@ -196,6 +198,8 @@ export const RoomView: React.FC<RoomViewProps> = ({ roomId }) => {
           if (s.type === slotType) {
             return {
               ...s,
+              occupancy: 'human' as const,
+              audioSource: 'human' as const,
               isCustomTake: true,
               isMuted: false,
               latencyOffsetMs,
@@ -209,7 +213,7 @@ export const RoomView: React.FC<RoomViewProps> = ({ roomId }) => {
         audioEngine.updateSlots(updatedSlots);
 
         // 4 席全真人 → 撒花(北极星指标:合奏拼图完成)
-        const humanTakes = updatedSlots.filter((st) => st.isCustomTake).length;
+        const humanTakes = updatedSlots.filter((st) => st.occupancy === 'human').length;
         if (humanTakes === 4) {
           confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
         }
@@ -222,12 +226,8 @@ export const RoomView: React.FC<RoomViewProps> = ({ roomId }) => {
   // 发布:房间行已存在,只更新招募信息
   const handlePublishRoom = useCallback(
     async (newRoom: { contactInfo: string; recruitmentCall: string; tags: string[]; genre?: string }) => {
-      if (!room) return;
-      try {
-        await updateRoomRecruitment(room.id, newRoom);
-      } catch (e) {
-        console.warn('发布失败', e);
-      }
+      if (!room) throw new Error('房间尚未加载完成');
+      await updateRoomRecruitment(room.id, newRoom);
     },
     [room]
   );
@@ -320,6 +320,8 @@ export const RoomView: React.FC<RoomViewProps> = ({ roomId }) => {
             onSelectSlot={handleClaimSlot}
             onSwitchTemplate={handleSwitchTemplate}
             onExportWav={handleExportWav}
+            onOpenShareModal={() => setIsShareModalOpen(true)}
+            onOpenPublishModal={() => setIsPublishModalOpen(true)}
             isExporting={isExportingWav}
           />
         </main>

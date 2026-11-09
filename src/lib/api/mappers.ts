@@ -1,11 +1,15 @@
 import type { Database } from '../../types/database';
 import type { CommunityRoom } from '../../types/community';
-import type { RoomState, SlotInfo, SlotTake, SlotType } from '../../types/music';
+import type { RoomPublicationStatus, RoomState, SlotInfo, SlotTake, SlotType } from '../../types/music';
 import { createDefaultSlots } from '../../data/templates';
 
 export type RoomRow = Database['public']['Tables']['rooms']['Row'];
 export type SlotRow = Database['public']['Tables']['slots']['Row'];
 export type TakeRow = Database['public']['Tables']['takes']['Row'];
+
+function publicationStatus(value: string | null | undefined): RoomPublicationStatus {
+  return value === 'published' || value === 'archived' ? value : 'draft';
+}
 
 /** takes 桶的公开访问 URL(免签名,RLS 公开读) */
 export function publicAudioUrl(audioPath: string): string {
@@ -77,8 +81,11 @@ export function buildSlotInfos(
         isMuted: row.is_muted,
         isSolo: row.is_solo,
         latencyOffsetMs: row.latency_offset_ms,
+        occupancy: hasRealAudio ? 'human' : 'system',
+        audioSource: hasRealAudio ? 'human' : 'synthetic',
         isCustomTake: hasRealAudio,
-        musician: latest ? latest.musician : b.musician,
+        // 无 audio_path 的种子 Take 只是展示元数据,不能伪装成正在播放的真人音轨。
+        musician: hasRealAudio && latest ? latest.musician : b.musician,
         takes: humanTakes.length ? [...humanTakes, ...b.takes] : b.takes,
         activeTakeIndex: 0,
       };
@@ -99,6 +106,8 @@ export function roomToRoomState(
     bpm: roomRow.bpm,
     createdAt: roomRow.created_at,
     creatorName: roomRow.creator_name,
+    publicationStatus: publicationStatus(roomRow.status),
+    publishedAt: roomRow.published_at,
     slots: buildSlotInfos(slotRows, takesBySlotId),
     progression: roomRow.progression,
   };
@@ -117,7 +126,7 @@ export function rowToCommunityRoom(
   const occupied = new Set<SlotType>();
   for (const s of slotRows) {
     const takes = takesBySlotId.get(s.id) || [];
-    if (takes.length > 0) occupied.add(s.slot_type as SlotType);
+    if (takes.some((take) => !!take.audio_path)) occupied.add(s.slot_type as SlotType);
   }
 
   return {
@@ -128,6 +137,8 @@ export function rowToCommunityRoom(
     bpm: roomRow.bpm,
     progression: roomRow.progression,
     creatorName: roomRow.creator_name,
+    publicationStatus: publicationStatus(roomRow.status),
+    publishedAt: roomRow.published_at,
     creatorAvatar: roomRow.creator_avatar,
     contactInfo: roomRow.contact_info,
     recruitmentCall: roomRow.recruitment_call,

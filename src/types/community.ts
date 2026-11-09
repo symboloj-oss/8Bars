@@ -1,4 +1,4 @@
-import { SlotInfo, SlotType } from './music';
+import { RoomPublicationStatus, SlotInfo, SlotType } from './music';
 
 export interface CommunityRoom {
   id: string;
@@ -8,6 +8,8 @@ export interface CommunityRoom {
   bpm: number;
   progression: string[];
   creatorName: string;
+  publicationStatus: RoomPublicationStatus;
+  publishedAt?: string | null;
   creatorAvatar: string;
   contactInfo: string; // e.g. "微信: guitar_ajie99" or "Discord: @bassman"
   recruitmentCall: string; // e.g. "急寻贝斯手！走根音即可稳过，今晚成团！"
