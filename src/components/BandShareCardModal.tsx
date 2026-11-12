@@ -7,7 +7,6 @@ import { downloadRoomWav } from '../lib/exportWav';
 import { Share2, Users, Check, Copy, Download, ArrowRight } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Button } from './ui/button';
-import confetti from 'canvas-confetti';
 
 interface BandShareCardModalProps {
   isOpen: boolean;
@@ -32,7 +31,7 @@ export const BandShareCardModal: React.FC<BandShareCardModalProps> = ({
     drums: '鼓手',
     bass: '贝斯',
     chords: '和弦',
-    melody: '主奏',
+    melody: '主旋律',
   };
   const missingNames = missingSlots.map((slot) => slotLabels[slot.type] || t('role.' + slot.type) || slot.roleName.split(' ')[0]);
 
@@ -51,7 +50,6 @@ export const BandShareCardModal: React.FC<BandShareCardModalProps> = ({
       textarea.remove();
     }
     setCopied(true);
-    confetti({ particleCount: 24, spread: 42, origin: { y: 0.55 } });
     window.setTimeout(() => setCopied(false), 2200);
   };
 

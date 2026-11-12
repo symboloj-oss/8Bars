@@ -34,21 +34,22 @@ export function slotAvatar(slotType: SlotType): string {
 
 /**
  * 把数据库的 slots + takes 行组装成前端的 SlotInfo[]。
- * 以 createDefaultSlots 的 AI 替补人设打底,再叠加数据库里的真人 take。
+ * 以 createDefaultSlots 的席位信息打底,伴奏席位无真人音频时由系统补位,
+ * 主旋律席位保持空白,再叠加数据库里的真人 take。
  * takesBySlotId 需按 created_at 降序(最新在前)。
  */
 export function buildSlotInfos(
   slotRows: SlotRow[],
   takesBySlotId: Map<string, TakeRow[]>
 ): SlotInfo[] {
-  const base = createDefaultSlots(); // 提供 TRACK 编号/角色文案/AI 替补 take
+  const base = createDefaultSlots(); // 提供 TRACK 编号/角色文案/伴奏 AI 替补
   const baseByType = new Map(base.map((s) => [s.type, s]));
 
   const ordered = ['drums', 'bass', 'chords', 'melody'] as SlotType[];
   const slotByType = new Map(slotRows.map((r) => [r.slot_type as SlotType, r]));
 
   return ordered
-    .map((type) => {
+    .map((type): SlotInfo | null => {
       const row = slotByType.get(type);
       const b = baseByType.get(type);
       if (!row || !b) return null;
@@ -70,9 +71,14 @@ export function buildSlotInfos(
         createdAt: relTime(t.created_at),
       }));
 
-      // 有真人 take 且确实带音频才算"已接管";仅有元数据的种子席位回退 AI 合成发声
-      const latest = humanTakes[0];
-      const hasRealAudio = !!latest?.audioBlobUrl;
+      // 新 schema 使用 active_take_id 明确选择播放版本；旧 schema 缺列时回退到最新有效 Take。
+      const playableTakes = humanTakes.filter((take) => !!take.audioBlobUrl);
+      const activeTake = row.active_take_id === undefined
+        ? playableTakes[0]
+        : row.active_take_id
+          ? playableTakes.find((take) => take.id === row.active_take_id)
+          : undefined;
+      const hasRealAudio = !!activeTake;
 
       return {
         ...b,
@@ -82,12 +88,13 @@ export function buildSlotInfos(
         isSolo: row.is_solo,
         latencyOffsetMs: row.latency_offset_ms,
         occupancy: hasRealAudio ? 'human' : 'system',
-        audioSource: hasRealAudio ? 'human' : 'synthetic',
+        audioSource: hasRealAudio ? 'human' : type === 'melody' ? 'empty' : 'synthetic',
         isCustomTake: hasRealAudio,
         // 无 audio_path 的种子 Take 只是展示元数据,不能伪装成正在播放的真人音轨。
-        musician: hasRealAudio && latest ? latest.musician : b.musician,
+        musician: activeTake?.musician ?? b.musician,
         takes: humanTakes.length ? [...humanTakes, ...b.takes] : b.takes,
-        activeTakeIndex: 0,
+        activeTakeId: activeTake?.id ?? null,
+        activeTakeIndex: activeTake ? humanTakes.findIndex((take) => take.id === activeTake.id) : -1,
       };
     })
     .filter((s): s is SlotInfo => s !== null);

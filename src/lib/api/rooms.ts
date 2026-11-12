@@ -191,6 +191,47 @@ export async function saveTake(input: {
   return take;
 }
 
+/** 首条有效录音自动成为当前版本；并发上传时仅一个 Take 能完成首次激活。 */
+export async function activateTakeIfEmpty(slotId: string, takeId: string): Promise<string | null> {
+  await ensureAnonymousUser();
+  const supabase = getSupabaseBrowser();
+  const { data, error } = await supabase
+    .from('slots')
+    .update({ active_take_id: takeId })
+    .eq('id', slotId)
+    .is('active_take_id', null)
+    .select('active_take_id')
+    .maybeSingle();
+  if (error) {
+    // 在迁移尚未部署的旧环境里保留录音上传能力，前端会继续按最新版本回退。
+    if (error.message.includes('active_take_id')) return null;
+    throw new Error('设置当前录音失败: ' + error.message);
+  }
+  if (data?.active_take_id) return data.active_take_id;
+
+  const { data: slot, error: readError } = await supabase
+    .from('slots')
+    .select('active_take_id')
+    .eq('id', slotId)
+    .maybeSingle();
+  if (readError) throw new Error('读取当前录音失败: ' + readError.message);
+  return slot?.active_take_id ?? null;
+}
+
+/** 明确切换当前播放版本；数据库复合外键确保 Take 属于该席位。 */
+export async function setActiveTake(slotId: string, takeId: string): Promise<void> {
+  await ensureAnonymousUser();
+  const supabase = getSupabaseBrowser();
+  const { data, error } = await supabase
+    .from('slots')
+    .update({ active_take_id: takeId })
+    .eq('id', slotId)
+    .select('id')
+    .maybeSingle();
+  if (error) throw new Error('切换播放版本失败: ' + error.message);
+  if (!data) throw new Error('切换播放版本失败: 席位不存在或当前身份无权操作');
+}
+
 /** 点赞/取消点赞:走数据库 RPC(原子计数 + 去重) */
 export async function toggleLikeRoom(roomId: string): Promise<{ likesCount: number; liked: boolean }> {
   await ensureAnonymousUser();

@@ -1,6 +1,6 @@
 export type SlotType = 'drums' | 'bass' | 'chords' | 'melody';
 export type SlotOccupancy = 'system' | 'human';
-export type SlotAudioSource = 'synthetic' | 'template' | 'human';
+export type SlotAudioSource = 'synthetic' | 'template' | 'human' | 'empty';
 export type RoomPublicationStatus = 'draft' | 'published' | 'archived';
 
 export interface MusicianInfo {
@@ -41,6 +41,8 @@ export interface SlotInfo {
   audioSource: SlotAudioSource;
   isCustomTake: boolean;
   takes: SlotTake[];
+  /** 当前正在播放的真人 Take;没有真人录音时为空。 */
+  activeTakeId?: string | null;
   activeTakeIndex: number;
 }
 

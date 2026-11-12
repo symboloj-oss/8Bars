@@ -36,11 +36,11 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: '8Bars - 8小节极简乐器异步合奏',
-  description: '极简乐器初学者 Web 端异步合奏工具:8小节积木式拼图,固定4席位,随时拼出完整乐队作品。',
+  title: '8Bars - 和朋友一起完成一段音乐',
+  description: '与朋友在线协作，录制并叠加 8 小节声部，一起完成一段音乐。',
   openGraph: {
-    title: '8Bars - 8小节极简乐器异步合奏',
-    description: '极简乐器初学者 Web 端异步合奏工具:8小节积木式拼图,固定4席位,随时拼出完整乐队作品。',
+    title: '8Bars - 和朋友一起完成一段音乐',
+    description: '与朋友在线协作，录制并叠加 8 小节声部，一起完成一段音乐。',
     type: 'website',
   },
   twitter: {

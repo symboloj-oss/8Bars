@@ -152,7 +152,7 @@ export const CreateRoomModal: React.FC<CreateRoomModalProps> = ({
 
           <div className="rounded-xl bg-zinc-50 dark:bg-white/[0.04] px-3.5 py-3 text-[11px] text-zinc-500 dark:text-zinc-400 flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full bg-[#ff5522] shrink-0" />
-            创建后会自动生成鼓、贝斯、和弦、主奏 4 个席位，你可以先录一个。
+            鼓、贝斯和和弦伴奏会自动准备好，主旋律留给你或队友来录。
           </div>
 
           <Button type="submit" disabled={!selectedTemplateId} className="w-full h-11">

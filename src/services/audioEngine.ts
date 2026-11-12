@@ -1,6 +1,6 @@
 import * as Tone from 'tone';
 import { RoomTemplate, SlotInfo, SlotType } from '../types/music';
-import { CHORD_DATABASE } from '../data/chords';
+import { createTemplateScorePlan, ScoreEvent } from '../data/templateArrangements';
 
 export interface TransportState {
   isPlaying: boolean;
@@ -18,6 +18,7 @@ export type TransportListener = (state: TransportState) => void;
 class AudioEngine {
   private isInitialized = false;
   private template: RoomTemplate | null = null;
+  private scorePlan: ReturnType<typeof createTemplateScorePlan> | null = null;
   private slots: SlotInfo[] = [];
   private currentBpm = 120;
   private transportListeners: Set<TransportListener> = new Set();
@@ -35,9 +36,11 @@ class AudioEngine {
   // Synthesizers for cold-start (AI Virtual Musicians)
   private kickSynth: Tone.MembraneSynth | null = null;
   private snareSynth: Tone.NoiseSynth | null = null;
-  private hihatSynth: Tone.MetalSynth | null = null;
+  private hihatSynth: Tone.NoiseSynth | null = null;
   private bassSynth: Tone.MonoSynth | null = null;
   private chordsSynth: Tone.PolySynth | null = null;
+  private chordPlucks: Tone.PluckSynth[] = [];
+  private chordPluckCursor = 0;
   private melodySynth: Tone.Synth | null = null;
 
   // Custom user audio buffers
@@ -56,20 +59,52 @@ class AudioEngine {
   // 避免 StrictMode 双调用/多组件同时触发时重复执行 Tone.start()
   private initPromise: Promise<void> | null = null;
 
+  private supportsAudioWorklet(): boolean {
+    return typeof window !== 'undefined'
+      && window.isSecureContext
+      && typeof AudioWorkletNode !== 'undefined';
+  }
+
   constructor() {
     // Lazy initialized on first user interaction
   }
 
   public async initialize(): Promise<void> {
     if (this.isInitialized) return;
+
+    // Must be called from a user gesture when possible. If an earlier
+    // background initialization is waiting for browser audio permission,
+    // calling Tone.start() again here lets the gesture unlock that context.
+    await Tone.start();
+
+    await this.initializeNodes();
+  }
+
+  // Resume a suspended browser audio context from a user gesture, then make
+  // sure the synth graph is ready. A plain initialize() stays safe for loading
+  // remote audio in the background after the graph already exists.
+  public async prepareAudio(): Promise<void> {
+    await Tone.start();
+    await this.initializeNodes();
+  }
+
+  private async initializeNodes(): Promise<void> {
+    if (this.isInitialized) return;
     if (!this.initPromise) {
-      this.initPromise = this.doInitialize();
+      const initPromise = this.doInitialize();
+      this.initPromise = initPromise;
+      try {
+        await initPromise;
+      } catch (error) {
+        if (this.initPromise === initPromise) this.initPromise = null;
+        throw error;
+      }
+      return;
     }
     await this.initPromise;
   }
 
   private async doInitialize(): Promise<void> {
-    await Tone.start();
     Tone.getContext().lookAhead = 0.05;
 
     // Master bus
@@ -108,14 +143,13 @@ class AudioEngine {
       envelope: { attack: 0.001, decay: 0.2, sustain: 0.01, release: 0.1 },
     }).connect(this.channelNodes.drums.volume);
 
-    this.hihatSynth = new Tone.MetalSynth({
-      envelope: { attack: 0.001, decay: 0.08, release: 0.05 },
-      harmonicity: 4.8,
-      modulationIndex: 28,
-      resonance: 2500,
-      octaves: 1.2,
+    // White-noise hats sound closer to a shaker/brush than the metallic default,
+    // which was making every template feel like the same electronic loop.
+    this.hihatSynth = new Tone.NoiseSynth({
+      noise: { type: 'white' },
+      envelope: { attack: 0.001, decay: 0.045, sustain: 0, release: 0.02 },
     }).connect(this.channelNodes.drums.volume);
-    this.hihatSynth.volume.value = -8;
+    this.hihatSynth.volume.value = -10;
 
     // Bass synth (warm vintage punch)
     this.bassSynth = new Tone.MonoSynth({
@@ -127,15 +161,30 @@ class AudioEngine {
 
     // Chords synth (lush acoustic/electric piano vibe)
     this.chordsSynth = new Tone.PolySynth(Tone.Synth, {
-      oscillator: { type: 'fatsine', spread: 20, count: 3 },
-      envelope: { attack: 0.02, decay: 0.4, sustain: 0.35, release: 0.8 },
+      oscillator: { type: 'sine' },
+      envelope: { attack: 0.035, decay: 0.35, sustain: 0.3, release: 0.7 },
     }).connect(this.channelNodes.chords.volume);
+
+    // Karplus-Strong uses AudioWorklet; insecure origins use the poly synth fallback.
+    if (this.supportsAudioWorklet()) {
+      try {
+        for (let i = 0; i < 4; i++) {
+          const pluck = new Tone.PluckSynth({ attackNoise: 1.2, dampening: 3200, resonance: 0.62, release: 0.2 });
+          this.chordPlucks.push(pluck);
+          pluck.connect(this.channelNodes.chords.volume);
+        }
+      } catch (error) {
+        this.chordPlucks.forEach((pluck) => pluck.dispose());
+        this.chordPlucks = [];
+        console.warn('拨弦音色不可用，和弦将使用合成器播放', error);
+      }
+    }
 
     // Melody synth (expressive smooth lead)
     this.melodySynth = new Tone.Synth({
       oscillator: { type: 'triangle' },
-      envelope: { attack: 0.04, decay: 0.2, sustain: 0.5, release: 0.4 },
-      portamento: 0.05,
+      envelope: { attack: 0.015, decay: 0.2, sustain: 0.4, release: 0.25 },
+      portamento: 0,
     }).connect(this.channelNodes.melody.volume);
 
     // Metronome
@@ -173,8 +222,16 @@ class AudioEngine {
     // 内容没变就跳过重排:StrictMode 双调用/重复 setState 会走到这里,
     // 重复排程会触发 Tone 时间线断言("time must be greater than last scheduled")
     const bpm = bpmOverride ?? template.bpm;
+    const sameArrangement =
+      this.template?.drumGroove === template.drumGroove &&
+      this.template?.bassLineType === template.bassLineType &&
+      this.template?.chordsStrumType === template.chordsStrumType &&
+      this.template?.melodyHookType === template.melodyHookType &&
+      this.template?.progression.length === template.progression.length &&
+      this.template?.progression.every((chord, i) => chord === template.progression[i]);
     const unchanged =
       this.template?.id === template.id &&
+      sameArrangement &&
       this.currentBpm === bpm &&
       this.slots.length === slots.length &&
       this.slots.every((s, i) => {
@@ -203,6 +260,8 @@ class AudioEngine {
     this.slots = slots;
     // 房间行 bpm 是权威值(种子房可能和模板默认值不同),无覆盖时用模板默认
     this.currentBpm = bpm;
+    this.scorePlan = createTemplateScorePlan(template);
+    this.configureTemplateVoices(template);
 
     // Set Transport BPM
     Tone.getTransport().bpm.value = this.currentBpm;
@@ -250,7 +309,7 @@ class AudioEngine {
   }
 
   private scheduleScore(): void {
-    if (!this.template) return;
+    if (!this.template || !this.scorePlan) return;
 
     // 清空整条事件时间线。注意不能用逐条 clear(id):
     // Tone 内部 StateTimeline 的"最后调度时间"只有 cancel() 才会复位,
@@ -258,120 +317,14 @@ class AudioEngine {
     Tone.getTransport().cancel(0);
     this.scheduledIds = [];
 
-    const bpm = this.template.bpm;
-    const progression = this.template.progression; // 8 items
-
-    // 1. DRUMS (32 beats = 8 bars)
-    for (let bar = 0; bar < 8; bar++) {
-      for (let beat = 0; beat < 4; beat++) {
-        const timeStr = `${bar}:${beat}:0`;
-        const time8th = `${bar}:${beat}:2`;
-
-        // Kick pattern: always on beat 1 and beat 3 (plus syncopations)
-        const idKick = Tone.getTransport().schedule((time) => {
-          const slot = this.slots.find(s => s.type === 'drums');
-          if (slot?.isCustomTake) return; // Mute AI synth if user has recorded audio
-          if (beat === 0 || beat === 2 || (beat === 3 && (bar === 3 || bar === 7))) {
-            this.kickSynth?.triggerAttackRelease('C1', '8n', time, 0.9);
-          }
-        }, timeStr);
-        this.scheduledIds.push(idKick);
-
-        // Snare pattern: on beat 2 and beat 4
-        const idSnare = Tone.getTransport().schedule((time) => {
-          const slot = this.slots.find(s => s.type === 'drums');
-          if (slot?.isCustomTake) return;
-          if (beat === 1 || beat === 3) {
-            this.snareSynth?.triggerAttackRelease('16n', time, 0.85);
-          }
-        }, timeStr);
-        this.scheduledIds.push(idSnare);
-
-        // Hi-Hat pattern: steady 8th notes
-        const idHat1 = Tone.getTransport().schedule((time) => {
-          const slot = this.slots.find(s => s.type === 'drums');
-          if (slot?.isCustomTake) return;
-          this.hihatSynth?.triggerAttackRelease('32n', time, 0.5);
-        }, timeStr);
-        const idHat2 = Tone.getTransport().schedule((time) => {
-          const slot = this.slots.find(s => s.type === 'drums');
-          if (slot?.isCustomTake) return;
-          this.hihatSynth?.triggerAttackRelease('32n', time, 0.35);
-        }, time8th);
-        this.scheduledIds.push(idHat1, idHat2);
-      }
-    }
-
-    // 2. BASS (Following chord roots + groove)
-    for (let bar = 0; bar < 8; bar++) {
-      const chordName = progression[bar % progression.length];
-      const chord = CHORD_DATABASE[chordName];
-      const bassNote = chord ? chord.bassNote : 'C2';
-      // Octave or fifth helper
-      const rootLetter = chord?.root || 'C';
-
-      for (let beat = 0; beat < 4; beat++) {
-        const timeStr = `${bar}:${beat}:0`;
-        const idBass = Tone.getTransport().schedule((time) => {
-          const slot = this.slots.find(s => s.type === 'bass');
-          if (slot?.isCustomTake) return;
-
-          // Groove: Beat 1 = root, Beat 2.5/3 = fifth or octave, Beat 4 = passing note
-          if (beat === 0) {
-            this.bassSynth?.triggerAttackRelease(bassNote, '4n', time, 0.95);
-          } else if (beat === 2) {
-            this.bassSynth?.triggerAttackRelease(bassNote, '8n', time, 0.85);
-          } else if (beat === 3 && bar % 2 === 1) {
-            // Passing chromatic
-            this.bassSynth?.triggerAttackRelease(rootLetter + '1', '16n', time, 0.7);
-          }
-        }, timeStr);
-        this.scheduledIds.push(idBass);
-      }
-    }
-
-    // 3. CHORDS (Acoustic / Electric Keys Rhythm)
-    for (let bar = 0; bar < 8; bar++) {
-      const chordName = progression[bar % progression.length];
-      const chord = CHORD_DATABASE[chordName];
-      const notes = chord?.notes || ['C4', 'E4', 'G4'];
-
-      // Strum rhythm: Beat 1, Beat 2 (syncopated), Beat 3, Beat 4
-      const idChords1 = Tone.getTransport().schedule((time) => {
-        const slot = this.slots.find(s => s.type === 'chords');
-        if (slot?.isCustomTake) return;
-        this.chordsSynth?.triggerAttackRelease(notes, '2n', time, 0.85);
-      }, `${bar}:0:0`);
-
-      const idChords2 = Tone.getTransport().schedule((time) => {
-        const slot = this.slots.find(s => s.type === 'chords');
-        if (slot?.isCustomTake) return;
-        this.chordsSynth?.triggerAttackRelease(notes, '4n', time, 0.75);
-      }, `${bar}:2:0`);
-
-      const idChords3 = Tone.getTransport().schedule((time) => {
-        const slot = this.slots.find(s => s.type === 'chords');
-        if (slot?.isCustomTake) return;
-        this.chordsSynth?.triggerAttackRelease(notes, '8n', time, 0.65);
-      }, `${bar}:3:2`);
-
-      this.scheduledIds.push(idChords1, idChords2, idChords3);
-    }
-
-    // 4. MELODY (Catchy 8-bar musical motif)
-    // Melodic sequence spanning 8 bars
-    const melodyScaleNotes = this.getMelodyPattern(this.template.id);
-    for (let bar = 0; bar < 8; bar++) {
-      const phrase = melodyScaleNotes[bar % melodyScaleNotes.length];
-      for (const item of phrase) {
-        const timeStr = `${bar}:${item.beat}`;
-        const idMelody = Tone.getTransport().schedule((time) => {
-          const slot = this.slots.find(s => s.type === 'melody');
-          if (slot?.isCustomTake) return;
-          this.melodySynth?.triggerAttackRelease(item.note, item.duration, time, 0.9);
-        }, timeStr);
-        this.scheduledIds.push(idMelody);
-      }
+    for (const event of [
+      ...this.scorePlan.drums,
+      ...this.scorePlan.bass,
+      ...this.scorePlan.chords,
+      ...this.scorePlan.melody,
+    ]) {
+      const id = Tone.getTransport().schedule((time) => this.playScoreEvent(event, time), event.time);
+      this.scheduledIds.push(id);
     }
 
     // Loop trigger for custom audio buffers sync
@@ -381,42 +334,77 @@ class AudioEngine {
     this.scheduledIds.push(idLoop);
   }
 
-  private getMelodyPattern(templateId: string): Array<Array<{ beat: string; note: string; duration: string }>> {
-    if (templateId === 'midnight-jazz') {
-      return [
-        [{ beat: '0:2', note: 'F4', duration: '8n' }, { beat: '1:0', note: 'A4', duration: '4n' }, { beat: '2:2', note: 'C5', duration: '4n' }],
-        [{ beat: '0:0', note: 'B4', duration: '4n' }, { beat: '2:0', note: 'G4', duration: '2n' }],
-        [{ beat: '0:2', note: 'E4', duration: '8n' }, { beat: '1:0', note: 'G4', duration: '4n' }, { beat: '2:2', note: 'B4', duration: '4n' }],
-        [{ beat: '0:0', note: 'C#5', duration: '4n' }, { beat: '2:0', note: 'A4', duration: '2n' }],
-        [{ beat: '0:2', note: 'D5', duration: '8n' }, { beat: '1:0', note: 'C5', duration: '4n' }, { beat: '2:0', note: 'A4', duration: '4n' }],
-        [{ beat: '0:0', note: 'F4', duration: '4n' }, { beat: '2:0', note: 'D4', duration: '2n' }],
-        [{ beat: '0:2', note: 'E4', duration: '8n' }, { beat: '1:2', note: 'G4', duration: '8n' }, { beat: '2:0', note: 'C5', duration: '2n' }],
-        [{ beat: '0:0', note: 'E5', duration: '4n' }, { beat: '2:0', note: 'C5', duration: '2n' }],
-      ];
-    } else if (templateId === 'retro-funk') {
-      return [
-        [{ beat: '0:0', note: 'E4', duration: '16n' }, { beat: '0:2', note: 'G4', duration: '16n' }, { beat: '1:0', note: 'E4', duration: '8n' }],
-        [{ beat: '0:0', note: 'A4', duration: '8n' }, { beat: '1:2', note: 'C5', duration: '8n' }, { beat: '2:0', note: 'A4', duration: '4n' }],
-        [{ beat: '0:0', note: 'E4', duration: '16n' }, { beat: '0:2', note: 'G4', duration: '16n' }, { beat: '1:0', note: 'B4', duration: '8n' }],
-        [{ beat: '0:0', note: 'D#5', duration: '8n' }, { beat: '1:2', note: 'F#5', duration: '8n' }, { beat: '2:0', note: 'B4', duration: '2n' }],
-        [{ beat: '0:0', note: 'E5', duration: '8n' }, { beat: '1:0', note: 'D5', duration: '8n' }, { beat: '2:0', note: 'B4', duration: '4n' }],
-        [{ beat: '0:0', note: 'A4', duration: '8n' }, { beat: '1:0', note: 'G4', duration: '8n' }, { beat: '2:0', note: 'E4', duration: '4n' }],
-        [{ beat: '0:0', note: 'G4', duration: '16n' }, { beat: '0:2', note: 'A4', duration: '16n' }, { beat: '1:0', note: 'B4', duration: '4n' }],
-        [{ beat: '0:0', note: 'E4', duration: '2n' }],
-      ];
-    }
+  private configureTemplateVoices(template: RoomTemplate): void {
+    const isJazz = template.chordsStrumType === 'rhodes_chill';
+    const isFunk = template.chordsStrumType === 'funk_skank';
+    this.chordsSynth?.set({
+      oscillator: { type: isJazz ? 'sine' : 'triangle' },
+      envelope: {
+        attack: isFunk ? 0.005 : 0.035,
+        decay: isFunk ? 0.12 : 0.35,
+        sustain: isFunk ? 0.08 : 0.3,
+        release: isFunk ? 0.08 : 0.7,
+      },
+    });
+  }
 
-    // Default: Friday Pop (Uplifting C-G-Am-F Hook)
-    return [
-      [{ beat: '0:0', note: 'G4', duration: '4n' }, { beat: '1:2', note: 'C5', duration: '4n' }, { beat: '3:0', note: 'E5', duration: '4n' }],
-      [{ beat: '0:0', note: 'D5', duration: '2n' }, { beat: '2:2', note: 'B4', duration: '4n' }],
-      [{ beat: '0:0', note: 'C5', duration: '4n' }, { beat: '1:2', note: 'A4', duration: '4n' }, { beat: '3:0', note: 'C5', duration: '4n' }],
-      [{ beat: '0:0', note: 'A4', duration: '2n' }, { beat: '2:2', note: 'F4', duration: '4n' }],
-      [{ beat: '0:0', note: 'G4', duration: '4n' }, { beat: '1:2', note: 'C5', duration: '4n' }, { beat: '3:0', note: 'E5', duration: '4n' }],
-      [{ beat: '0:0', note: 'D5', duration: '2n' }, { beat: '2:2', note: 'G5', duration: '4n' }],
-      [{ beat: '0:0', note: 'E5', duration: '4n' }, { beat: '1:2', note: 'D5', duration: '4n' }, { beat: '2:2', note: 'C5', duration: '4n' }],
-      [{ beat: '0:0', note: 'C5', duration: '1m' }],
-    ];
+  private durationSeconds(duration: string): number {
+    const beats: Record<string, number> = {
+      '16n': 0.25,
+      '8n': 0.5,
+      '4n': 1,
+      '2n': 2,
+      '1m': 16,
+    };
+    return (60 / this.currentBpm) * (beats[duration] ?? 1);
+  }
+
+  private scoreEventOffsetSeconds(event: ScoreEvent): number {
+    return (event.swingOffsetBeats || 0) * (60 / this.currentBpm);
+  }
+
+  private playScoreEvent(event: ScoreEvent, time: number): void {
+    const slot = this.slots.find((candidate) => candidate.type === event.slotType);
+    if (!slot || slot.isCustomTake) return;
+
+    const scheduledTime = time + this.scoreEventOffsetSeconds(event);
+    switch (event.kind) {
+      case 'kick':
+        this.kickSynth?.triggerAttackRelease(event.notes[0] || 'C1', event.duration, scheduledTime, event.velocity);
+        break;
+      case 'snare':
+        this.snareSynth?.triggerAttackRelease(event.duration, scheduledTime, event.velocity);
+        break;
+      case 'hat':
+        this.hihatSynth?.triggerAttackRelease(event.duration, scheduledTime, event.velocity);
+        break;
+      case 'bass':
+        this.bassSynth?.triggerAttackRelease(event.notes[0], event.duration, scheduledTime, event.velocity);
+        break;
+      case 'chord':
+        if (this.template?.chordsStrumType === 'rhodes_chill' || this.chordPlucks.length === 0) {
+          this.chordsSynth?.triggerAttackRelease(event.notes, event.duration, scheduledTime, event.velocity);
+        } else {
+          this.playPluckedChord(this.chordPlucks, event, scheduledTime);
+        }
+        break;
+      case 'melody':
+        this.melodySynth?.triggerAttackRelease(event.notes[0], event.duration, scheduledTime, event.velocity);
+        break;
+    }
+  }
+
+  private playPluckedChord(voices: Tone.PluckSynth[], event: ScoreEvent, time: number): void {
+    const duration = this.durationSeconds(event.duration);
+    event.notes.forEach((note, index) => {
+      const voiceIndex = event.notes.length === 1
+        ? this.chordPluckCursor++ % voices.length
+        : index % voices.length;
+      const voice = voices[voiceIndex];
+      const noteTime = time + index * 0.012;
+      voice.triggerAttack(note, noteTime);
+      voice.triggerRelease(noteTime + duration);
+    });
   }
 
   // Set custom user recorded audio for a slot
@@ -425,9 +413,10 @@ class AudioEngine {
     const arrayBuffer = await blob.arrayBuffer();
     // 注意:decodeAudioData 会转移(detach)传入 buffer 的所有权,
     // 必须先把副本存起来,供离线导出时重新解码
-    this.customAudioArrayBuffers.set(slotType, arrayBuffer.slice(0));
+    const exportBuffer = arrayBuffer.slice(0);
     const rawContext = Tone.getContext().rawContext;
     const audioBuffer = await rawContext.decodeAudioData(arrayBuffer);
+    this.customAudioArrayBuffers.set(slotType, exportBuffer);
     this.customAudioBuffers.set(slotType, audioBuffer);
   }
 
@@ -438,9 +427,10 @@ class AudioEngine {
     if (!res.ok) throw new Error('音频下载失败 HTTP ' + res.status);
     const arrayBuffer = await res.arrayBuffer();
     // 同上:先存副本再解码
-    this.customAudioArrayBuffers.set(slotType, arrayBuffer.slice(0));
+    const exportBuffer = arrayBuffer.slice(0);
     const rawContext = Tone.getContext().rawContext;
     const audioBuffer = await rawContext.decodeAudioData(arrayBuffer);
+    this.customAudioArrayBuffers.set(slotType, exportBuffer);
     this.customAudioBuffers.set(slotType, audioBuffer);
   }
 
@@ -468,7 +458,7 @@ class AudioEngine {
       }
 
       // Hardware latency compensation (offset in seconds)
-      const offsetSec = (slot.latencyOffsetMs || -80) / 1000;
+      const offsetSec = (slot.latencyOffsetMs ?? -80) / 1000;
       // Start buffer: if negative offset, play starting at Math.abs(offsetSec)
       const bufferOffset = offsetSec < 0 ? Math.abs(offsetSec) : 0;
       const startTime = scheduledTime + (offsetSec > 0 ? offsetSec : 0);
@@ -489,7 +479,7 @@ class AudioEngine {
   }
 
   public async start(): Promise<void> {
-    await this.initialize();
+    await this.prepareAudio();
     if (Tone.getTransport().state !== 'started') {
       Tone.getTransport().start();
       this.startProgressTicker();
@@ -519,11 +509,11 @@ class AudioEngine {
     this.notifyState();
   }
 
-  public togglePlay(): void {
+  public async togglePlay(): Promise<void> {
     if (Tone.getTransport().state === 'started') {
       this.pause();
     } else {
-      this.start();
+      await this.start();
     }
   }
 
@@ -612,48 +602,128 @@ class AudioEngine {
   // Export 8-bar mixdown as a high-quality WAV audio file
   public async exportMixdownWav(): Promise<Blob> {
     await this.initialize();
-    if (!this.template) throw new Error('No template loaded');
+    if (!this.template || !this.scorePlan) throw new Error('No template loaded');
 
     const bpm = this.currentBpm;
     const duration = (32 * 60) / bpm;
+    const template = this.template;
+    const scorePlan = this.scorePlan;
+    const slots = this.slots;
 
     const offlineBuffer = await Tone.Offline(async () => {
-      // Recreate a master offline bus
-      const offlineBpm = this.currentBpm;
-      Tone.getTransport().bpm.value = offlineBpm;
+      Tone.getTransport().bpm.value = bpm;
 
-      // Synthesize full 8 bars offline
-      const offKick = new Tone.MembraneSynth().toDestination();
-      const offSnare = new Tone.NoiseSynth().toDestination();
-      const offBass = new Tone.MonoSynth({ oscillator: { type: 'triangle' } }).toDestination();
-      const offChords = new Tone.PolySynth().toDestination();
-      const offMelody = new Tone.Synth({ oscillator: { type: 'triangle' } }).toDestination();
+      const anySolo = slots.some((slot) => slot.isSolo);
+      const offlineChannels: Record<SlotType, { volume: Tone.Volume; panner: Tone.Panner }> = {} as any;
+      const channelPosition: Record<SlotType, number> = {
+        drums: 0,
+        bass: 0,
+        chords: -0.25,
+        melody: 0.2,
+      };
+      for (const slotType of ['drums', 'bass', 'chords', 'melody'] as SlotType[]) {
+        const slot = slots.find((candidate) => candidate.type === slotType);
+        const muted = !slot || (anySolo ? !slot.isSolo : slot.isMuted);
+        const volume = new Tone.Volume(slot && slot.volume > 0.001 ? Tone.gainToDb(slot.volume) : -96);
+        volume.mute = muted;
+        const panner = new Tone.Panner(channelPosition[slotType]);
+        volume.connect(panner);
+        panner.toDestination();
+        offlineChannels[slotType] = { volume, panner };
+      }
 
-      const progression = this.template!.progression;
+      const offKick = new Tone.MembraneSynth({
+        pitchDecay: 0.05,
+        octaves: 6,
+        oscillator: { type: 'sine' },
+        envelope: { attack: 0.001, decay: 0.35, sustain: 0.01, release: 0.2 },
+      }).connect(offlineChannels.drums.volume);
+      const offSnare = new Tone.NoiseSynth({
+        noise: { type: 'pink' },
+        envelope: { attack: 0.001, decay: 0.2, sustain: 0.01, release: 0.1 },
+      }).connect(offlineChannels.drums.volume);
+      const offHat = new Tone.NoiseSynth({
+        noise: { type: 'white' },
+        envelope: { attack: 0.001, decay: 0.045, sustain: 0, release: 0.02 },
+      }).connect(offlineChannels.drums.volume);
+      offHat.volume.value = -10;
+      const offBass = new Tone.MonoSynth({
+        oscillator: { type: 'triangle' },
+        filter: { Q: 3, type: 'lowpass', rolloff: -24 },
+        envelope: { attack: 0.015, decay: 0.3, sustain: 0.4, release: 0.3 },
+        filterEnvelope: { attack: 0.01, decay: 0.2, sustain: 0.2, release: 0.2, baseFrequency: 120, octaves: 2.8 },
+      }).connect(offlineChannels.bass.volume);
+      const isJazz = template.chordsStrumType === 'rhodes_chill';
+      const isFunk = template.chordsStrumType === 'funk_skank';
+      const offChords = new Tone.PolySynth(Tone.Synth, {
+        oscillator: { type: isJazz ? 'sine' : 'triangle' },
+        envelope: {
+          attack: isFunk ? 0.005 : 0.035,
+          decay: isFunk ? 0.12 : 0.35,
+          sustain: isFunk ? 0.08 : 0.3,
+          release: isFunk ? 0.08 : 0.7,
+        },
+      }).connect(offlineChannels.chords.volume);
+      const offChordPlucks = this.supportsAudioWorklet()
+        ? Array.from({ length: 4 }, () =>
+            new Tone.PluckSynth({ attackNoise: 1.2, dampening: 3200, resonance: 0.62, release: 0.2 })
+              .connect(offlineChannels.chords.volume),
+          )
+        : [];
+      const offMelody = new Tone.Synth({
+        oscillator: { type: isJazz ? 'sine' : 'triangle' },
+        envelope: {
+          attack: isFunk ? 0.004 : 0.015,
+          decay: isFunk ? 0.12 : 0.2,
+          sustain: isFunk ? 0.12 : 0.4,
+          release: isFunk ? 0.08 : 0.25,
+        },
+        portamento: 0,
+      }).connect(offlineChannels.melody.volume);
 
-      for (let bar = 0; bar < 8; bar++) {
-        const chordName = progression[bar % progression.length];
-        const chord = CHORD_DATABASE[chordName];
-        const notes = chord?.notes || ['C4', 'E4', 'G4'];
-        const bassNote = chord ? chord.bassNote : 'C2';
-
-        for (let beat = 0; beat < 4; beat++) {
-          const time = `${bar}:${beat}:0`;
-          const drumSlot = this.slots.find(s => s.type === 'drums');
-          if (!drumSlot?.isCustomTake) {
-            if (beat === 0 || beat === 2) offKick.triggerAttackRelease('C1', '8n', time, 0.9);
-            if (beat === 1 || beat === 3) offSnare.triggerAttackRelease('16n', time, 0.8);
-          }
-
-          const bassSlot = this.slots.find(s => s.type === 'bass');
-          if (!bassSlot?.isCustomTake && beat === 0) {
-            offBass.triggerAttackRelease(bassNote, '4n', time, 0.9);
-          }
-        }
-
-        const chordSlot = this.slots.find(s => s.type === 'chords');
-        if (!chordSlot?.isCustomTake) {
-          offChords.triggerAttackRelease(notes, '2n', `${bar}:0:0`, 0.8);
+      let pluckCursor = 0;
+      const events = [
+        ...scorePlan.drums,
+        ...scorePlan.bass,
+        ...scorePlan.chords,
+        ...scorePlan.melody,
+      ];
+      for (const event of events) {
+        const slot = slots.find((candidate) => candidate.type === event.slotType);
+        if (!slot || slot.isCustomTake) continue;
+        const [bar, beat, sixteenth] = event.time.split(':').map(Number);
+        const baseTime = ((bar * 4) + beat + sixteenth / 4) * (60 / bpm);
+        const time = baseTime + (event.swingOffsetBeats || 0) * (60 / bpm);
+        switch (event.kind) {
+          case 'kick':
+            offKick.triggerAttackRelease(event.notes[0] || 'C1', event.duration, time, event.velocity);
+            break;
+          case 'snare':
+            offSnare.triggerAttackRelease(event.duration, time, event.velocity);
+            break;
+          case 'hat':
+            offHat.triggerAttackRelease(event.duration, time, event.velocity);
+            break;
+          case 'bass':
+            offBass.triggerAttackRelease(event.notes[0], event.duration, time, event.velocity);
+            break;
+          case 'chord':
+            if (template.chordsStrumType === 'rhodes_chill' || offChordPlucks.length === 0) {
+              offChords.triggerAttackRelease(event.notes, event.duration, time, event.velocity);
+            } else {
+              const durationSeconds = this.durationSeconds(event.duration);
+              event.notes.forEach((note, index) => {
+                const voiceIndex = event.notes.length === 1 ? pluckCursor++ % offChordPlucks.length : index % offChordPlucks.length;
+                const voice = offChordPlucks[voiceIndex];
+                const noteTime = time + index * 0.012;
+                voice.triggerAttack(note, noteTime);
+                voice.triggerRelease(noteTime + durationSeconds);
+              });
+            }
+            break;
+          case 'melody':
+            offMelody.triggerAttackRelease(event.notes[0], event.duration, time, event.velocity);
+            break;
         }
       }
 
@@ -668,9 +738,10 @@ class AudioEngine {
           const buffer = await offlineCtx.decodeAudioData(arrayBuf.slice(0));
           const src = offlineCtx.createBufferSource();
           src.buffer = buffer;
-          src.connect(offlineCtx.destination);
+          const channel = offlineChannels[slot.type];
+          if (channel) Tone.connect(src, channel.volume);
           // 与 playCustomBuffers 相同的延迟对齐语义
-          const offsetSec = (slot.latencyOffsetMs || -80) / 1000;
+          const offsetSec = (slot.latencyOffsetMs ?? -80) / 1000;
           const bufferOffset = offsetSec < 0 ? Math.abs(offsetSec) : 0;
           const startTime = offsetSec > 0 ? offsetSec : 0;
           src.start(startTime, bufferOffset);

@@ -19,14 +19,14 @@ export async function generateMetadata({ params }: RoomPageProps): Promise<Metad
     .maybeSingle();
 
   if (!room) {
-    return { title: '8Bars - 8小节极简乐器异步合奏' };
+    return { title: '8Bars - 和朋友一起完成一段音乐' };
   }
   return {
     title: `${room.title} · 8Bars 合奏房间`,
-    description: `进入 8Bars 合奏房间「${room.title}」,认领空缺席位,8 小节拼出一支乐队。`,
+    description: `进入 8Bars 合奏房间「${room.title}」，选择一个声部并录制 8 小节，和朋友一起完成一段音乐。`,
     openGraph: {
       title: `${room.title} · 8Bars 合奏房间`,
-      description: '8小节积木式拼图,固定4席位,随时拼出完整乐队作品。',
+      description: `加入「${room.title}」合奏房间，选择一个声部并录制 8 小节，和朋友一起完成一段音乐。`,
       type: 'website',
     },
   };

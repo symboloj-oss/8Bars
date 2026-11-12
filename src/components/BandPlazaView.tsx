@@ -19,7 +19,6 @@ import {
   Search,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import confetti from 'canvas-confetti';
 import { toggleLikeRoom } from '../lib/api/rooms';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
@@ -67,15 +66,27 @@ export const BandPlazaView: React.FC<BandPlazaViewProps> = ({
     return room.vacantRoles.includes(filter as SlotType);
   });
 
-  const handleCopyContact = (id: string, contact: string) => {
-    navigator.clipboard.writeText(contact);
+  const handleCopyContact = async (id: string, contact: string) => {
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(contact);
+      } else {
+        throw new Error('浏览器剪贴板不可用');
+      }
+    } catch (error) {
+      const textarea = document.createElement('textarea');
+      textarea.value = contact;
+      document.body.appendChild(textarea);
+      textarea.select();
+      const copied = document.execCommand('copy');
+      textarea.remove();
+      if (!copied) {
+        console.warn('复制联系方式失败', error);
+        return;
+      }
+    }
     setCopiedId(id);
-    confetti({
-      particleCount: 30,
-      spread: 50,
-      origin: { y: 0.6 },
-    });
-    setTimeout(() => {
+    window.setTimeout(() => {
       setCopiedId((cur) => (cur === id ? null : cur));
     }, 2000);
   };
@@ -86,11 +97,6 @@ export const BandPlazaView: React.FC<BandPlazaViewProps> = ({
       ...prev,
       [id]: (prev[id] ?? currentCount) + 1,
     }));
-    confetti({
-      particleCount: 25,
-      spread: 45,
-      origin: { y: 0.8 },
-    });
     try {
       const { likesCount } = await toggleLikeRoom(id);
       setLikesMap((prev) => ({ ...prev, [id]: likesCount }));
@@ -279,6 +285,7 @@ export const BandPlazaView: React.FC<BandPlazaViewProps> = ({
                       <Button
                         variant="secondary"
                         size="sm"
+                        className="active:scale-95"
                         onClick={() => handleApplaud(commRoom.id, commRoom.likesCount)}
                       >
                         <Heart className="text-[#ff5522]" />

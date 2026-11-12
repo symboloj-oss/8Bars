@@ -19,7 +19,6 @@ import { useTemplates } from '../hooks/useTemplates';
 import { RoomHeader } from '../components/RoomHeader';
 import { CreateRoomModal } from '../components/CreateRoomModal';
 import { BandPlazaView } from '../components/BandPlazaView';
-import confetti from 'canvas-confetti';
 
 export default function App() {
   const { theme, toggleTheme, isDark } = useTheme();
@@ -72,11 +71,6 @@ export default function App() {
   // 进入别人的乐队:直达该乐队的舞台
   const handleSelectCommunityRoom = (commRoom: CommunityRoom) => {
     audioEngine.stop();
-    confetti({
-      particleCount: 60,
-      spread: 60,
-      origin: { y: 0.5 },
-    });
     router.push(`/room/${commRoom.id}`);
   };
 

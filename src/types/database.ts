@@ -102,6 +102,7 @@ export type Database = {
       }
       slots: {
         Row: {
+          active_take_id: string | null
           id: string
           is_muted: boolean
           is_solo: boolean
@@ -111,6 +112,7 @@ export type Database = {
           volume: number
         }
         Insert: {
+          active_take_id?: string | null
           id?: string
           is_muted?: boolean
           is_solo?: boolean
@@ -120,6 +122,7 @@ export type Database = {
           volume?: number
         }
         Update: {
+          active_take_id?: string | null
           id?: string
           is_muted?: boolean
           is_solo?: boolean
@@ -135,6 +138,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "rooms"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "slots_active_take_same_slot_fkey"
+            columns: ["active_take_id", "id"]
+            isOneToOne: false
+            referencedRelation: "takes"
+            referencedColumns: ["id", "slot_id"]
           },
         ]
       }

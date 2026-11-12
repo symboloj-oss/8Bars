@@ -7,7 +7,6 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { Badge } from './ui/badge';
-import confetti from 'canvas-confetti';
 
 interface PublishRoomModalProps {
   isOpen: boolean;
@@ -56,7 +55,6 @@ export const PublishRoomModal: React.FC<PublishRoomModalProps> = ({
         recruitmentCall: slogan.trim() || '欢迎任何乐器伙伴戴耳机加入！',
         tags: parsedTags.length > 0 ? parsedTags : ['新手友好', '8小节合奏'],
       });
-      confetti({ particleCount: 70, spread: 70, origin: { y: 0.6 } });
       onClose();
     } catch (error) {
       setSubmitError(error instanceof Error ? error.message : '发布失败，请稍后重试');

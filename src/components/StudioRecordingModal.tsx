@@ -7,6 +7,7 @@ import { PianoChordView } from './PianoChordView';
 import { ChordTeleprompter } from './ChordTeleprompter';
 import { getChordDetail } from '../data/chords';
 import { getCharacterForSlot } from '../data/characters';
+import { getTemplateAsset } from '../data/templateAssets';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -28,7 +29,7 @@ interface StudioRecordingModalProps {
  targetSlot: SlotInfo;
  allSlots: SlotInfo[];
  template: RoomTemplate;
- onSaveRecording: (slotType: SlotType, blob: Blob, latencyOffsetMs: number, musicianName: string) => void;
+ onSaveRecording: (slotType: SlotType, blob: Blob, latencyOffsetMs: number, musicianName: string) => Promise<void>;
  t?: (key: string, params?: Record<string, string | number>) => string;
 }
 
@@ -45,7 +46,10 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
 }) => {
  const [phase, setPhase] = useState<StudioPhase>('headphone_warning');
  const [countInBeat, setCountInBeat] = useState<number>(4);
+  const [isPreparingAudio, setIsPreparingAudio] = useState(false);
+  const [isStartingMic, setIsStartingMic] = useState(false);
  const [latencyOffsetMs, setLatencyOffsetMs] = useState<number>(-80);
+ const [micError, setMicError] = useState<string | null>(null);
  // 记忆上次用过的昵称,新访客随机一个
  const [musicianName, setMusicianName] = useState<string>(() => {
  try {
@@ -56,9 +60,12 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
  });
  const [activeTab, setActiveTab] = useState<'guitar' | 'piano'>('guitar');
  const [micVolumeLevel, setMicVolumeLevel] = useState<number>(0);
+  const [isMicClipping, setIsMicClipping] = useState(false);
  const [recordedAudioBlob, setRecordedAudioBlob] = useState<Blob | null>(null);
  const [recordedAudioUrl, setRecordedAudioUrl] = useState<string | null>(null);
  const [isReviewPlaying, setIsReviewPlaying] = useState<boolean>(false);
+ const [isSaving, setIsSaving] = useState(false);
+ const [saveError, setSaveError] = useState<string | null>(null);
 
  // Transport tracking
  const [transportState, setTransportState] = useState<TransportState>({
@@ -74,28 +81,64 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
 
  // MediaRecorder and Audio context refs
  const mediaStreamRef = useRef<MediaStream | null>(null);
+ const audioContextRef = useRef<AudioContext | null>(null);
  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
  const audioChunksRef = useRef<Blob[]>([]);
  const analyserRef = useRef<AnalyserNode | null>(null);
  const animFrameRef = useRef<number | null>(null);
  const countInTimerRef = useRef<any>(null);
+  const clippingResetTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isOpenRef = useRef(isOpen);
+  const isStartingCountInRef = useRef(false);
+  const isStartingMicRef = useRef(false);
+  const micMeterLevelRef = useRef(0);
+  const hasSavedTakeRef = useRef(false);
  const recordedAudioUrlRef = useRef<string | null>(null);
 
- // Stop background music when studio opens
+  const restoreActiveSlotAudio = async () => {
+    const activeTake = targetSlot.takes.find((take) => take.id === targetSlot.activeTakeId);
+    const templateAudio = targetSlot.type !== 'melody'
+      ? getTemplateAsset(template.id, targetSlot.type)
+      : undefined;
+
+    if (activeTake?.audioBlobUrl) {
+      await audioEngine.setSlotAudioFromUrl(targetSlot.type, activeTake.audioBlobUrl);
+    } else if (activeTake?.audioBlob) {
+      await audioEngine.setSlotAudio(targetSlot.type, activeTake.audioBlob, activeTake.latencyOffsetMs);
+    } else if (templateAudio) {
+      await audioEngine.setSlotAudioFromUrl(targetSlot.type, templateAudio);
+    } else {
+      audioEngine.removeSlotAudio(targetSlot.type);
+    }
+    audioEngine.updateSlots(allSlots);
+  };
+  const restoreActiveSlotAudioRef = useRef(restoreActiveSlotAudio);
+  restoreActiveSlotAudioRef.current = restoreActiveSlotAudio;
+
+ // Stop background music while the recording studio owns this slot.
+ // The modal is conditionally mounted by RoomView, so its cleanup is the
+ // reliable path for both an explicit close and a route/unmount close.
  useEffect(() => {
- if (isOpen) {
- audioEngine.pause();
+  isOpenRef.current = true;
+  // Recording always starts from bar 1, regardless of where room playback stopped.
+  audioEngine.stop();
+  hasSavedTakeRef.current = false;
  setPhase('headphone_warning');
  setRecordedAudioBlob(null);
+ setMicError(null);
  revokeRecordedAudioUrl();
- } else {
- cleanupMic();
- audioEngine.stop();
- }
  return () => {
+  isOpenRef.current = false;
  cleanupMic();
+  audioEngine.stop();
+  if (!hasSavedTakeRef.current) {
+    void restoreActiveSlotAudioRef.current().catch((err) => {
+      console.warn('Could not restore the room track after leaving the studio', err);
+      audioEngine.updateSlots(allSlots);
+    });
+  }
  };
- }, [isOpen]);
+ }, []);
 
  // Subscribe to transport state
  useEffect(() => {
@@ -112,6 +155,10 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
  // Cleanup mic on exit
  const cleanupMic = () => {
  if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+  if (clippingResetTimeoutRef.current) {
+    clearTimeout(clippingResetTimeoutRef.current);
+    clippingResetTimeoutRef.current = null;
+  }
  if (countInTimerRef.current) {
  clearInterval(countInTimerRef.current);
  countInTimerRef.current = null;
@@ -122,6 +169,12 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
  if (mediaStreamRef.current) {
  mediaStreamRef.current.getTracks().forEach((t) => t.stop());
  mediaStreamRef.current = null;
+ }
+ analyserRef.current = null;
+ const audioContext = audioContextRef.current;
+ audioContextRef.current = null;
+ if (audioContext && audioContext.state !== 'closed') {
+ void audioContext.close().catch(() => {});
  }
  };
 
@@ -134,7 +187,15 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
 
  // Start Mic Monitor
  const startMicMonitor = async () => {
+  if (isStartingMicRef.current) return;
+  isStartingMicRef.current = true;
+  setIsStartingMic(true);
+ setMicError(null);
+  micMeterLevelRef.current = 0;
+  setMicVolumeLevel(0);
+  setIsMicClipping(false);
  try {
+ if (!navigator.mediaDevices?.getUserMedia) throw new Error('Microphone access is unavailable');
  const stream = await navigator.mediaDevices.getUserMedia({
  audio: {
  echoCancellation: false,
@@ -142,39 +203,97 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
  autoGainControl: false,
  },
  });
+  if (!isOpenRef.current) {
+    stream.getTracks().forEach((track) => track.stop());
+    return;
+  }
  mediaStreamRef.current = stream;
 
- const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+ const AudioContextConstructor = window.AudioContext || (window as any).webkitAudioContext;
+ if (!AudioContextConstructor) throw new Error('Web Audio is unavailable');
+ const audioCtx: AudioContext = new AudioContextConstructor();
+ audioContextRef.current = audioCtx;
+  await audioCtx.resume();
+  if (!isOpenRef.current) {
+    cleanupMic();
+    return;
+  }
  const source = audioCtx.createMediaStreamSource(stream);
  const analyser = audioCtx.createAnalyser();
- analyser.fftSize = 256;
+  analyser.fftSize = 2048;
  source.connect(analyser);
  analyserRef.current = analyser;
 
- const bufferLength = analyser.frequencyBinCount;
- const dataArray = new Uint8Array(bufferLength);
+  const sampleData = new Float32Array(analyser.fftSize);
 
  const updateLevel = () => {
  if (!analyserRef.current) return;
- analyserRef.current.getByteFrequencyData(dataArray);
- let sum = 0;
- for (let i = 0; i < bufferLength; i++) {
- sum += dataArray[i];
+  analyserRef.current.getFloatTimeDomainData(sampleData);
+  let sumSquares = 0;
+  let peak = 0;
+  for (let i = 0; i < sampleData.length; i++) {
+    const sample = sampleData[i];
+    sumSquares += sample * sample;
+    peak = Math.max(peak, Math.abs(sample));
  }
- const avg = sum / bufferLength;
- setMicVolumeLevel(Math.min(1, avg / 128));
+  const rms = Math.sqrt(sumSquares / sampleData.length);
+  const rmsDb = rms > 0 ? 20 * Math.log10(rms) : -100;
+  const targetLevel = Math.max(0, Math.min(1, (rmsDb + 48) / 42));
+  const smoothing = targetLevel > micMeterLevelRef.current ? 0.45 : 0.14;
+  micMeterLevelRef.current += (targetLevel - micMeterLevelRef.current) * smoothing;
+  setMicVolumeLevel(micMeterLevelRef.current);
+  if (peak >= 0.995) {
+    setIsMicClipping(true);
+    if (clippingResetTimeoutRef.current) clearTimeout(clippingResetTimeoutRef.current);
+    clippingResetTimeoutRef.current = setTimeout(() => {
+      setIsMicClipping(false);
+      clippingResetTimeoutRef.current = null;
+    }, 900);
+  }
  animFrameRef.current = requestAnimationFrame(updateLevel);
  };
  updateLevel();
  setPhase('ready');
  } catch (err) {
  console.error('Failed to get mic access', err);
- setPhase('ready');
+  cleanupMic();
+  if (isOpenRef.current) setMicError(t('studio.micAccessFailed'));
+  } finally {
+    isStartingMicRef.current = false;
+    setIsStartingMic(false);
  }
  };
 
  // Trigger 4-beat count-in
- const startCountInAndRecord = () => {
+  const startCountInAndRecord = async () => {
+  if (isStartingCountInRef.current) return;
+ const hasLiveMicrophone = mediaStreamRef.current?.getAudioTracks().some((track) => track.readyState === 'live');
+ if (!hasLiveMicrophone) {
+ setMicError(t('studio.micAccessFailed'));
+ setPhase('headphone_warning');
+ return;
+ }
+  isStartingCountInRef.current = true;
+  setIsPreparingAudio(true);
+  setMicError(null);
+  try {
+    await audioEngine.prepareAudio();
+  } catch (err) {
+    console.error('Audio engine initialization failed before recording', err);
+    setMicError(t('studio.audioStartFailed'));
+    isStartingCountInRef.current = false;
+    setIsPreparingAudio(false);
+    return;
+  }
+  isStartingCountInRef.current = false;
+  setIsPreparingAudio(false);
+  if (!isOpenRef.current) return;
+  const microphoneStillLive = mediaStreamRef.current?.getAudioTracks().some((track) => track.readyState === 'live');
+  if (!microphoneStillLive) {
+    setMicError(t('studio.micAccessFailed'));
+    setPhase('headphone_warning');
+    return;
+  }
  setPhase('counting_in');
  let beatLeft = 4;
  setCountInBeat(beatLeft);
@@ -190,18 +309,42 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
  audioEngine.playCountInBeat(4 - beatLeft + 1);
  } else {
  clearInterval(countInTimerRef.current);
- beginActualRecording();
+      countInTimerRef.current = null;
+      void beginActualRecording();
  }
  }, beatIntervalMs);
  };
 
  // Begin actual recording at Bar 1 Beat 1
- const beginActualRecording = () => {
- setPhase('recording');
- audioChunksRef.current = [];
+  const beginActualRecording = async () => {
+ const stream = mediaStreamRef.current;
+ if (!stream?.getAudioTracks().some((track) => track.readyState === 'live')) {
+ setMicError(t('studio.micAccessFailed'));
+ setPhase('headphone_warning');
+ audioEngine.stop();
+ return;
+ }
 
- if (mediaStreamRef.current) {
+    // Mute the selected slot and make sure the backing transport starts before
+    // MediaRecorder captures audio, so a failed audio context cannot produce a
+    // silent or misleading recording.
+    const previewSlots = allSlots.map((s) =>
+      s.type === targetSlot.type ? { ...s, isMuted: true } : s
+    );
+    audioEngine.updateSlots(previewSlots);
+    try {
+      await audioEngine.start();
+    } catch (err) {
+      console.error('Audio engine could not start recording playback', err);
+      audioEngine.stop();
+      audioEngine.updateSlots(allSlots);
+      setMicError(t('studio.audioStartFailed'));
+      setPhase('ready');
+      return;
+    }
+
  try {
+      audioChunksRef.current = [];
  const supportedMimeType = [
  'audio/webm;codecs=opus',
  'audio/webm',
@@ -209,8 +352,8 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
  'audio/ogg;codecs=opus',
  ].find((type) => MediaRecorder.isTypeSupported(type));
  const recorder = supportedMimeType
- ? new MediaRecorder(mediaStreamRef.current, { mimeType: supportedMimeType })
- : new MediaRecorder(mediaStreamRef.current);
+ ? new MediaRecorder(stream, { mimeType: supportedMimeType })
+ : new MediaRecorder(stream);
 
  recorder.ondataavailable = (e) => {
  if (e.data.size > 0) {
@@ -219,6 +362,10 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
  };
 
  recorder.onstop = async () => {
+      if (!isOpenRef.current) {
+        audioChunksRef.current = [];
+        return;
+      }
  const blob = new Blob(audioChunksRef.current, {
  type: recorder.mimeType || supportedMimeType || 'audio/webm',
  });
@@ -228,22 +375,25 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
  setRecordedAudioUrl(url);
 
  // Preload into audio engine for latency test preview
- await audioEngine.setSlotAudio(targetSlot.type, blob, latencyOffsetMs);
+      try {
+        await audioEngine.setSlotAudio(targetSlot.type, blob, latencyOffsetMs);
+      } catch (err) {
+        console.error('Recorded audio could not be prepared for preview', err);
+        setSaveError(t('studio.previewFailed'));
+      }
  };
 
  mediaRecorderRef.current = recorder;
  recorder.start(100);
+      setPhase('recording');
  } catch (err) {
  console.error('Error starting media recorder', err);
+      audioEngine.stop();
+      audioEngine.updateSlots(allSlots);
+ setMicError(t('studio.micAccessFailed'));
+      setPhase('ready');
+ return;
  }
- }
-
- // Mute target slot's original stem so user hears backing
- const previewSlots = allSlots.map((s) =>
- s.type === targetSlot.type ? { ...s, isMuted: true } : s
- );
- audioEngine.updateSlots(previewSlots);
- audioEngine.start();
  };
 
  // Stop recording
@@ -260,13 +410,23 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
  };
 
  // Retake
- const handleRetake = () => {
+  const handleRetake = async () => {
+  if (isPreparingAudio) return;
+  setIsPreparingAudio(true);
+  setSaveError(null);
  audioEngine.stop();
- setIsReviewPlaying(false);
- audioEngine.removeSlotAudio(targetSlot.type);
- setRecordedAudioBlob(null);
- revokeRecordedAudioUrl();
- setPhase('ready');
+  try {
+    await restoreActiveSlotAudio();
+    setIsReviewPlaying(false);
+    setRecordedAudioBlob(null);
+    revokeRecordedAudioUrl();
+    setPhase('ready');
+  } catch (err) {
+    console.error('Could not restore the current take before retaking', err);
+    setSaveError(t('studio.restoreFailed'));
+  } finally {
+    setIsPreparingAudio(false);
+  }
  };
 
  // Toggle review playback
@@ -275,7 +435,9 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
  audioEngine.pause();
  setIsReviewPlaying(false);
  } else {
- if (recordedAudioBlob) {
+      if (!recordedAudioBlob) return;
+      setSaveError(null);
+      try {
  await audioEngine.setSlotAudio(targetSlot.type, recordedAudioBlob, latencyOffsetMs);
  const reviewSlots = allSlots.map((s) =>
  s.type === targetSlot.type
@@ -283,20 +445,35 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
  : s
  );
  audioEngine.updateSlots(reviewSlots);
- audioEngine.start();
+        await audioEngine.start();
  setIsReviewPlaying(true);
+      } catch (err) {
+        console.error('Recorded audio preview failed', err);
+        audioEngine.stop();
+        audioEngine.updateSlots(allSlots);
+        setIsReviewPlaying(false);
+        setSaveError(t('studio.previewFailed'));
  }
  }
  };
 
  // Handle Save
- const handleSaveTake = () => {
- if (!recordedAudioBlob) return;
+ const handleSaveTake = async () => {
+ if (!recordedAudioBlob || isSaving || isPreparingAudio) return;
  const name = musicianName.trim() || '新乐手';
  try { localStorage.setItem('8bars_nickname', name); } catch (e) {}
  audioEngine.stop();
- onSaveRecording(targetSlot.type, recordedAudioBlob, latencyOffsetMs, name);
+ setIsSaving(true);
+ setSaveError(null);
+ try {
+ await onSaveRecording(targetSlot.type, recordedAudioBlob, latencyOffsetMs, name);
+  hasSavedTakeRef.current = true;
  onClose();
+ } catch (error) {
+ setSaveError(error instanceof Error ? error.message : '录音保存失败，请检查网络后重试。');
+ } finally {
+ setIsSaving(false);
+ }
  };
 
  const targetChar = getCharacterForSlot(targetSlot.type);
@@ -304,7 +481,7 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
  const nextChordDetail = getChordDetail(transportState.nextChord);
 
  return (
- <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+ <Dialog open={isOpen} onOpenChange={(open) => !open && !isSaving && onClose()}>
  <DialogContent showCloseButton={false} className="sm:max-w-4xl bg-white dark:bg-zinc-900 p-0 gap-0 rounded-2xl max-h-[92vh] overflow-hidden flex flex-col">
  {/* Header with Cartoon Character Buddy Badge */}
  <div className="flex items-center justify-between px-5 py-3.5 border-b bg-zinc-50 dark:bg-black/30 shrink-0">
@@ -338,7 +515,7 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
  </div>
  </div>
 
- <Button variant="ghost" size="icon-sm" onClick={onClose}>
+ <Button variant="ghost" size="icon-sm" onClick={onClose} disabled={isSaving}>
  <span className="text-base">✕</span>
  </Button>
  </div>
@@ -381,12 +558,20 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
  <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed mb-5 font-mono">
  {t('studio.headphoneDesc')}
  </p>
+ {micError && (
+ <p role="alert" className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-left text-xs text-red-700 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300">
+ {micError}
+ </p>
+ )}
 
  <div className="w-full flex flex-col gap-2.5">
- <Button onClick={startMicMonitor} className="w-full py-3 font-mono">
+  <Button onClick={startMicMonitor} disabled={isStartingMic} className="w-full py-3 font-mono">
  <Headphones />
- {t('studio.headphoneBtn')}
+  {isStartingMic ? t('studio.requestingMic') : t('studio.headphoneBtn')}
  </Button>
+ <p className="text-[11px] leading-relaxed text-zinc-500 dark:text-zinc-400">
+ {t('studio.headphoneTip')}
+ </p>
  <Button variant="ghost" onClick={onClose} className="w-full py-2 text-xs text-zinc-500 font-mono">
  {t('studio.exit')}
  </Button>
@@ -418,14 +603,18 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
  <Mic className="w-3.5 h-3.5 text-[#ff5522]" />
  {t('studio.micTest')}
  </span>
- <span className={micVolumeLevel > 0.05 ? 'text-[#ff5522] font-semibold' : 'text-zinc-400'}>
- {micVolumeLevel > 0.05 ? t('studio.micGood') : t('studio.micNear')}
+  <span className={isMicClipping ? 'text-red-600 font-semibold' : micVolumeLevel > 0.12 ? 'text-[#ff5522] font-semibold' : 'text-zinc-400'}>
+    {isMicClipping
+      ? t('studio.micClipping')
+      : micVolumeLevel > 0.12
+        ? t('studio.micGood')
+        : t('studio.micNear')}
  </span>
  </div>
  {/* VU Level Meter */}
  <div className="h-2 w-full bg-zinc-200 dark:bg-white/8 rounded-full overflow-hidden p-0.5">
  <div
- className="h-full rounded-full transition-all duration-75 bg-[#ff5522]"
+    className={`h-full rounded-full transition-all duration-75 ${isMicClipping ? 'bg-red-600' : 'bg-[#ff5522]'}`}
  style={{ width: `${Math.max(4, micVolumeLevel * 100)}%` }}
  />
  </div>
@@ -482,9 +671,9 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
 
  {/* Big CTA */}
  <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
- <Button onClick={startCountInAndRecord} className="w-full py-3.5 text-sm font-mono">
+  <Button onClick={startCountInAndRecord} disabled={isPreparingAudio} className="w-full py-3.5 text-sm font-mono">
  <span className="w-2.5 h-2.5 rounded-full bg-white animate-ping" />
- {t('studio.startRec')}
+  {isPreparingAudio ? t('studio.preparingAudio') : t('studio.startRec')}
  </Button>
  </div>
  </div>
@@ -574,7 +763,7 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
  </div>
  </div>
 
- <Button onClick={toggleReviewPlayback} className="bg-zinc-900 hover:bg-black dark:bg-white dark:hover:bg-zinc-200 text-white dark:text-black font-mono text-xs">
+ <Button onClick={toggleReviewPlayback} disabled={isPreparingAudio} className="bg-zinc-900 hover:bg-black dark:bg-white dark:hover:bg-zinc-200 text-white dark:text-black font-mono text-xs">
  {isReviewPlaying ? <Pause className="size-3.5" /> : <Play className="size-3.5" />}
  {isReviewPlaying ? t('studio.previewPause') : t('studio.previewPlay')}
  </Button>
@@ -612,15 +801,20 @@ export const StudioRecordingModal: React.FC<StudioRecordingModalProps> = ({
  </div>
 
  {/* Confirmation actions */}
+ {saveError && (
+ <p role="alert" className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300">
+ {saveError}
+ </p>
+ )}
  <div className="flex items-center justify-end gap-3 pt-2 font-mono">
- <Button variant="secondary" onClick={handleRetake} className="text-xs font-mono">
+ <Button variant="secondary" onClick={handleRetake} disabled={isSaving || isPreparingAudio} className="text-xs font-mono">
  <RotateCcw className="size-3.5" />
- {t('studio.retake')}
+ {isPreparingAudio ? t('studio.preparingAudio') : t('studio.retake')}
  </Button>
 
- <Button onClick={handleSaveTake} className="text-xs">
+ <Button onClick={handleSaveTake} disabled={isSaving || isPreparingAudio || !recordedAudioBlob} className="text-xs">
  <Check />
- {t('studio.saveTake')}
+ {isSaving ? t('studio.savingTake') : t('studio.saveTake')}
  </Button>
  </div>
  </div>

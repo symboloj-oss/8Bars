@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from 'react';
-import { RoomState, RoomTemplate, SlotInfo } from '../types/music';
+import { RoomState, RoomTemplate, SlotInfo, SlotTake } from '../types/music';
 import { TransportState } from '../services/audioEngine';
 import { getCharacterForSlot } from '../data/characters';
 import { BandFigure } from './BandFigures';
@@ -19,6 +19,7 @@ interface StageHeroProps {
   t: (key: string, params?: Record<string, string | number>) => string;
   onTogglePlay: () => void;
   onSelectSlot: (slot: SlotInfo) => void;
+  onSetActiveTake: (slot: SlotInfo, take: SlotTake) => void;
   onSwitchTemplate: (template: RoomTemplate) => void;
   onExportWav: () => void;
   onOpenShareModal: () => void;
@@ -30,7 +31,7 @@ const SLOT_SHORT: Record<string, string> = {
   drums: '架子鼓',
   bass: '贝斯',
   chords: '吉他',
-  melody: '主唱',
+  melody: '主旋律',
 };
 
 export const StageHero: React.FC<StageHeroProps> = ({
@@ -42,6 +43,7 @@ export const StageHero: React.FC<StageHeroProps> = ({
   t,
   onTogglePlay,
   onSelectSlot,
+  onSetActiveTake,
   onSwitchTemplate,
   onExportWav,
   onOpenShareModal,
@@ -50,6 +52,9 @@ export const StageHero: React.FC<StageHeroProps> = ({
 }) => {
   const { isPlaying, currentBar, progress } = transportState;
   const [configSlot, setConfigSlot] = useState<SlotInfo | null>(null);
+  const currentConfigSlot = configSlot
+    ? room.slots.find((slot) => slot.id === configSlot.id) ?? configSlot
+    : null;
 
   // 明暗配色
   const c = {
@@ -163,7 +168,7 @@ export const StageHero: React.FC<StageHeroProps> = ({
                       {isHuman && <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#ff5a36] ml-1.5 align-middle" />}
                     </span>
                     <span className="text-xs font-bold" style={{ color: character.accentColor }}>
-                      {character.name}
+                      {slot.type === 'melody' && !isHuman ? '等你来创作' : character.name}
                     </span>
                   </div>
                 </div>
@@ -271,7 +276,7 @@ export const StageHero: React.FC<StageHeroProps> = ({
       </main>
 
       {/* ================= 乐器配置弹窗 ================= */}
-      {configSlot && (
+      {currentConfigSlot && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setConfigSlot(null)} />
           <motion.div
@@ -282,7 +287,7 @@ export const StageHero: React.FC<StageHeroProps> = ({
           >
             <div className={`flex items-center justify-between pb-3 border-b ${isDark ? 'border-white/10' : 'border-zinc-200'}`}>
               <h3 className={`text-sm font-bold ${isDark ? 'text-white' : 'text-zinc-800'}`}>
-                {SLOT_SHORT[configSlot.type]} · {getCharacterForSlot(configSlot.type).name}
+                {SLOT_SHORT[currentConfigSlot.type]} · {getCharacterForSlot(currentConfigSlot.type).name}
               </h3>
               <button
                 onClick={() => setConfigSlot(null)}
@@ -296,7 +301,9 @@ export const StageHero: React.FC<StageHeroProps> = ({
               <div className={`p-3 rounded-2xl border flex items-center justify-between text-xs ${isDark ? 'bg-white/5 border-white/5' : 'bg-zinc-50 border-zinc-200'}`}>
                 <span className={c.modalText}>当前演奏者</span>
                 <span className="text-[#ff5a36] font-medium">
-                  {configSlot.musician.name.split(' ')[0]}
+                  {currentConfigSlot.activeTakeId
+                    ? currentConfigSlot.takes.find((take) => take.id === currentConfigSlot.activeTakeId)?.musician.name.split(' ')[0] ?? '系统伴奏'
+                    : '等待录音'}
                 </span>
               </div>
               <div className="p-3.5 rounded-2xl bg-[#ff5a36]/10 border border-[#ff5a36]/20 text-[11px] text-[#ff8e73] leading-relaxed">
@@ -304,10 +311,47 @@ export const StageHero: React.FC<StageHeroProps> = ({
               </div>
             </div>
 
+            {currentConfigSlot.takes.some((take) => !!take.audioBlobUrl) && (
+              <div className="mb-4 space-y-2">
+                <div className={`text-[11px] font-semibold ${c.modalText}`}>录音版本</div>
+                <div className="max-h-56 space-y-2 overflow-y-auto pr-1">
+                  {currentConfigSlot.takes.filter((take) => !!take.audioBlobUrl).map((take) => {
+                    const isActive = take.id === currentConfigSlot.activeTakeId;
+                    return (
+                      <div
+                        key={take.id}
+                        className={`rounded-xl border p-3 ${isActive ? 'border-[#ff5a36]/50 bg-[#ff5a36]/10' : isDark ? 'border-white/10 bg-white/[0.03]' : 'border-zinc-200 bg-zinc-50'}`}
+                      >
+                        <div className="flex items-center justify-between gap-2 text-xs">
+                          <span className={isDark ? 'text-zinc-200' : 'text-zinc-700'}>
+                            {take.musician.name} · {take.musician.recordedAt ?? take.createdAt}
+                          </span>
+                          {isActive && <span className="shrink-0 text-[10px] font-semibold text-[#ff5a36]">当前播放</span>}
+                        </div>
+                        <audio className="mt-2 h-8 w-full" controls preload="none" src={take.audioBlobUrl} />
+                        {!isActive && (
+                          <button
+                            type="button"
+                            className="mt-2 text-[11px] font-semibold text-[#ff5a36] hover:text-[#ff7658]"
+                            onClick={() => onSetActiveTake(currentConfigSlot, take)}
+                          >
+                            设为当前播放
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className={`text-[10px] leading-relaxed ${c.modalText}`}>
+                  新录音会作为候选版本保存，不会自动替换当前播放版本。
+                </div>
+              </div>
+            )}
+
             <Button
               className="w-full py-2.5 rounded-2xl bg-[#ff5a36] hover:bg-[#ff6e4d] text-white font-bold text-xs shadow-lg"
               onClick={() => {
-                const slot = configSlot;
+                const slot = currentConfigSlot;
                 setConfigSlot(null);
                 onSelectSlot(slot);
               }}
